@@ -1,0 +1,63 @@
+{
+  "name": "beyond_get_my_organizations",
+  "description": "List organizations accessible to the current API key user. Use this before beyond_create_project to choose a valid organization_id; never invent values such as 'default'. The user's default organization is marked with is_default=true.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {},
+    "required": []
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "organizations": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "organization_id": {
+              "type": "string"
+            },
+            "organization_name": {
+              "type": "string"
+            },
+            "organization_role": {
+              "type": "string"
+            },
+            "can_create_project": {
+              "type": "boolean"
+            },
+            "is_default": {
+              "type": "boolean"
+            },
+            "activation_status": {
+              "type": "string"
+            },
+            "subscription_status": {
+              "type": "string"
+            },
+            "plan_id": {
+              "type": "string"
+            },
+            "plan_name": {
+              "type": "string"
+            },
+            "last_accessed_at": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "organization_id",
+            "organization_name",
+            "can_create_project",
+            "is_default"
+          ]
+        }
+      }
+    },
+    "required": [
+      "organizations"
+    ]
+  },
+  "output_schema_declared": true
+}

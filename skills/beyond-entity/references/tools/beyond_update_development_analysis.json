@@ -1,0 +1,473 @@
+{
+  "name": "beyond_update_development_analysis",
+  "description": "Modify an existing report only on explicit user request; otherwise create a new code. Store Markdown regardless of chat delivery format. Preserve omitted values; null clears optional values. Update body, representative forecasts and matching OTHER_INFO together. Default response_detail=compact; use full only when complete saved records are needed. Responses embed current/next-stage guide text and disclose server-generated values; no separate guide query is required.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "analysis_code": {
+        "type": "string",
+        "minLength": 1
+      },
+      "updates": {
+        "type": "object",
+        "properties": {
+          "analysis_content": {
+            "type": "string",
+            "description": "In the AI chat app, deliver the report in the format the user wants: HTML, PDF, PPT/PPTX, Markdown or another supported format. Independently, ALWAYS store the full readable report in BE ANALYSIS_CONTENT as Markdown text. Never store an HTML document, PDF/PPT binary, base64 content or merely an attachment URL in ANALYSIS_CONTENT. Convert/author an equivalent Markdown version, keeping figures, scope and conclusions consistent across deliverables.",
+            "minLength": 1
+          },
+          "budget_forecasted": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "duration_days_forecasted": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "other_info": {
+            "type": [
+              "object",
+              "string",
+              "null"
+            ],
+            "properties": {
+              "schema_version": {
+                "type": "integer",
+                "enum": [
+                  1
+                ]
+              },
+              "confidence": {
+                "type": "object",
+                "properties": {
+                  "score": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "basis": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "evidence_level": {
+                    "type": "string",
+                    "enum": [
+                      "requirements",
+                      "design",
+                      "first_code",
+                      "verified_code"
+                    ]
+                  }
+                },
+                "required": [
+                  "score",
+                  "basis",
+                  "evidence_level"
+                ]
+              },
+              "estimates": {
+                "type": "object",
+                "properties": {
+                  "budget": {
+                    "type": "object",
+                    "properties": {
+                      "low": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0
+                      },
+                      "recommended": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0
+                      },
+                      "high": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0
+                      },
+                      "currency": {
+                        "type": "string"
+                      },
+                      "day_basis": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "duration_days": {
+                    "type": "object",
+                    "properties": {
+                      "low": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0
+                      },
+                      "recommended": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0
+                      },
+                      "high": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0
+                      },
+                      "currency": {
+                        "type": "string"
+                      },
+                      "day_basis": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "selected_scenario": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "without_ai",
+                  "with_ai",
+                  null
+                ],
+                "description": "Write OTHER_INFO.selected_scenario=without_ai or with_ai for the actually agreed delivery scenario, and name it at the top of the report. BUDGET_FORECASTED and DURATION_DAYS_FORECASTED must be that scenario recommended values, as must OTHER_INFO.estimates when supplied. Reuse an already agreed choice; do not silently select the cheaper scenario. If AI adoption is undecided, set selected_scenario=null, show both alternatives as comparison only, and leave representative forecast columns null. Do not put an arbitrary scenario or average into them. Change the selected scenario, representative forecasts and report labeling together."
+              },
+              "scenarios": {
+                "type": "object",
+                "properties": {
+                  "without_ai": {
+                    "type": "object",
+                    "properties": {
+                      "estimates": {
+                        "type": "object",
+                        "properties": {
+                          "budget": {
+                            "type": "object",
+                            "properties": {
+                              "low": {
+                                "type": [
+                                  "number",
+                                  "null"
+                                ],
+                                "minimum": 0
+                              },
+                              "recommended": {
+                                "type": [
+                                  "number",
+                                  "null"
+                                ],
+                                "minimum": 0
+                              },
+                              "high": {
+                                "type": [
+                                  "number",
+                                  "null"
+                                ],
+                                "minimum": 0
+                              },
+                              "currency": {
+                                "type": "string"
+                              },
+                              "day_basis": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "duration_days": {
+                            "type": "object",
+                            "properties": {
+                              "low": {
+                                "type": [
+                                  "number",
+                                  "null"
+                                ],
+                                "minimum": 0
+                              },
+                              "recommended": {
+                                "type": [
+                                  "number",
+                                  "null"
+                                ],
+                                "minimum": 0
+                              },
+                              "high": {
+                                "type": [
+                                  "number",
+                                  "null"
+                                ],
+                                "minimum": 0
+                              },
+                              "currency": {
+                                "type": "string"
+                              },
+                              "day_basis": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "required": [
+                          "budget",
+                          "duration_days"
+                        ]
+                      },
+                      "confidence": {
+                        "type": "object",
+                        "properties": {
+                          "score": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "basis": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "evidence_level": {
+                            "type": "string",
+                            "enum": [
+                              "requirements",
+                              "design",
+                              "first_code",
+                              "verified_code"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "score",
+                          "basis",
+                          "evidence_level"
+                        ]
+                      },
+                      "assumptions": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "unverified": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "estimates",
+                      "confidence"
+                    ]
+                  },
+                  "with_ai": {
+                    "type": "object",
+                    "properties": {
+                      "estimates": {
+                        "type": "object",
+                        "properties": {
+                          "budget": {
+                            "type": "object",
+                            "properties": {
+                              "low": {
+                                "type": [
+                                  "number",
+                                  "null"
+                                ],
+                                "minimum": 0
+                              },
+                              "recommended": {
+                                "type": [
+                                  "number",
+                                  "null"
+                                ],
+                                "minimum": 0
+                              },
+                              "high": {
+                                "type": [
+                                  "number",
+                                  "null"
+                                ],
+                                "minimum": 0
+                              },
+                              "currency": {
+                                "type": "string"
+                              },
+                              "day_basis": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "duration_days": {
+                            "type": "object",
+                            "properties": {
+                              "low": {
+                                "type": [
+                                  "number",
+                                  "null"
+                                ],
+                                "minimum": 0
+                              },
+                              "recommended": {
+                                "type": [
+                                  "number",
+                                  "null"
+                                ],
+                                "minimum": 0
+                              },
+                              "high": {
+                                "type": [
+                                  "number",
+                                  "null"
+                                ],
+                                "minimum": 0
+                              },
+                              "currency": {
+                                "type": "string"
+                              },
+                              "day_basis": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "required": [
+                          "budget",
+                          "duration_days"
+                        ]
+                      },
+                      "confidence": {
+                        "type": "object",
+                        "properties": {
+                          "score": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "basis": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "evidence_level": {
+                            "type": "string",
+                            "enum": [
+                              "requirements",
+                              "design",
+                              "first_code",
+                              "verified_code"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "score",
+                          "basis",
+                          "evidence_level"
+                        ]
+                      },
+                      "assumptions": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "unverified": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "estimates",
+                      "confidence"
+                    ]
+                  }
+                },
+                "required": [
+                  "without_ai",
+                  "with_ai"
+                ],
+                "additionalProperties": false,
+                "description": "Every new analysis report MUST show both without_ai (AI 미사용) and with_ai (AI 사용) side by side, under identical requirements, Phase, quality and acceptance conditions. Compare role-based staffing/person-days, duration low/recommended/high, labor cost, tool/runtime costs, contingency, total budget low/recommended/high, and separate Confidence with evidence and unknowns. AI use is not assumed to be cheaper or faster. State source/data access permissions, permitted AI tools/models and execution environment, team AI proficiency, human review responsibilities and adoption/setup costs. Include AI subscriptions, API/token usage and runtime/environment costs with pricing assumptions and calculation basis; unknown costs remain unknown, not zero. Use available trial-implementation/build/critical-flow evidence; without it, use conservative assumptions and disclose the limitation in the AI scenario Confidence."
+              },
+              "item_confidence": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "score": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100
+                    },
+                    "basis": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "evidence_level": {
+                      "type": "string",
+                      "enum": [
+                        "requirements",
+                        "design",
+                        "first_code",
+                        "verified_code"
+                      ]
+                    },
+                    "dev_item_id": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "dev_item_id",
+                    "score",
+                    "basis",
+                    "evidence_level"
+                  ]
+                }
+              }
+            },
+            "description": "OTHER_INFO is optional JSON with schema_version=1, estimates.budget and estimates.duration_days (low/recommended/high; currency or day_basis), scenarios.without_ai and scenarios.with_ai (each with estimates and confidence), selected_scenario (without_ai|with_ai|null), phases, confidence, item_confidence, baseline, assumptions, unverified, guide_version and review_status. confidence is an object {score: number 0..100, basis: non-empty string, evidence_level: requirements|design|first_code|verified_code}; each item_confidence entry adds dev_item_id. Only top-level estimates and the selected scenario recommended values must match table forecasts; unselected scenario estimates remain independent. If undecided, leave representative forecast columns null. Optional forecast columns contain report representative values, not customer limits. Store item scenario estimates in RESOURCE_FORECAST.scenarios.without_ai and .with_ai, and report totals/evidence in OTHER_INFO.scenarios with the same keys. Keep the full comparison table in ANALYSIS_CONTENT as Markdown. Use the same currency, rates and duration day_basis across scenarios, explicitly explaining any differences."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "response_detail": {
+        "type": "string",
+        "enum": [
+          "compact",
+          "full"
+        ],
+        "default": "compact",
+        "description": "Compact returns identities and automatic-value receipts without echoing input bodies. Full returns complete saved records."
+      }
+    },
+    "required": [
+      "analysis_code",
+      "updates"
+    ],
+    "additionalProperties": false
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

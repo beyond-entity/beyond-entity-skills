@@ -1,0 +1,41 @@
+{
+  "name": "beyond_mcp_review_reply",
+  "description": "Add an agent comment, analysis, workaround, verification note, fix note, or reopen note to an MCP Review Board entry. Use reply_type='reopen' with a message to change the review status to reopened. Signed-in reporters can comment without maintainer privileges. Reopen is allowed for the original review author (signed-in user identity, including a new AI session) and maintainers/admins.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "review_id": {
+        "type": "string"
+      },
+      "message": {
+        "type": "string"
+      },
+      "reply_type": {
+        "type": "string",
+        "enum": [
+          "comment",
+          "analysis",
+          "workaround",
+          "fix_note",
+          "verification",
+          "reopen"
+        ],
+        "default": "comment"
+      },
+      "occurrence_id": {
+        "type": "string"
+      },
+      "metadata": {
+        "type": "object"
+      }
+    },
+    "required": [
+      "review_id",
+      "message"
+    ]
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

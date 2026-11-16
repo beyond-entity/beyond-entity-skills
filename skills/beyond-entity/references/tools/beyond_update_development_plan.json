@@ -1,0 +1,94 @@
+{
+  "name": "beyond_update_development_plan",
+  "description": "Update an existing plan. Omitted fields preserve values; null clears optional fields. Identity cannot change. Default response_detail=compact; use full only when complete saved records are needed. Responses embed current/next-stage guide text and disclose server-generated values; no separate guide query is required.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "dev_plan_id": {
+        "type": "string",
+        "minLength": 1
+      },
+      "updates": {
+        "type": "object",
+        "properties": {
+          "dev_plan_name": {
+            "type": "string"
+          },
+          "dev_plan_type": {
+            "type": "string",
+            "description": "Suggested convention when the project/user has none; custom existing values remain valid: {'NEW': 'Initial build', 'CHANGE': 'Change to an existing system'}"
+          },
+          "plan_status": {
+            "type": "string",
+            "description": "Suggested convention when the project/user has none; custom existing values remain valid: {'DRAFT': 'Being prepared', 'ACTIVE': 'In progress', 'DONE': 'Completed', 'ON_HOLD': 'Paused'}"
+          },
+          "dev_budget": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "dev_duration_days": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "dev_start_at": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "client_company_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "client_contact_info": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "dev_overall_description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "other_info": {
+            "type": [
+              "object",
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "response_detail": {
+        "type": "string",
+        "enum": [
+          "compact",
+          "full"
+        ],
+        "default": "compact",
+        "description": "Compact returns identities and automatic-value receipts without echoing input bodies. Full returns complete saved records."
+      }
+    },
+    "required": [
+      "dev_plan_id",
+      "updates"
+    ],
+    "additionalProperties": false
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

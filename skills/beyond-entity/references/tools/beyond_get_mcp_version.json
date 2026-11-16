@@ -1,0 +1,12 @@
+{
+  "name": "beyond_get_mcp_version",
+  "description": "Return the Beyond Entity MCP server/runtime version. Use this to verify client-server compatibility before relying on recently added tools.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {}
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

@@ -1,0 +1,27 @@
+{
+  "guide_id": "transformation_design_guide",
+  "guide_revision": "9c055d04bc700827",
+  "source_mcp_version": "3.2.51",
+  "content": {
+    "scope": "A transformation represents verified data movement or derivation inside or between modeled processors/entities. SQL is BE lineage notation, not a requirement that the runtime executes SQL.",
+    "rules": [
+      "Review relevant UI, interaction, state, application/service, integration and data-access flows. Do not restrict transformations to processors with runtime SQL or to DAO/Repository.",
+      "Model meaningful field mappings, calculations, request arguments, returned results and state changes with beyond_add_transformation_by_sql over verified BE objects/attributes. BE records lineage; it does not execute this SQL.",
+      "Read current source/target attributes and transformations first. Reuse existing mappings and respect use_lookup: false means INPUT/OUTPUT only, not no transformations.",
+      "SELECT maps verified source results or caller inputs into current-processor results. INSERT into another processor maps arguments into its existing INPUT contract; it is not a database write at runtime.",
+      "Keep original runtime code/evidence distinct from the SQL representation. Use only supported SQL syntax and actual modeled fields; never invent fields, objects or SELECT 1 to draw a call.",
+      "Pure control calls, DDL and unrepresentable behavior require caller/target, conditions and code evidence in metadata/checkpoints. Record unresolved parser gaps instead of silently omitting them or submitting unavailable manual payload tools."
+    ],
+    "completion": [
+      "Implementation/UX status updates to DESIGNED, DRAFT_IMPLEMENTED, TESTING, IMPLEMENTED or MODIFICATION_TESTING and new checkpoints return transformation_check. Inspect its warnings before reporting completion. Checkpoints check processors changed in the preceding checkpoint interval, within accessible canvases.",
+      "Compare the requested scope against relevant processors and verified data flows across layers. Report saved transformation IDs, reused mappings, justified exclusions and unresolved flows.",
+      "A successful SQL registration or completed analysis run proves only its submitted scope, not coverage of all required flows. Report PARTIAL when required flows remain unresolved."
+    ],
+    "patterns": {
+      "caller_arguments": "INSERT INTO BE_OBJECT('<callee_id>') (argument) VALUES (:request_value)",
+      "returned_result": "SELECT s.result AS result FROM BE_OBJECT('<source_processor_id>') s",
+      "in_memory_derivation": "SELECT UPPER(:name) AS normalized_name"
+    },
+    "pattern_note": "Patterns are templates. Verify IDs, fields, nested contracts and target IO policy through MCP before use."
+  }
+}

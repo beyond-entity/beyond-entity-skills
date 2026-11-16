@@ -1,0 +1,122 @@
+{
+  "guide_id": "http_metadata_guide",
+  "guide_revision": "b25d38a333b113a3",
+  "source_mcp_version": "3.2.51",
+  "content": {
+    "processor_types": [
+      "actix_web_endpoint_handler",
+      "api_server",
+      "asp_net_controller",
+      "asp_net_endpoint_handler",
+      "asp_net_http_handler",
+      "asp_net_page_handler",
+      "asp_net_view_handler",
+      "axum_endpoint_handler",
+      "django_endpoint_handler",
+      "express_controller",
+      "express_endpoint_handler",
+      "external_api",
+      "fastapi_endpoint_handler",
+      "flask_endpoint_handler",
+      "nestjs_controller",
+      "nextjs_endpoint_handler",
+      "rocket_endpoint_handler",
+      "spring_boot_controller"
+    ],
+    "controller_endpoint_contract": {
+      "applies_to": [
+        "actix_web_endpoint_handler",
+        "asp_net_controller",
+        "asp_net_endpoint_handler",
+        "asp_net_http_handler",
+        "asp_net_page_handler",
+        "asp_net_view_handler",
+        "axum_endpoint_handler",
+        "django_endpoint_handler",
+        "express_controller",
+        "express_endpoint_handler",
+        "fastapi_endpoint_handler",
+        "flask_endpoint_handler",
+        "nestjs_controller",
+        "nextjs_endpoint_handler",
+        "rocket_endpoint_handler",
+        "spring_boot_controller"
+      ],
+      "rules": [
+        "Each verified handler gets one INPUT and one OUTPUT OBJECT container using the catalog physical object type. Same-handler routes share a pair; attribute and column names equal the handler.",
+        "Unknown handlers create no containers. These empty IO groupings imply no HTTP body schema; add only verified children. Reads do not backfill contracts.",
+        "Read returned endpoints, auto_created_attributes and IDs. Updates replace the endpoints list: preserve endpoint_id, input_attribute_id and output_attribute_id on retained routes; omit IDs on new routes.",
+        "Preserving endpoint_id preserves contract and child IDs and ID-based lineage during handler/route renames. Raw SQL text is not rewritten. Rename shared-handler routes together; split a route by submitting it without old IDs.",
+        "Reuse one same-handler root OBJECT in the same IO port. Non-object or duplicate roots, foreign IDs and inconsistent shared handlers fail; inspect current attributes before editing.",
+        "Omitted endpoints preserves routing, [] removes routes and null clears routing. Route removal retains contracts, children and lineage for explicit review and cleanup.",
+        "Use existing handler OUTPUT contracts for SQL results. Create verified child fields first and address them by full handler.field path. Never invent top-level results or copy caller arguments into response fields."
+      ],
+      "example": {
+        "note": "Illustrative verified design only. Replace angle-bracket IDs with actual server-returned IDs; never send these placeholders literally.",
+        "create_endpoint": {
+          "method": "GET",
+          "path": "/orders/{id}",
+          "handler": "getOrder"
+        },
+        "returned_endpoint_shape": {
+          "method": "GET",
+          "path": "/orders/{id}",
+          "handler": "getOrder",
+          "endpoint_id": "<returned endpoint_id>",
+          "input_attribute_id": "<returned INPUT Object ID>",
+          "output_attribute_id": "<returned OUTPUT Object ID>"
+        },
+        "add_verified_children": {
+          "tool": "beyond_add_processor_attributes",
+          "arguments": {
+            "processor_id": "<Controller ID>",
+            "input_attributes": [
+              {
+                "attribute_name": "Order ID",
+                "column_name": "id",
+                "data_type": "string",
+                "upper_attribute_id": "<returned INPUT Object ID>"
+              }
+            ],
+            "output_attributes": [
+              {
+                "attribute_name": "Status",
+                "column_name": "status",
+                "data_type": "string",
+                "upper_attribute_id": "<returned OUTPUT Object ID>"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "endpoint_cardinality": {
+      "source": "processor_storage_types catalog is_module flag; not a client-supplied processor property",
+      "rules": [
+        "Only storage types whose is_module is exactly true allow multiple endpoints. False, null or omitted is_module means a processor and allows at most one endpoint.",
+        "Read acceptable_processors or the processor_storage_types catalog for is_module and max_endpoints before creation. Do not infer module status from a type name or override it in processor_info/other_info.",
+        "This applies to every processor storage type on creation, modification and type changes, for both endpoints and other_info.endpoints. Missing endpoints, null and [] are allowed. A module-to-processor change must supply at most one endpoint if multiple endpoints exist.",
+        "Store only in other_info.endpoints; top-level endpoints is an input and output convenience. Explicit endpoints wins over nested endpoints. Omitted routing preserves it, a list replaces it, [] empties it and null clears it.",
+        "Module status permits multiple endpoints but does not imply that a component exposes HTTP. Record verified endpoints only. Filter matchers, Interceptor patterns and Advice scope remain separate metadata.",
+        "Modules start collapsed on canvases. Module status does not change the parent model or require creating a separate model."
+      ]
+    },
+    "inputs": {
+      "endpoints": "Array of objects containing path, method, and optional handler; null clears all endpoints."
+    },
+    "rules": [
+      "One Spring Controller class is one processor, even when it handles several HTTP routes. Use its simple class name without package as module_name; do not split it into processors merely by endpoint.",
+      "Use endpoints for registered HTTP entry processors, including the framework types in processor_types. One API Server processor represents exactly one Swagger/OpenAPI operation (one HTTP method + path), never a server/router grouping. Its endpoints array allows at most one item; use separate processors for GET and POST even on the same path. Empty or null routing is allowed when unknown.",
+      "Use only verified mappings from source annotations, configuration, an API specification, or explicit user requirements. Combine class-level and handler-level mappings only when resolved. Never guess GET, a URL, or a handler from a class or business name. Omit unknown fields; ask for missing evidence when required.",
+      "For HTTP modules whose catalog is_module=true, record multiple verified path/method combinations with their handlers. For api_server use a separate processor for each combination. An unspecified HTTP method must not be guessed as GET; record only the known mapping.",
+      "Service, Repository, and Spring AI components do not acquire HTTP endpoints merely because a Controller calls them.",
+      "Each endpoint groups its path, HTTP method and optional handler name. Preserve their correspondence instead of separate path/method arrays.",
+      "For a processor listed in controller_endpoint_contract_guide.applies_to with a verified handler, the server creates empty INPUT and OUTPUT containers using the catalog OBJECT physical type named after that handler. Same-handler routes share the pair. Read auto_created_attributes and returned endpoint_id/input_attribute_id/output_attribute_id; preserve IDs when editing. Add only verified request/response child fields; do not guess handlers or schemas. The Object is an IO grouping, not an asserted HTTP body type. Types with use_lookup=false map directly to OUTPUT. Removing routing does not delete contracts or lineage.",
+      "On update, omitted endpoints preserves the list; a supplied list replaces it, [] empties it, and null clears it.",
+      "Legacy method/path, http_method/uri_path, and other_info.method/path inputs are converted into one endpoint. Explicit endpoints takes precedence.",
+      "Legacy partial updates preserve the other values of a single endpoint. For multiple endpoints, supply the endpoints array explicitly; ambiguous single-route updates are rejected.",
+      "New clients send endpoints as an array or null. Legacy JSON strings encoding an array or null are accepted for explicit endpoints and other_info.endpoints; the decoded value is validated and new writes persist arrays or null. Top-level endpoints read projections are arrays or null; existing raw other_info may retain legacy strings until updated. Malformed or non-array strings fail without clearing metadata. Preserve all returned endpoint IDs and unknown per-endpoint fields when editing; do not double-encode new values.",
+      "The server stores routing only in other_info.endpoints. Use the explicit endpoints input; direct other_info.endpoints input is also accepted. Explicit endpoints wins over nested endpoints, which wins over legacy method/path. Legacy method/path keys are removed after conversion. Read responses also expose endpoints as a projection of other_info.endpoints. For Filter use other_info.matchers with pattern and optional method, plus order and dispatcher_types when known. For Handler Interceptor use other_info.include_paths, exclude_paths and order. For Controller Advice use other_info.controller_scope and exception_types. These are applicability conditions, not endpoints."
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "beyond_get_development_item",
+  "description": "Get work content, completion conditions, resource forecast and optionally linked requirements. Responses embed current/next-stage guide text and disclose server-generated values; no separate guide query is required.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "dev_item_id": {
+        "type": "string",
+        "minLength": 1
+      },
+      "include_requirements": {
+        "type": "boolean",
+        "default": false
+      },
+      "related_limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 200,
+        "default": 50
+      },
+      "related_offset": {
+        "type": "integer",
+        "minimum": 0,
+        "default": 0
+      }
+    },
+    "required": [
+      "dev_item_id"
+    ],
+    "additionalProperties": false
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

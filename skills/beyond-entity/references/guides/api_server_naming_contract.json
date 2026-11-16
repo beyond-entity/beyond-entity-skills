@@ -1,0 +1,43 @@
+{
+  "guide_id": "api_server_naming_contract",
+  "guide_revision": "94513f63a65a175e",
+  "source_mcp_version": "3.2.51",
+  "content": {
+    "title": "API Server Naming And HTTP Metadata Contract",
+    "processor_storage_type": "api_server",
+    "rules": [
+      "One api_server processor represents one Swagger/OpenAPI operation: one HTTP method + path. endpoints is an array with at most one item. Use separate processors for GET /orders and POST /orders; never group a server or router into one api_server processor.",
+      "processor_name is the human-readable logical/business operation name in the user's language. module_name is the verified operation identifier, such as operationId, controller method, option_id or function name; it is not the whole Controller class. The simple class-name rule applies to class-backed Spring processors, not api_server operations.",
+      "For new data use endpoints or other_info.endpoints. The explicit endpoints input takes precedence, including [] and null; nested endpoints takes precedence over legacy method/path. The server stores only other_info.endpoints and also exposes endpoints in read responses.",
+      "Legacy method/path, http_method/uri_path and other_info.method/path remain accepted and are converted. For each field, http_method/uri_path wins over method/path, which wins over legacy other_info fields. The old other_info.method/path keys are removed after conversion.",
+      "Omission preserves existing endpoints on update, a list replaces them, [] empties them and null clears them. Unrelated other_info keys are merged; other_info:null clears unrelated metadata but preserves omitted endpoints. Explicit endpoints:null clears routing.",
+      "Use only verified contract or source values. Unknown endpoints may be omitted, null or []; a partially known entry may omit unknown path/method/handler fields. Never guess GET or derive a URL from a name. Each entry must include at least one of path, method or handler; their values are strings or null.",
+      "The server rejects more than one endpoint on creation, modification and type changes to api_server, including nested inputs. Existing multi-endpoint API data is not automatically split or truncated; supply at most one endpoint explicitly to repair it before further edits and create separate processors for the remaining operations.",
+      "Inspect the Swagger/OpenAPI response status, content type, properties, required fields, array items and referenced components before defining OUTPUT attributes. Model the documented nested response structure; ask for missing contracts instead of inventing placeholder fields. This is design guidance, not automatic source verification by the server."
+    ],
+    "correct_processor_info_example": {
+      "processor_name": "관리자 로그인",
+      "module_name": "loginAdmin",
+      "processor_storage_type": "api_server",
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/auth/login",
+          "handler": "loginAdmin"
+        }
+      ],
+      "other_info": {
+        "operation_id": "loginAdmin",
+        "summary": "관리자 로그인",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "wrong_patterns": [
+      "Do not put HTTP method/path into processor_name or replace a verified operation identifier with a whole Controller class name.",
+      "Do not combine multiple Swagger/OpenAPI operations into one api_server processor.",
+      "Do not use legacy other_info.method/path for new designs; these are compatibility inputs only."
+    ]
+  }
+}

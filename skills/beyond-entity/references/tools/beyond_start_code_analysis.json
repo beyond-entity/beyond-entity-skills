@@ -1,0 +1,145 @@
+{
+  "name": "beyond_start_code_analysis",
+  "description": "Start an extraction/security run linked optionally to CP_AT. scope_summary.nodes explicitly plans up to 200 targets; split larger analyses into runs. Reuse run_id on retry. Source Git metadata is separate from BE Git.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "run_id": {
+        "type": "string"
+      },
+      "metadata": {
+        "type": "object",
+        "properties": {
+          "analyzer_id": {
+            "type": "string"
+          },
+          "analyzer_version": {
+            "type": "string"
+          },
+          "ruleset_version": {
+            "type": "string"
+          },
+          "config_hash": {
+            "type": "string"
+          },
+          "source_repository_key": {
+            "type": "string"
+          },
+          "source_branch": {
+            "type": "string"
+          },
+          "source_commit": {
+            "type": "string"
+          },
+          "source_snapshot_hash": {
+            "type": "string"
+          },
+          "scope_hash": {
+            "type": "string"
+          },
+          "external_run_id": {
+            "type": "string"
+          },
+          "report_ref": {
+            "type": "string"
+          },
+          "cp_at": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "source_dirty": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "enum": [
+              0,
+              1,
+              null
+            ]
+          },
+          "analysis_kind": {
+            "type": "string",
+            "enum": [
+              "EXTRACTION",
+              "SECURITY"
+            ]
+          },
+          "analyzer_kind": {
+            "type": "string",
+            "enum": [
+              "PARSER",
+              "AI",
+              "MANUAL",
+              "HYBRID"
+            ]
+          },
+          "scope_mode": {
+            "type": "string",
+            "enum": [
+              "FULL",
+              "INCREMENTAL"
+            ]
+          },
+          "scope_summary": {
+            "type": "object",
+            "properties": {
+              "nodes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "node_type": {
+                      "type": "string"
+                    },
+                    "node_key": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "object"
+                        }
+                      ]
+                    },
+                    "expected_revision": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "node_type",
+                    "node_key"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 200
+              }
+            },
+            "required": [
+              "nodes"
+            ]
+          }
+        },
+        "required": [
+          "analysis_kind",
+          "analyzer_kind",
+          "analyzer_id",
+          "source_repository_key",
+          "scope_mode",
+          "scope_summary"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "required": [
+      "run_id",
+      "metadata"
+    ],
+    "additionalProperties": false
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

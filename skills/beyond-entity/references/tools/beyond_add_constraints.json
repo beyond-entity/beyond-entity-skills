@@ -1,0 +1,275 @@
+{
+  "name": "beyond_add_constraints",
+  "description": "Add constraints to an entity. ForeignKey constraints are relationship-owned and must be created with beyond_create_relationships, not this tool. For pgvector vector similarity indexes, use constraint_type 'cosine', 'l2', or 'inner_product' instead of generic 'Index'. For PostgreSQL partial unique indexes, use constraint_type 'Unique' with other_info.where, for example {\"where\":\"status = 'active'\"}; do not use check_expression for Unique because check_expression is only for CHECK constraints. PrimaryKey additions synchronize affected working-stage attribute is_primary_key flags and publish EntityAttribute old/new rows in the same committed transaction. Failed constraints do not publish rolled-back rows.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "entity_id": {
+        "type": "string",
+        "description": "Target entity ID"
+      },
+      "constraints": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/constraint"
+        }
+      }
+    },
+    "required": [
+      "entity_id",
+      "constraints"
+    ],
+    "definitions": {
+      "constraint": {
+        "type": "object",
+        "description": "Constraint definition. Used for create/update payloads and for persisted constraint records.",
+        "properties": {
+          "constraint_id": {
+            "type": "string",
+            "description": "Beyond Entity constraint ID"
+          },
+          "entity_id": {
+            "type": "string",
+            "description": "Target entity ID"
+          },
+          "model_id": {
+            "type": "string",
+            "description": "Target model ID"
+          },
+          "constraint_name": {
+            "type": "string"
+          },
+          "index_name": {
+            "type": "string",
+            "description": "Physical index name when applicable"
+          },
+          "constraint_type": {
+            "type": "string",
+            "description": "Constraint type. For pgvector vector similarity indexes, use 'cosine', 'l2', or 'inner_product' instead of generic 'Index'. These map to pgvector cosine, L2, and inner-product operator classes.",
+            "enum": [
+              "PrimaryKey",
+              "Unique",
+              "Check",
+              "Default",
+              "Index",
+              "cosine",
+              "l2",
+              "inner_product"
+            ],
+            "x-vectorConstraintTypes": [
+              {
+                "constraint_type": "cosine",
+                "pgvectorOperatorClass": "vector_cosine_ops",
+                "preferredFor": "cosine similarity / cosine distance"
+              },
+              {
+                "constraint_type": "l2",
+                "pgvectorOperatorClass": "vector_l2_ops",
+                "preferredFor": "Euclidean L2 distance"
+              },
+              {
+                "constraint_type": "inner_product",
+                "pgvectorOperatorClass": "vector_ip_ops",
+                "preferredFor": "negative inner product"
+              }
+            ]
+          },
+          "attribute_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For existing entities"
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Column names involved in the constraint"
+          },
+          "attribute_names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For batch create"
+          },
+          "check_expression": {
+            "type": "string",
+            "description": "For CHECK constraints only. Do not use this for Unique constraints or partial unique indexes."
+          },
+          "constraint_value": {
+            "type": "string",
+            "description": "For Default or Check constraints, the stored value or condition"
+          },
+          "constraint_order": {
+            "type": "integer",
+            "description": "Attribute order within the constraint for persisted records"
+          },
+          "index_type": {
+            "type": "string",
+            "enum": [
+              "BTREE",
+              "HASH",
+              "GIN",
+              "GIST"
+            ],
+            "description": "For generic INDEX constraints. For pgvector vector similarity indexes, prefer constraint_type 'cosine', 'l2', or 'inner_product' instead of encoding the vector index as a generic Index."
+          },
+          "other_info": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Preserved relationship metadata. on_delete/on_update are reference annotations, not supported BE behaviors.",
+            "additionalProperties": true
+          },
+          "relationship_description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Stored relationship description, separate from referential-action metadata."
+          },
+          "metadata_guide": {
+            "type": "string",
+            "description": "Present when on_delete or on_update metadata exists; explains that BE does not support or apply these behavior settings."
+          }
+        },
+        "required": [
+          "constraint_name",
+          "constraint_type"
+        ],
+        "examples": [
+          {
+            "constraint_id": "cst_4FfSu6cF1S",
+            "entity_id": "ent_kMntnK7JSM",
+            "model_id": "mdl_ef32pexmia",
+            "constraint_name": "pk_code_group",
+            "index_name": "PK_code_group",
+            "constraint_type": "PrimaryKey",
+            "attribute_ids": [
+              "attr_c3SpXfySa6"
+            ],
+            "constraint_order": 0
+          },
+          {
+            "constraint_id": "cst_5gJbnF2BK4",
+            "entity_id": "ent_kMntnK7JSM",
+            "model_id": "mdl_ef32pexmia",
+            "constraint_name": "DF_code_group_created_at",
+            "constraint_type": "Default",
+            "attribute_ids": [
+              "attr_ey1Y7Rd8ba"
+            ],
+            "constraint_order": 0
+          },
+          {
+            "constraint_id": "cst_tjxr3CfQTW",
+            "entity_id": "ent_kMntnK7JSM",
+            "model_id": "mdl_ef32pexmia",
+            "constraint_name": "chk_code_group_use_yn",
+            "constraint_type": "Check",
+            "attribute_ids": [
+              "attr_wrh7pEDzPK"
+            ],
+            "constraint_order": 0
+          },
+          {
+            "constraint_id": "cst_vectorCosine01",
+            "entity_id": "ent_pgvectorChunk01",
+            "model_id": "mdl_pgvectorEmbeddings01",
+            "constraint_name": "idx_document_embedding_cosine",
+            "index_name": "idx_document_embedding_cosine",
+            "constraint_type": "cosine",
+            "attribute_ids": [
+              "attr_embeddingVector01"
+            ],
+            "columns": [
+              "embedding"
+            ],
+            "other_info": {
+              "pgvector_operator_class": "vector_cosine_ops"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          },
+          "added_constraints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/constraint_summary"
+            }
+          },
+          "failed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/operation_failure"
+            }
+          }
+        }
+      }
+    },
+    "definitions": {
+      "constraint_summary": {
+        "type": "object",
+        "properties": {
+          "constraint_id": {
+            "type": "string"
+          },
+          "constraint_name": {
+            "type": "string"
+          },
+          "constraint_type": {
+            "type": "string"
+          },
+          "attribute_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "other_info": {
+            "type": "object"
+          }
+        }
+      },
+      "operation_failure": {
+        "type": "object",
+        "properties": {
+          "object_type": {
+            "type": "string"
+          },
+          "object_name": {
+            "type": "string"
+          },
+          "transformation_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "error_message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "output_schema_declared": true
+}

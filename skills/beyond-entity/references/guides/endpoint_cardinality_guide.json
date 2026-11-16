@@ -1,0 +1,16 @@
+{
+  "guide_id": "endpoint_cardinality_guide",
+  "guide_revision": "7a2a8b05affda4bb",
+  "source_mcp_version": "3.2.51",
+  "content": {
+    "source": "processor_storage_types catalog is_module flag; not a client-supplied processor property",
+    "rules": [
+      "Only storage types whose is_module is exactly true allow multiple endpoints. False, null or omitted is_module means a processor and allows at most one endpoint.",
+      "Read acceptable_processors or the processor_storage_types catalog for is_module and max_endpoints before creation. Do not infer module status from a type name or override it in processor_info/other_info.",
+      "This applies to every processor storage type on creation, modification and type changes, for both endpoints and other_info.endpoints. Missing endpoints, null and [] are allowed. A module-to-processor change must supply at most one endpoint if multiple endpoints exist.",
+      "Store only in other_info.endpoints; top-level endpoints is an input and output convenience. Explicit endpoints wins over nested endpoints. Omitted routing preserves it, a list replaces it, [] empties it and null clears it.",
+      "Module status permits multiple endpoints but does not imply that a component exposes HTTP. Record verified endpoints only. Filter matchers, Interceptor patterns and Advice scope remain separate metadata.",
+      "Modules start collapsed on canvases. Module status does not change the parent model or require creating a separate model."
+    ]
+  }
+}

@@ -1,0 +1,385 @@
+{
+  "name": "beyond_modify_model",
+  "description": "Modify model properties.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "model_id": {
+        "type": "string",
+        "description": "Model ID to update"
+      },
+      "updates": {
+        "$ref": "#/definitions/model_update"
+      }
+    },
+    "required": [
+      "model_id",
+      "updates"
+    ],
+    "definitions": {
+      "model_update": {
+        "type": "object",
+        "description": "Partial model update payload for modify flows.",
+        "properties": {
+          "model_name": {
+            "type": "string"
+          },
+          "model_storage_type": {
+            "type": "string",
+            "enum": [
+              "mysql",
+              "mariadb",
+              "pgvector",
+              "postgresql",
+              "supabase",
+              "hive",
+              "athena",
+              "inceptor",
+              "redshift",
+              "netezza",
+              "vertica",
+              "snowflake",
+              "databricks",
+              "mongodb",
+              "cassandra",
+              "scylladb",
+              "hbase",
+              "bigtable",
+              "bigquery",
+              "elasticsearch",
+              "opensearch",
+              "oracle",
+              "sqlserver",
+              "sybase",
+              "db2",
+              "influxdb",
+              "saphana",
+              "sqlite",
+              "hsqldb",
+              "h2",
+              "derby",
+              "webapp",
+              "app",
+              "rabbitmq",
+              "kafka",
+              "spring_boot_application",
+              "google_workspace",
+              "general_system",
+              "asp_net_application",
+              "django_application",
+              "flask_application",
+              "fastapi_application",
+              "express_application",
+              "nestjs_application",
+              "nextjs_application",
+              "axum_application",
+              "actix_web_application",
+              "rocket_application",
+              "tonic_application",
+              "react_application",
+              "tauri_react_application",
+              "tauri_react_rust_application",
+              "tauri_general_application",
+              "external_system"
+            ],
+            "description": " Use model_storage_type='spring_boot_application' for legacy Spring Boot, Spring AI, and Spring MVC (including non-Boot MVC). When extracting architecture from code, use the actual class name as processor physical name/module_name; exclude its package and record verified package_name, qualified_class_name and source_file in other_info for class tracing. Choose the closest matching allowed spring_boot_* processor type, such as spring_boot_controller or spring_boot_service; use module_general for an unmatched class/module or processor_general for an individual operation. Use model_storage_type='google_workspace' for Google Workspace resources and automation. Query beyond_get_definitions(definition_names=[\"model_selection_guide\"]) for the full rules and examples."
+          },
+          "database_name": {
+            "type": "string"
+          },
+          "system_name": {
+            "type": "string"
+          },
+          "schema_name": {
+            "type": "string"
+          },
+          "namespace_name": {
+            "type": "string"
+          },
+          "storage_name": {
+            "type": "string"
+          },
+          "partition_name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "model_description": {
+            "type": "string"
+          },
+          "criticality_level": {
+            "type": "integer",
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "description": "TARA criticality level. 1 = Low, 2 = Medium, 3 = High."
+          },
+          "exposure_level": {
+            "type": "integer",
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "description": "TARA exposure level. 0 = Not defined, 1 = Isolated, 2 = Internal, 3 = Partner, 4 = External, 5 = Public."
+          },
+          "other_info": {
+            "type": "object"
+          },
+          "auto_created": {
+            "type": "boolean",
+            "description": "True when the constraint was automatically created from attribute metadata such as is_primary_key or default_value."
+          },
+          "created_for": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Why the constraint was automatically created, such as entity_attribute.is_primary_key or entity_attribute.default_value."
+          },
+          "constraint_value": {
+            "description": "Value or expression used by auto-created Default or Check constraints."
+          },
+          "framework": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional application framework. Examples: Spring Boot, Spring MVC, Spring Boot + Spring AI. Omit or use null if unknown. Does not change model_storage_type or allowed processor types."
+          }
+        }
+      }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "$ref": "#/definitions/model"
+          }
+        }
+      }
+    },
+    "definitions": {
+      "model": {
+        "type": "object",
+        "description": "Top-level design container for a system boundary in Beyond Entity. A model can represent a database/warehouse schema, a browser or app UI/task design surface, or a general system boundary for APIs, processor groups, files, caches, applications, or mixed components.",
+        "properties": {
+          "model_id": {
+            "type": "string",
+            "description": "Beyond Entity model ID"
+          },
+          "model_name": {
+            "type": "string",
+            "description": "Logical name for the model"
+          },
+          "model_storage_type": {
+            "type": "string",
+            "description": "Storage/system type for the model. Use database values such as 'postgresql', 'pgvector', or 'bigquery' only for real persisted data platforms. Use 'pgvector' for dedicated PostgreSQL pgvector vector databases and embedding stores; PostgreSQL and Supabase models can also contain vector or bit columns when those data types are present in the entity schema. Use 'webapp' for browser-based user workflows and screens such as signup, login, search forms, and modal/page interactions. Use 'app' for application UI workflows and screens such as product lists, detail pages, dashboards, and mobile app navigation. Use 'rabbitmq' or 'kafka' for messaging-system boundaries. Use 'influxdb' for InfluxDB time-series models, where database_name represents Bucket and schema_name represents Measurement. Use 'general_system' for backend, API, file, cache, integration, or processor-centric system groupings; use entity_storage_type='general_file' inside general_system for unstructured or mixed file resources. Store exchange/topic/binding/partitioning or other platform-specific settings in other_info when needed. Use model_storage_type='spring_boot_application' for legacy Spring Boot, Spring AI, and Spring MVC (including non-Boot MVC). When extracting architecture from code, use the actual class name as processor physical name/module_name; exclude its package and record verified package_name, qualified_class_name and source_file in other_info for class tracing. Choose the closest matching allowed spring_boot_* processor type, such as spring_boot_controller or spring_boot_service; use module_general for an unmatched class/module or processor_general for an individual operation. Use model_storage_type='google_workspace' for Google Workspace resources and automation. Query beyond_get_definitions(definition_names=[\"model_selection_guide\"]) for the full rules and examples.",
+            "enum": [
+              "mysql",
+              "mariadb",
+              "pgvector",
+              "postgresql",
+              "supabase",
+              "hive",
+              "athena",
+              "inceptor",
+              "redshift",
+              "netezza",
+              "vertica",
+              "snowflake",
+              "databricks",
+              "mongodb",
+              "cassandra",
+              "scylladb",
+              "hbase",
+              "bigtable",
+              "bigquery",
+              "elasticsearch",
+              "opensearch",
+              "oracle",
+              "sqlserver",
+              "sybase",
+              "db2",
+              "influxdb",
+              "saphana",
+              "sqlite",
+              "hsqldb",
+              "h2",
+              "derby",
+              "webapp",
+              "app",
+              "rabbitmq",
+              "kafka",
+              "spring_boot_application",
+              "google_workspace",
+              "general_system",
+              "asp_net_application",
+              "django_application",
+              "flask_application",
+              "fastapi_application",
+              "express_application",
+              "nestjs_application",
+              "nextjs_application",
+              "axum_application",
+              "actix_web_application",
+              "rocket_application",
+              "tonic_application",
+              "react_application",
+              "tauri_react_application",
+              "tauri_react_rust_application",
+              "tauri_general_application",
+              "external_system"
+            ]
+          },
+          "database_name": {
+            "type": "string",
+            "description": "Physical database/schema/container name when the model represents a database-like platform. Optional. If omitted, defaults to model_name."
+          },
+          "system_name": {
+            "type": "string",
+            "description": "Logical system name exposed for non-database models such as 'general_system', 'webapp', 'app', 'rabbitmq', and 'kafka'. This must be a readable business-facing name such as 'Virtual Office API' or 'Virtual Office App', not a physical identifier like 'virtual_office_api'. In persistence this is backed by database_name; there is no separate system_name field in storage. Use the user's language for logical names: Korean for Korean users, Japanese for Japanese users, otherwise English."
+          },
+          "schema_name": {
+            "type": "string",
+            "description": "Optional schema name when applicable."
+          },
+          "namespace_name": {
+            "type": "string",
+            "description": "Optional namespace name used by modify/get flows."
+          },
+          "storage_name": {
+            "type": "string",
+            "description": "Optional storage container/group name used by modify/get flows."
+          },
+          "partition_name": {
+            "type": "string",
+            "description": "Optional partition name used by modify/get flows."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the model's purpose"
+          },
+          "model_description": {
+            "type": "string",
+            "description": "Alias of description used by some modify/get flows."
+          },
+          "criticality_level": {
+            "type": "integer",
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "default": 1,
+            "description": "TARA criticality level. 1 = Low, 2 = Medium, 3 = High."
+          },
+          "exposure_level": {
+            "type": "integer",
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "default": 0,
+            "description": "TARA exposure level. 0 = Not defined, 1 = Isolated, 2 = Internal, 3 = Partner, 4 = External, 5 = Public."
+          },
+          "other_info": {
+            "type": "object",
+            "description": "Additional JSON metadata for the model"
+          },
+          "framework": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional application framework. Examples: Spring Boot, Spring MVC, Spring Boot + Spring AI. Omit or use null if unknown. Does not change model_storage_type or allowed processor types."
+          }
+        },
+        "required": [
+          "model_name",
+          "model_storage_type"
+        ],
+        "examples": [
+          {
+            "model_id": "mdl_ef32pexmia",
+            "model_name": "배달DB",
+            "model_storage_type": "postgresql",
+            "database_name": "database",
+            "schema_name": "database"
+          },
+          {
+            "model_id": "mdl_pgvectorEmbeddings01",
+            "model_name": "Document Embedding Store",
+            "model_storage_type": "pgvector",
+            "database_name": "knowledge_base",
+            "schema_name": "public"
+          },
+          {
+            "model_id": "mdl_influxRuntime01",
+            "model_name": "설비 모니터링",
+            "model_storage_type": "influxdb",
+            "database_name": "factory_metrics",
+            "schema_name": "equipment_status"
+          },
+          {
+            "model_id": "mdl_E9BzHuTfsD",
+            "model_name": "Virtual Office API",
+            "model_storage_type": "general_system",
+            "system_name": "Virtual Office API",
+            "schema_name": "database"
+          },
+          {
+            "model_id": "mdl_browserSignup01",
+            "model_name": "Virtual Office Browser",
+            "model_storage_type": "webapp",
+            "system_name": "Virtual Office Browser",
+            "description": "Browser signup UI with form validation, consent, and completion flow."
+          },
+          {
+            "model_id": "mdl_appProducts01",
+            "model_name": "Virtual Office App",
+            "model_storage_type": "app",
+            "system_name": "Virtual Office App",
+            "description": "Application product listing UI with filters, sorting, and product detail navigation."
+          },
+          {
+            "model_id": "mdl_kafkaOrders01",
+            "model_name": "Order Event Bus",
+            "model_storage_type": "kafka",
+            "system_name": "Order Event Bus",
+            "other_info": {
+              "topic": "orders.events",
+              "key_strategy": "order_id",
+              "value_format": "json"
+            }
+          },
+          {
+            "model_id": "mdl_dVgesasWF5",
+            "model_name": "Log Processing",
+            "model_storage_type": "general_system",
+            "system_name": "Log Collector"
+          }
+        ]
+      }
+    }
+  },
+  "output_schema_declared": true
+}

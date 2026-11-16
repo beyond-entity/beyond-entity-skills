@@ -1,0 +1,1368 @@
+{
+  "name": "beyond_create_model",
+  "description": "Discover supported technologies with beyond_get_definitions(definition_names=[\"design_navigation_guide\"]). React frontend uses react_application. Read only the selected model_design_guide:<type> and processor_design_guide:<type>. Verify the current runtime catalog before claiming a technology is unsupported. Create a new model, which is the top-level design container for a system. A model can represent a database, vector database, warehouse schema, UI/task design surface, or a non-database system boundary such as an API/server/file/cache/processor group. Use model_storage_type='pgvector' when the model represents a dedicated PostgreSQL pgvector vector database or embedding store. PostgreSQL and Supabase models can also contain vector or bit columns when those data types are present in the entity schema. Use model_storage_type='webapp' for browser-based user workflows and screens such as signup UI, login UI, forms, search pages, and modal/page interactions. Use model_storage_type='app' for application UI workflows and screens such as product list UI, detail views, dashboards, and mobile app navigation. Use model_storage_type='rabbitmq' or 'kafka' when the model represents a messaging-system boundary. For JMS/SQS, use entity_storage_type='jms' or 'sqs' inside the existing general_system or framework application model when allowed by acceptable_entities, including Spring Boot, Flask and other supported frameworks; do not create separate JMS/SQS models. Read the current model messaging_design guide for queue metadata and publisher/consumer SQL lineage. Use model_storage_type='influxdb' when the model represents an InfluxDB time-series runtime. For InfluxDB, map database_name to Bucket and schema_name to Measurement. Use model_storage_type='general_system' when designing backend or processor-centric systems like API servers, file integrations, caches, or mixed application modules; use entity_storage_type='general_file' inside that model for unstructured or mixed file resources. ELT/ETL processors can still live inside a database-oriented model when they conceptually belong to that data platform. Store messaging-specific operational metadata in other_info when needed. Query beyond_get_definitions(definition_names=[\"processor_storage_types\"]) for the exhaustive global processor ID/title catalog with allowed model types. A model acceptable_processors list is only its allowed subset, not the global catalog. Use model_storage_type='spring_boot_application' for legacy Spring Boot, Spring AI, and Spring MVC (including non-Boot MVC). When extracting architecture from code, use the actual class name as processor physical name/module_name; exclude its package and record verified package_name, qualified_class_name and source_file in other_info for class tracing. Choose the closest matching allowed spring_boot_* processor type, such as spring_boot_controller or spring_boot_service; use module_general for an unmatched class/module or processor_general for an individual operation. Use model_storage_type='google_workspace' for Google Workspace resources and automation. Query beyond_get_definitions(definition_names=[\"model_selection_guide\"]) for the full rules and examples. Before architecture writes, read the model_storage_design_guide and acceptable_processors returned by model creation/retrieval. Use verified source, configuration, specifications or explicit user requirements; never guess missing classes, routes, framework or subtype. Omit unknown optional values and ask for required information. Guide delivery is session-scoped by guide_id and guide_revision: first delivery includes delivery=full and content, subsequent responses use delivery=reference without content. MUST read and follow full content. A paged guide counts as delivered only after every page is returned. If context was lost, use the details call (beyond_get_definitions, mode=full, include_examples=true) to retrieve the full guide again. A new session, changed revision or expired delivery cache resends content. Delivery records do not prove the AI read it. Never retry model creation merely to recover expired pages; re-read the model. Optional other_info JSON metadata is persisted and returned by model creation and reads. Read only the selected model_design_guide:<model_storage_type> and processor_design_guide:<processor_storage_type> for responsibilities, IO policy and data types.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "description": "Top-level design container for a system boundary in Beyond Entity. A model can represent a database/warehouse schema, a browser or app UI/task design surface, or a general system boundary for APIs, processor groups, files, caches, applications, or mixed components.",
+    "properties": {
+      "model_id": {
+        "type": "string",
+        "description": "Beyond Entity model ID"
+      },
+      "model_name": {
+        "type": "string",
+        "description": "Logical name for the model"
+      },
+      "model_storage_type": {
+        "type": "string",
+        "description": "Storage/system type for the model. Use database values such as 'postgresql', 'pgvector', or 'bigquery' only for real persisted data platforms. Use 'pgvector' for dedicated PostgreSQL pgvector vector databases and embedding stores; PostgreSQL and Supabase models can also contain vector or bit columns when those data types are present in the entity schema. Use 'webapp' for browser-based user workflows and screens such as signup, login, search forms, and modal/page interactions. Use 'app' for application UI workflows and screens such as product lists, detail pages, dashboards, and mobile app navigation. Use 'rabbitmq' or 'kafka' for messaging-system boundaries. Use 'influxdb' for InfluxDB time-series models, where database_name represents Bucket and schema_name represents Measurement. Use 'general_system' for backend, API, file, cache, integration, or processor-centric system groupings; use entity_storage_type='general_file' inside general_system for unstructured or mixed file resources. Store exchange/topic/binding/partitioning or other platform-specific settings in other_info when needed. Use model_storage_type='spring_boot_application' for legacy Spring Boot, Spring AI, and Spring MVC (including non-Boot MVC). When extracting architecture from code, use the actual class name as processor physical name/module_name; exclude its package and record verified package_name, qualified_class_name and source_file in other_info for class tracing. Choose the closest matching allowed spring_boot_* processor type, such as spring_boot_controller or spring_boot_service; use module_general for an unmatched class/module or processor_general for an individual operation. Use model_storage_type='google_workspace' for Google Workspace resources and automation. Query beyond_get_definitions(definition_names=[\"model_selection_guide\"]) for the full rules and examples.",
+        "enum": [
+          "mysql",
+          "mariadb",
+          "pgvector",
+          "postgresql",
+          "supabase",
+          "hive",
+          "athena",
+          "inceptor",
+          "redshift",
+          "netezza",
+          "vertica",
+          "snowflake",
+          "databricks",
+          "mongodb",
+          "cassandra",
+          "scylladb",
+          "hbase",
+          "bigtable",
+          "bigquery",
+          "elasticsearch",
+          "opensearch",
+          "oracle",
+          "sqlserver",
+          "sybase",
+          "db2",
+          "influxdb",
+          "saphana",
+          "sqlite",
+          "hsqldb",
+          "h2",
+          "derby",
+          "webapp",
+          "app",
+          "rabbitmq",
+          "kafka",
+          "spring_boot_application",
+          "google_workspace",
+          "general_system",
+          "asp_net_application",
+          "django_application",
+          "flask_application",
+          "fastapi_application",
+          "express_application",
+          "nestjs_application",
+          "nextjs_application",
+          "axum_application",
+          "actix_web_application",
+          "rocket_application",
+          "tonic_application",
+          "react_application",
+          "tauri_react_application",
+          "tauri_react_rust_application",
+          "tauri_general_application",
+          "external_system"
+        ]
+      },
+      "database_name": {
+        "type": "string",
+        "description": "Physical database/schema/container name when the model represents a database-like platform. Optional. If omitted, defaults to model_name."
+      },
+      "system_name": {
+        "type": "string",
+        "description": "Logical system name exposed for non-database models such as 'general_system', 'webapp', 'app', 'rabbitmq', and 'kafka'. This must be a readable business-facing name such as 'Virtual Office API' or 'Virtual Office App', not a physical identifier like 'virtual_office_api'. In persistence this is backed by database_name; there is no separate system_name field in storage. Use the user's language for logical names: Korean for Korean users, Japanese for Japanese users, otherwise English."
+      },
+      "schema_name": {
+        "type": "string",
+        "description": "Optional schema name when applicable."
+      },
+      "namespace_name": {
+        "type": "string",
+        "description": "Optional namespace name used by modify/get flows."
+      },
+      "storage_name": {
+        "type": "string",
+        "description": "Optional storage container/group name used by modify/get flows."
+      },
+      "partition_name": {
+        "type": "string",
+        "description": "Optional partition name used by modify/get flows."
+      },
+      "description": {
+        "type": "string",
+        "description": "Description of the model's purpose"
+      },
+      "model_description": {
+        "type": "string",
+        "description": "Alias of description used by some modify/get flows."
+      },
+      "criticality_level": {
+        "type": "integer",
+        "enum": [
+          1,
+          2,
+          3
+        ],
+        "default": 1,
+        "description": "TARA criticality level. 1 = Low, 2 = Medium, 3 = High."
+      },
+      "exposure_level": {
+        "type": "integer",
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "default": 0,
+        "description": "TARA exposure level. 0 = Not defined, 1 = Isolated, 2 = Internal, 3 = Partner, 4 = External, 5 = Public."
+      },
+      "other_info": {
+        "type": "object",
+        "description": "Additional JSON metadata for the model"
+      },
+      "framework": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Optional application framework. Examples: Spring Boot, Spring MVC, Spring Boot + Spring AI. Omit or use null if unknown. Does not change model_storage_type or allowed processor types."
+      }
+    },
+    "required": [
+      "model_name",
+      "model_storage_type"
+    ],
+    "examples": [
+      {
+        "model_id": "mdl_ef32pexmia",
+        "model_name": "배달DB",
+        "model_storage_type": "postgresql",
+        "database_name": "database",
+        "schema_name": "database"
+      },
+      {
+        "model_id": "mdl_pgvectorEmbeddings01",
+        "model_name": "Document Embedding Store",
+        "model_storage_type": "pgvector",
+        "database_name": "knowledge_base",
+        "schema_name": "public"
+      },
+      {
+        "model_id": "mdl_influxRuntime01",
+        "model_name": "설비 모니터링",
+        "model_storage_type": "influxdb",
+        "database_name": "factory_metrics",
+        "schema_name": "equipment_status"
+      },
+      {
+        "model_id": "mdl_E9BzHuTfsD",
+        "model_name": "Virtual Office API",
+        "model_storage_type": "general_system",
+        "system_name": "Virtual Office API",
+        "schema_name": "database"
+      },
+      {
+        "model_id": "mdl_browserSignup01",
+        "model_name": "Virtual Office Browser",
+        "model_storage_type": "webapp",
+        "system_name": "Virtual Office Browser",
+        "description": "Browser signup UI with form validation, consent, and completion flow."
+      },
+      {
+        "model_id": "mdl_appProducts01",
+        "model_name": "Virtual Office App",
+        "model_storage_type": "app",
+        "system_name": "Virtual Office App",
+        "description": "Application product listing UI with filters, sorting, and product detail navigation."
+      },
+      {
+        "model_id": "mdl_kafkaOrders01",
+        "model_name": "Order Event Bus",
+        "model_storage_type": "kafka",
+        "system_name": "Order Event Bus",
+        "other_info": {
+          "topic": "orders.events",
+          "key_strategy": "order_id",
+          "value_format": "json"
+        }
+      },
+      {
+        "model_id": "mdl_dVgesasWF5",
+        "model_name": "Log Processing",
+        "model_storage_type": "general_system",
+        "system_name": "Log Collector"
+      }
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "created": {
+            "type": "object",
+            "properties": {
+              "model": {
+                "$ref": "#/definitions/model"
+              },
+              "canvas": {
+                "$ref": "#/definitions/canvas_info"
+              }
+            }
+          },
+          "acceptable_entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/storage_type_option"
+            }
+          },
+          "acceptable_processors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/storage_type_option"
+            }
+          },
+          "model_storage_design_guide": {
+            "$ref": "#/definitions/model_storage_design_guide"
+          }
+        }
+      }
+    },
+    "definitions": {
+      "canvas_info": {
+        "type": "object",
+        "properties": {
+          "canvas_id": {
+            "type": "string"
+          },
+          "canvas_name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "entities_processors_in_models": {
+            "type": "string"
+          },
+          "permission": {
+            "type": "string"
+          },
+          "allow_all_branches": {
+            "type": "boolean"
+          },
+          "allowed_branches": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "model": {
+        "type": "object",
+        "description": "Top-level design container for a system boundary in Beyond Entity. A model can represent a database/warehouse schema, a browser or app UI/task design surface, or a general system boundary for APIs, processor groups, files, caches, applications, or mixed components.",
+        "properties": {
+          "model_id": {
+            "type": "string",
+            "description": "Beyond Entity model ID"
+          },
+          "model_name": {
+            "type": "string",
+            "description": "Logical name for the model"
+          },
+          "model_storage_type": {
+            "type": "string",
+            "description": "Storage/system type for the model. Use database values such as 'postgresql', 'pgvector', or 'bigquery' only for real persisted data platforms. Use 'pgvector' for dedicated PostgreSQL pgvector vector databases and embedding stores; PostgreSQL and Supabase models can also contain vector or bit columns when those data types are present in the entity schema. Use 'webapp' for browser-based user workflows and screens such as signup, login, search forms, and modal/page interactions. Use 'app' for application UI workflows and screens such as product lists, detail pages, dashboards, and mobile app navigation. Use 'rabbitmq' or 'kafka' for messaging-system boundaries. Use 'influxdb' for InfluxDB time-series models, where database_name represents Bucket and schema_name represents Measurement. Use 'general_system' for backend, API, file, cache, integration, or processor-centric system groupings; use entity_storage_type='general_file' inside general_system for unstructured or mixed file resources. Store exchange/topic/binding/partitioning or other platform-specific settings in other_info when needed. Use model_storage_type='spring_boot_application' for legacy Spring Boot, Spring AI, and Spring MVC (including non-Boot MVC). When extracting architecture from code, use the actual class name as processor physical name/module_name; exclude its package and record verified package_name, qualified_class_name and source_file in other_info for class tracing. Choose the closest matching allowed spring_boot_* processor type, such as spring_boot_controller or spring_boot_service; use module_general for an unmatched class/module or processor_general for an individual operation. Use model_storage_type='google_workspace' for Google Workspace resources and automation. Query beyond_get_definitions(definition_names=[\"model_selection_guide\"]) for the full rules and examples.",
+            "enum": [
+              "mysql",
+              "mariadb",
+              "pgvector",
+              "postgresql",
+              "supabase",
+              "hive",
+              "athena",
+              "inceptor",
+              "redshift",
+              "netezza",
+              "vertica",
+              "snowflake",
+              "databricks",
+              "mongodb",
+              "cassandra",
+              "scylladb",
+              "hbase",
+              "bigtable",
+              "bigquery",
+              "elasticsearch",
+              "opensearch",
+              "oracle",
+              "sqlserver",
+              "sybase",
+              "db2",
+              "influxdb",
+              "saphana",
+              "sqlite",
+              "hsqldb",
+              "h2",
+              "derby",
+              "webapp",
+              "app",
+              "rabbitmq",
+              "kafka",
+              "spring_boot_application",
+              "google_workspace",
+              "general_system",
+              "asp_net_application",
+              "django_application",
+              "flask_application",
+              "fastapi_application",
+              "express_application",
+              "nestjs_application",
+              "nextjs_application",
+              "axum_application",
+              "actix_web_application",
+              "rocket_application",
+              "tonic_application",
+              "react_application",
+              "tauri_react_application",
+              "tauri_react_rust_application",
+              "tauri_general_application",
+              "external_system"
+            ]
+          },
+          "database_name": {
+            "type": "string",
+            "description": "Physical database/schema/container name when the model represents a database-like platform. Optional. If omitted, defaults to model_name."
+          },
+          "system_name": {
+            "type": "string",
+            "description": "Logical system name exposed for non-database models such as 'general_system', 'webapp', 'app', 'rabbitmq', and 'kafka'. This must be a readable business-facing name such as 'Virtual Office API' or 'Virtual Office App', not a physical identifier like 'virtual_office_api'. In persistence this is backed by database_name; there is no separate system_name field in storage. Use the user's language for logical names: Korean for Korean users, Japanese for Japanese users, otherwise English."
+          },
+          "schema_name": {
+            "type": "string",
+            "description": "Optional schema name when applicable."
+          },
+          "namespace_name": {
+            "type": "string",
+            "description": "Optional namespace name used by modify/get flows."
+          },
+          "storage_name": {
+            "type": "string",
+            "description": "Optional storage container/group name used by modify/get flows."
+          },
+          "partition_name": {
+            "type": "string",
+            "description": "Optional partition name used by modify/get flows."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the model's purpose"
+          },
+          "model_description": {
+            "type": "string",
+            "description": "Alias of description used by some modify/get flows."
+          },
+          "criticality_level": {
+            "type": "integer",
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "default": 1,
+            "description": "TARA criticality level. 1 = Low, 2 = Medium, 3 = High."
+          },
+          "exposure_level": {
+            "type": "integer",
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "default": 0,
+            "description": "TARA exposure level. 0 = Not defined, 1 = Isolated, 2 = Internal, 3 = Partner, 4 = External, 5 = Public."
+          },
+          "other_info": {
+            "type": "object",
+            "description": "Additional JSON metadata for the model"
+          },
+          "framework": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional application framework. Examples: Spring Boot, Spring MVC, Spring Boot + Spring AI. Omit or use null if unknown. Does not change model_storage_type or allowed processor types."
+          }
+        },
+        "required": [
+          "model_name",
+          "model_storage_type"
+        ],
+        "examples": [
+          {
+            "model_id": "mdl_ef32pexmia",
+            "model_name": "배달DB",
+            "model_storage_type": "postgresql",
+            "database_name": "database",
+            "schema_name": "database"
+          },
+          {
+            "model_id": "mdl_pgvectorEmbeddings01",
+            "model_name": "Document Embedding Store",
+            "model_storage_type": "pgvector",
+            "database_name": "knowledge_base",
+            "schema_name": "public"
+          },
+          {
+            "model_id": "mdl_influxRuntime01",
+            "model_name": "설비 모니터링",
+            "model_storage_type": "influxdb",
+            "database_name": "factory_metrics",
+            "schema_name": "equipment_status"
+          },
+          {
+            "model_id": "mdl_E9BzHuTfsD",
+            "model_name": "Virtual Office API",
+            "model_storage_type": "general_system",
+            "system_name": "Virtual Office API",
+            "schema_name": "database"
+          },
+          {
+            "model_id": "mdl_browserSignup01",
+            "model_name": "Virtual Office Browser",
+            "model_storage_type": "webapp",
+            "system_name": "Virtual Office Browser",
+            "description": "Browser signup UI with form validation, consent, and completion flow."
+          },
+          {
+            "model_id": "mdl_appProducts01",
+            "model_name": "Virtual Office App",
+            "model_storage_type": "app",
+            "system_name": "Virtual Office App",
+            "description": "Application product listing UI with filters, sorting, and product detail navigation."
+          },
+          {
+            "model_id": "mdl_kafkaOrders01",
+            "model_name": "Order Event Bus",
+            "model_storage_type": "kafka",
+            "system_name": "Order Event Bus",
+            "other_info": {
+              "topic": "orders.events",
+              "key_strategy": "order_id",
+              "value_format": "json"
+            }
+          },
+          {
+            "model_id": "mdl_dVgesasWF5",
+            "model_name": "Log Processing",
+            "model_storage_type": "general_system",
+            "system_name": "Log Collector"
+          }
+        ]
+      },
+      "model_storage_design_guide": {
+        "type": "object",
+        "description": "Before architecture writes, read the model_storage_design_guide and acceptable_processors returned by model creation/retrieval. Use verified source, configuration, specifications or explicit user requirements; never guess missing classes, routes, framework or subtype. Omit unknown optional values and ask for required information.",
+        "properties": {
+          "architecture_design": {
+            "type": "object",
+            "description": "Model-specific naming, subtype, framework, routing, source evidence and processor selection rules."
+          },
+          "model_selection": {
+            "spring_boot_application": {
+              "model_storage_type": "spring_boot_application",
+              "scope": "Use Spring Boot Application for legacy Spring Boot, Spring AI, and Spring MVC applications, including traditional Spring MVC applications without Spring Boot.",
+              "rules": [
+                "Read the returned model guide and acceptable_processors before creating or updating architecture. Use source code, configuration, specifications, existing verified design, or explicit user requirements as evidence. Never invent classes, endpoints, subtypes, frameworks, attributes, or connections to fill a catalog. Omit unknown optional values; ask when required information is missing. Clearly distinguish proposed designs from extracted facts.",
+                "Prefer spring_boot_application for these Spring architectures when creating models; record the actual framework in framework.",
+                "Select architecture management scope before processor type. Create a node only for a system boundary, business responsibility, storage/external contract, material data transformation, or explicit requirement; a call, class, annotation, or I/O value alone is insufficient.",
+                "Keep guards, validators, helpers, local policy checks, exception objects, and boundary-free adapters in the owner's implementation or other_info. Do not use module_general for an out-of-scope class.",
+                "Do not model Logger/SLF4J/Log4j as processors. Model a log file as a general_file entity only when a File/RollingFile appender or equivalent persisted log destination is verified; record active profile, level, path and retention in other_info.",
+                "Create log lineage only for verified request or personal-data fields written to that file, at the event or operation level rather than for every log statement. Console-only logging has no log-file entity; database logs remain ordinary database entities.",
+                "When extracting architecture from source code, set each processor physical name (module_name) to its actual class name so the architecture can be traced back to the class.",
+                "Use the simple class name without its package for class/module nodes. module_name must be unique within the model physical-name namespace. One class with several roles is one module: reuse it and record processing stages in transformation/implementation or other_info; do not create a second module merely for its ETL role. If document ETL is the existing class main responsibility, classify that one node as spring_boot_data_processor (use_lookup=true) and use LOOKUP for verified intermediate chunks, embeddings and processing state; keep only externally emitted results in OUTPUT. A service class name or annotation does not force spring_boot_service. Choose the type from its architecture responsibility, not merely to obtain LOOKUP. Record verified package_name, qualified_class_name and source_file in other_info for tracing; these do not permit duplicate module_name values. For distinct same-named classes in different packages, resolve model boundaries/naming with the user instead of inventing names or assuming duplicates are allowed. Do not replace a class name with an endpoint path, HTTP verb, business label or method name.",
+                "Keep processor_name as a human-readable logical/business name. Record source file paths and method details in other_info; use endpoints for endpoint routing metadata.",
+                "After a component passes the management-scope test, choose the closest matching allowed processor type for its architecture responsibility, such as spring_boot_controller or spring_boot_service. Use module_general only for an in-scope class/module with no closer type, or processor_general for an in-scope individual operation; check the model allowlist.",
+                "Read use_lookup on each acceptable processor type. Spring class modules and module_general disable LOOKUP; spring_boot_data_processor enables LOOKUP for document/data processing stages. Do not infer the flag from is_module.",
+                "Check the model acceptable_processors before creation; keep database storage entities in their own database models and connect them to the Spring processors.",
+                "Use sub_type (alias subType) for storage-type details. Subtype examples are recommendations, not an exhaustive enum.",
+                "Keep DAO and Mapper as spring_boot_repository subtypes by default. Consider a separate Mapper node only if the project has independently identifiable connections and contracts for it.",
+                "Do not register Query Transformer, Document Retriever, Document Post Processor, or ETL Reader/Transformer/Writer as default processor types. Record internal stages as Transformations and Implementation information within their owning processor.",
+                "Represent such a stage as a node only when it is an independent architectural component that must be identified and connected and passes the management-scope test; choose the closest existing type, or module_general for an in-scope class/module and processor_general for an in-scope individual operation.",
+                "Exception handlers are behavior; Throwable is input data (Object), not a processor type. Use spring_boot_controller_advice for annotated advice, and module_general only for an independently managed handler with an architectural boundary; keep local handling, guards and fallback helpers in their owner. Add only verified fields and connections; follow query_dependency_guide.",
+                "Filter, Handler Interceptor, Controller Advice, View Renderer, and Job / Handler are optional catalog types. Do not create them on the canvas when the project has no such component. Never create every catalog type merely to complete a diagram.",
+                "Recommended layers do not automatically assign a layer. New processors have no assigned layer; property updates preserve existing assignments."
+              ],
+              "processor_type_guidance": {
+                "spring_boot_controller": {
+                  "recommended_layer": "Controller",
+                  "subtype_examples": [
+                    "REST",
+                    "MVC"
+                  ],
+                  "purpose": "External request/response entry point",
+                  "create_only_when_present": false
+                },
+                "spring_boot_service": {
+                  "recommended_layer": "Service",
+                  "subtype_examples": [
+                    "Application",
+                    "Domain",
+                    "Facade",
+                    "AI Service"
+                  ],
+                  "purpose": "Business processing and component coordination",
+                  "create_only_when_present": false
+                },
+                "spring_boot_repository": {
+                  "recommended_layer": "Data Access",
+                  "subtype_examples": [
+                    "Repository",
+                    "DAO",
+                    "Mapper",
+                    "Memory Repository"
+                  ],
+                  "purpose": "Data access and persistence boundary",
+                  "create_only_when_present": false
+                },
+                "spring_boot_integration_client": {
+                  "recommended_layer": "Integration",
+                  "subtype_examples": [
+                    "HTTP",
+                    "SOAP",
+                    "Messaging",
+                    "MCP"
+                  ],
+                  "purpose": "Outbound application calls",
+                  "create_only_when_present": false
+                },
+                "spring_boot_chat_client": {
+                  "recommended_layer": "Spring AI",
+                  "subtype_examples": [
+                    "Chat",
+                    "Streaming"
+                  ],
+                  "purpose": "Composes prompts, advisors, and model calls",
+                  "create_only_when_present": false
+                },
+                "spring_boot_adviser": {
+                  "recommended_layer": "Spring AI",
+                  "subtype_examples": [
+                    "RAG",
+                    "Memory",
+                    "Tool Calling",
+                    "Custom"
+                  ],
+                  "purpose": "Independent component around AI invocation",
+                  "create_only_when_present": false
+                },
+                "spring_boot_tool": {
+                  "recommended_layer": "Spring AI",
+                  "subtype_examples": [
+                    "Local",
+                    "External",
+                    "MCP"
+                  ],
+                  "purpose": "Function executed at the AI's request",
+                  "create_only_when_present": false
+                },
+                "spring_boot_chat_memory": {
+                  "recommended_layer": "Spring AI",
+                  "subtype_examples": [
+                    "Window",
+                    "Persistent",
+                    "Custom"
+                  ],
+                  "purpose": "Conversation history management",
+                  "create_only_when_present": false
+                },
+                "spring_boot_ai_model_client": {
+                  "recommended_layer": "Spring AI",
+                  "subtype_examples": [
+                    "Chat",
+                    "Embedding",
+                    "Image",
+                    "Audio"
+                  ],
+                  "purpose": "In-application model invocation boundary",
+                  "create_only_when_present": false
+                },
+                "spring_boot_data_processor": {
+                  "recommended_layer": "Document ETL",
+                  "subtype_examples": [
+                    "Document ETL"
+                  ],
+                  "purpose": "Independent document ingestion flow",
+                  "create_only_when_present": false
+                },
+                "spring_boot_filter": {
+                  "recommended_layer": "Web Entry",
+                  "subtype_examples": [
+                    "Servlet",
+                    "Security"
+                  ],
+                  "purpose": "Request filtering",
+                  "create_only_when_present": true
+                },
+                "spring_boot_handler_interceptor": {
+                  "recommended_layer": "Web Entry",
+                  "subtype_examples": [
+                    "Request",
+                    "Session",
+                    "Audit"
+                  ],
+                  "purpose": "Request interception",
+                  "create_only_when_present": true
+                },
+                "spring_boot_controller_advice": {
+                  "recommended_layer": "Controller",
+                  "subtype_examples": [
+                    "Exception",
+                    "Request",
+                    "Response"
+                  ],
+                  "purpose": "Cross-controller advice",
+                  "create_only_when_present": true
+                },
+                "spring_boot_view_renderer": {
+                  "recommended_layer": "View",
+                  "subtype_examples": [
+                    "JSP",
+                    "Template"
+                  ],
+                  "purpose": "View rendering",
+                  "create_only_when_present": true
+                },
+                "spring_boot_job": {
+                  "recommended_layer": "Background",
+                  "subtype_examples": [
+                    "Scheduled",
+                    "Event",
+                    "Message Consumer",
+                    "Batch"
+                  ],
+                  "purpose": "Job / Handler",
+                  "create_only_when_present": true
+                }
+              },
+              "sub_type_guide": {
+                "field": "sub_type",
+                "alias": "subType",
+                "input_location": "processors[].processor_info.sub_type on creation; updates.sub_type on processor modification",
+                "meaning": "Optional free-text specialization of a processor_storage_type, describing the component's actual responsibility or implementation style.",
+                "rules": [
+                  "Choose the closest allowed processor_storage_type first, then use sub_type to refine it. Do not invent a storage type such as spring_boot_mapper or spring_boot_rest_controller.",
+                  "The model framework describes the application technology (Spring Boot, Spring MVC, Spring AI); sub_type describes an individual processor (REST, MVC, DAO, RAG). It is not a model field, class name, layer assignment, or HTTP route.",
+                  "Choose a subtype only when supported by the source architecture. Examples are suggestions, not an enum; use a project-specific value when appropriate, or omit it when unknown.",
+                  "Creation without sub_type stores null. Updates without sub_type preserve it; explicit null clears it. If both sub_type and subType are supplied, sub_type takes precedence.",
+                  "Keep DAO and Mapper under spring_boot_repository by default. Internal AI and ETL stages belong in Transformations and Implementation information unless independently identifiable architectural components."
+                ],
+                "by_processor_type": {
+                  "spring_boot_controller": {
+                    "recommended_layer": "Controller",
+                    "subtype_examples": [
+                      "REST",
+                      "MVC"
+                    ],
+                    "purpose": "External request/response entry point",
+                    "create_only_when_present": false
+                  },
+                  "spring_boot_service": {
+                    "recommended_layer": "Service",
+                    "subtype_examples": [
+                      "Application",
+                      "Domain",
+                      "Facade",
+                      "AI Service"
+                    ],
+                    "purpose": "Business processing and component coordination",
+                    "create_only_when_present": false
+                  },
+                  "spring_boot_repository": {
+                    "recommended_layer": "Data Access",
+                    "subtype_examples": [
+                      "Repository",
+                      "DAO",
+                      "Mapper",
+                      "Memory Repository"
+                    ],
+                    "purpose": "Data access and persistence boundary",
+                    "create_only_when_present": false
+                  },
+                  "spring_boot_integration_client": {
+                    "recommended_layer": "Integration",
+                    "subtype_examples": [
+                      "HTTP",
+                      "SOAP",
+                      "Messaging",
+                      "MCP"
+                    ],
+                    "purpose": "Outbound application calls",
+                    "create_only_when_present": false
+                  },
+                  "spring_boot_chat_client": {
+                    "recommended_layer": "Spring AI",
+                    "subtype_examples": [
+                      "Chat",
+                      "Streaming"
+                    ],
+                    "purpose": "Composes prompts, advisors, and model calls",
+                    "create_only_when_present": false
+                  },
+                  "spring_boot_adviser": {
+                    "recommended_layer": "Spring AI",
+                    "subtype_examples": [
+                      "RAG",
+                      "Memory",
+                      "Tool Calling",
+                      "Custom"
+                    ],
+                    "purpose": "Independent component around AI invocation",
+                    "create_only_when_present": false
+                  },
+                  "spring_boot_tool": {
+                    "recommended_layer": "Spring AI",
+                    "subtype_examples": [
+                      "Local",
+                      "External",
+                      "MCP"
+                    ],
+                    "purpose": "Function executed at the AI's request",
+                    "create_only_when_present": false
+                  },
+                  "spring_boot_chat_memory": {
+                    "recommended_layer": "Spring AI",
+                    "subtype_examples": [
+                      "Window",
+                      "Persistent",
+                      "Custom"
+                    ],
+                    "purpose": "Conversation history management",
+                    "create_only_when_present": false
+                  },
+                  "spring_boot_ai_model_client": {
+                    "recommended_layer": "Spring AI",
+                    "subtype_examples": [
+                      "Chat",
+                      "Embedding",
+                      "Image",
+                      "Audio"
+                    ],
+                    "purpose": "In-application model invocation boundary",
+                    "create_only_when_present": false
+                  },
+                  "spring_boot_data_processor": {
+                    "recommended_layer": "Document ETL",
+                    "subtype_examples": [
+                      "Document ETL"
+                    ],
+                    "purpose": "Independent document ingestion flow",
+                    "create_only_when_present": false
+                  },
+                  "spring_boot_filter": {
+                    "recommended_layer": "Web Entry",
+                    "subtype_examples": [
+                      "Servlet",
+                      "Security"
+                    ],
+                    "purpose": "Request filtering",
+                    "create_only_when_present": true
+                  },
+                  "spring_boot_handler_interceptor": {
+                    "recommended_layer": "Web Entry",
+                    "subtype_examples": [
+                      "Request",
+                      "Session",
+                      "Audit"
+                    ],
+                    "purpose": "Request interception",
+                    "create_only_when_present": true
+                  },
+                  "spring_boot_controller_advice": {
+                    "recommended_layer": "Controller",
+                    "subtype_examples": [
+                      "Exception",
+                      "Request",
+                      "Response"
+                    ],
+                    "purpose": "Cross-controller advice",
+                    "create_only_when_present": true
+                  },
+                  "spring_boot_view_renderer": {
+                    "recommended_layer": "View",
+                    "subtype_examples": [
+                      "JSP",
+                      "Template"
+                    ],
+                    "purpose": "View rendering",
+                    "create_only_when_present": true
+                  },
+                  "spring_boot_job": {
+                    "recommended_layer": "Background",
+                    "subtype_examples": [
+                      "Scheduled",
+                      "Event",
+                      "Message Consumer",
+                      "Batch"
+                    ],
+                    "purpose": "Job / Handler",
+                    "create_only_when_present": true
+                  }
+                },
+                "examples": [
+                  {
+                    "processor_storage_type": "spring_boot_controller",
+                    "module_name": "OrderController",
+                    "sub_type": "REST",
+                    "endpoints": [
+                      {
+                        "method": "POST",
+                        "path": "/orders",
+                        "handler": "createOrder"
+                      }
+                    ]
+                  },
+                  {
+                    "processor_storage_type": "spring_boot_repository",
+                    "module_name": "OrderMapper",
+                    "sub_type": "Mapper"
+                  },
+                  {
+                    "processor_storage_type": "spring_boot_service",
+                    "module_name": "ChatService",
+                    "sub_type": "AI Service"
+                  }
+                ]
+              },
+              "framework_guide": {
+                "field": "framework",
+                "required": false,
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  "Spring Boot",
+                  "Spring MVC",
+                  "Spring Boot + Spring AI"
+                ],
+                "rule": "Pass framework to beyond_create_model when known; omission stores null. This metadata does not change the model_storage_type or its allowed processor types."
+              },
+              "http_metadata": {
+                "processor_types": [
+                  "api_server",
+                  "asp_net_controller",
+                  "asp_net_endpoint_handler",
+                  "asp_net_http_handler",
+                  "asp_net_page_handler",
+                  "asp_net_view_handler",
+                  "django_endpoint_handler",
+                  "express_controller",
+                  "express_endpoint_handler",
+                  "fastapi_endpoint_handler",
+                  "flask_endpoint_handler",
+                  "nestjs_controller",
+                  "nextjs_endpoint_handler",
+                  "spring_boot_controller"
+                ],
+                "controller_endpoint_contract": {
+                  "applies_to": [
+                    "asp_net_controller",
+                    "asp_net_endpoint_handler",
+                    "asp_net_http_handler",
+                    "asp_net_page_handler",
+                    "asp_net_view_handler",
+                    "django_endpoint_handler",
+                    "express_controller",
+                    "express_endpoint_handler",
+                    "fastapi_endpoint_handler",
+                    "flask_endpoint_handler",
+                    "nestjs_controller",
+                    "nextjs_endpoint_handler",
+                    "spring_boot_controller"
+                  ],
+                  "rules": [
+                    "Each verified handler gets one INPUT and one OUTPUT OBJECT container using the catalog physical object type. Same-handler routes share a pair; attribute and column names equal the handler.",
+                    "Unknown handlers create no containers. These empty IO groupings imply no HTTP body schema; add only verified children. Reads do not backfill contracts.",
+                    "Read returned endpoints, auto_created_attributes and IDs. Updates replace the endpoints list: preserve endpoint_id, input_attribute_id and output_attribute_id on retained routes; omit IDs on new routes.",
+                    "Preserving endpoint_id preserves contract and child IDs and ID-based lineage during handler/route renames. Raw SQL text is not rewritten. Rename shared-handler routes together; split a route by submitting it without old IDs.",
+                    "Reuse one same-handler root OBJECT in the same IO port. Non-object or duplicate roots, foreign IDs and inconsistent shared handlers fail; inspect current attributes before editing.",
+                    "Omitted endpoints preserves routing, [] removes routes and null clears routing. Route removal retains contracts, children and lineage for explicit review and cleanup.",
+                    "Use existing handler OUTPUT contracts for SQL results. Create verified child fields first and address them by full handler.field path. Never invent top-level results or copy caller arguments into response fields."
+                  ],
+                  "example": {
+                    "note": "Illustrative verified design only. Replace angle-bracket IDs with actual server-returned IDs; never send these placeholders literally.",
+                    "create_endpoint": {
+                      "method": "GET",
+                      "path": "/orders/{id}",
+                      "handler": "getOrder"
+                    },
+                    "returned_endpoint_shape": {
+                      "method": "GET",
+                      "path": "/orders/{id}",
+                      "handler": "getOrder",
+                      "endpoint_id": "<returned endpoint_id>",
+                      "input_attribute_id": "<returned INPUT Object ID>",
+                      "output_attribute_id": "<returned OUTPUT Object ID>"
+                    },
+                    "add_verified_children": {
+                      "tool": "beyond_add_processor_attributes",
+                      "arguments": {
+                        "processor_id": "<Controller ID>",
+                        "input_attributes": [
+                          {
+                            "attribute_name": "Order ID",
+                            "column_name": "id",
+                            "data_type": "string",
+                            "upper_attribute_id": "<returned INPUT Object ID>"
+                          }
+                        ],
+                        "output_attributes": [
+                          {
+                            "attribute_name": "Status",
+                            "column_name": "status",
+                            "data_type": "string",
+                            "upper_attribute_id": "<returned OUTPUT Object ID>"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                "endpoint_cardinality": {
+                  "source": "processor_storage_types catalog is_module flag; not a client-supplied processor property",
+                  "rules": [
+                    "Only storage types whose is_module is exactly true allow multiple endpoints. False, null or omitted is_module means a processor and allows at most one endpoint.",
+                    "Read acceptable_processors or the processor_storage_types catalog for is_module and max_endpoints before creation. Do not infer module status from a type name or override it in processor_info/other_info.",
+                    "This applies to every processor storage type on creation, modification and type changes, for both endpoints and other_info.endpoints. Missing endpoints, null and [] are allowed. A module-to-processor change must supply at most one endpoint if multiple endpoints exist.",
+                    "Store only in other_info.endpoints; top-level endpoints is an input and output convenience. Explicit endpoints wins over nested endpoints. Omitted routing preserves it, a list replaces it, [] empties it and null clears it.",
+                    "Module status permits multiple endpoints but does not imply that a component exposes HTTP. Record verified endpoints only. Filter matchers, Interceptor patterns and Advice scope remain separate metadata.",
+                    "Modules start collapsed on canvases. Module status does not change the parent model or require creating a separate model."
+                  ]
+                },
+                "inputs": {
+                  "endpoints": "Array of objects containing path, method, and optional handler; null clears all endpoints."
+                },
+                "rules": [
+                  "One Spring Controller class is one processor, even when it handles several HTTP routes. Use its simple class name without package as module_name; do not split it into processors merely by endpoint.",
+                  "Use endpoints for registered HTTP entry processors, including the framework types in processor_types. One API Server processor represents exactly one Swagger/OpenAPI operation (one HTTP method + path), never a server/router grouping. Its endpoints array allows at most one item; use separate processors for GET and POST even on the same path. Empty or null routing is allowed when unknown.",
+                  "Use only verified mappings from source annotations, configuration, an API specification, or explicit user requirements. Combine class-level and handler-level mappings only when resolved. Never guess GET, a URL, or a handler from a class or business name. Omit unknown fields; ask for missing evidence when required.",
+                  "For HTTP modules whose catalog is_module=true, record multiple verified path/method combinations with their handlers. For api_server use a separate processor for each combination. An unspecified HTTP method must not be guessed as GET; record only the known mapping.",
+                  "Service, Repository, and Spring AI components do not acquire HTTP endpoints merely because a Controller calls them.",
+                  "Each endpoint groups its path, HTTP method and optional handler name. Preserve their correspondence instead of separate path/method arrays.",
+                  "For a processor listed in controller_endpoint_contract_guide.applies_to with a verified handler, the server creates empty INPUT and OUTPUT containers using the catalog OBJECT physical type named after that handler. Same-handler routes share the pair. Read auto_created_attributes and returned endpoint_id/input_attribute_id/output_attribute_id; preserve IDs when editing. Add only verified request/response child fields; do not guess handlers or schemas. The Object is an IO grouping, not an asserted HTTP body type. Types with use_lookup=false map directly to OUTPUT. Removing routing does not delete contracts or lineage.",
+                  "On update, omitted endpoints preserves the list; a supplied list replaces it, [] empties it, and null clears it.",
+                  "Legacy method/path, http_method/uri_path, and other_info.method/path inputs are converted into one endpoint. Explicit endpoints takes precedence.",
+                  "Legacy partial updates preserve the other values of a single endpoint. For multiple endpoints, supply the endpoints array explicitly; ambiguous single-route updates are rejected.",
+                  "The server stores routing only in other_info.endpoints. Use the explicit endpoints input; direct other_info.endpoints input is also accepted. Explicit endpoints wins over nested endpoints, which wins over legacy method/path. Legacy method/path keys are removed after conversion. Read responses also expose endpoints as a projection of other_info.endpoints. For Filter use other_info.matchers with pattern and optional method, plus order and dispatcher_types when known. For Handler Interceptor use other_info.include_paths, exclude_paths and order. For Controller Advice use other_info.controller_scope and exception_types. These are applicability conditions, not endpoints."
+                ]
+              },
+              "module_io_policy": {
+                "controller_endpoint_contract_guide": "Read http_metadata.controller_endpoint_contract in the model guide, or beyond_get_definitions(definition_names=[\"controller_endpoint_contract_guide\"]).",
+                "use_lookup": false,
+                "allowed_io_types": [
+                  "INPUT",
+                  "OUTPUT"
+                ],
+                "automatic_target_io_type": "OUTPUT",
+                "rules": [
+                  "use_lookup is a storage-type catalog policy, not an instance override. Missing or null preserves the legacy enabled behavior.",
+                  "When use_lookup=false, never create LOOKUP attributes or change an attribute to LOOKUP. SQL-generated targets go directly to OUTPUT; explicit LOOKUP requests fail. Existing LOOKUP data is retained for compatibility and is not silently migrated.",
+                  "When use_lookup=true, LOOKUP is allowed, not a requirement to add an extra transformation. Reuse a confirmed existing OUTPUT target for final results.",
+                  "For Controller endpoints with a verified handler, the server creates an INPUT Object and an OUTPUT Object named after the handler. Empty contracts represent no known fields; they do not assert an Object-shaped HTTP body.",
+                  "Preserve returned endpoint_id, input_attribute_id and output_attribute_id on endpoint edits. Same-handler routes share a contract pair; distinct handlers have separate pairs. Removed routes do not automatically delete their attributes or transformations.",
+                  "Do not invent a handler or request/response fields. Legacy endpoints without a handler remain unchanged until a verified handler is supplied. Add confirmed nested fields under the returned contract attribute IDs.",
+                  "Read a source child using alias.OUTPUT.handler.field (or alias.INPUT.handler.field for request bindings). Target an existing Controller response field using AS \"handler.field\"; create confirmed nested fields before SQL. Never combine unrelated endpoint contracts into common ports."
+                ]
+              },
+              "processor_type_examples": {
+                "filter": "spring_boot_filter",
+                "handler interceptor": "spring_boot_handler_interceptor",
+                "MVC or REST controller": "spring_boot_controller",
+                "@ControllerAdvice / @RestControllerAdvice class": "spring_boot_controller_advice",
+                "independent exception/fallback class without a closer type": "module_general",
+                "MVC view renderer": "spring_boot_view_renderer",
+                "service": "spring_boot_service",
+                "repository / DAO": "spring_boot_repository",
+                "external integration client": "spring_boot_integration_client",
+                "Spring AI chat client": "spring_boot_chat_client",
+                "Spring AI advisor": "spring_boot_adviser",
+                "Spring AI tool": "spring_boot_tool",
+                "Spring AI chat memory": "spring_boot_chat_memory",
+                "Spring AI model client": "spring_boot_ai_model_client",
+                "data processor": "spring_boot_data_processor",
+                "scheduled / batch job": "spring_boot_job",
+                "no suitable specialized type": "module_general",
+                "individual operation without a specialized type": "processor_general"
+              },
+              "example": {
+                "model_storage_type": "spring_boot_application",
+                "framework": "Spring MVC",
+                "processor_info": {
+                  "processor_name": "Order request controller",
+                  "module_name": "OrderController",
+                  "processor_storage_type": "spring_boot_controller",
+                  "sub_type": "MVC",
+                  "other_info": {
+                    "package_name": "com.example.orders",
+                    "qualified_class_name": "com.example.orders.OrderController",
+                    "source_file": "src/main/java/com/example/orders/OrderController.java"
+                  },
+                  "endpoints": [
+                    {
+                      "method": "GET",
+                      "path": "/orders",
+                      "handler": "listOrders"
+                    },
+                    {
+                      "method": "POST",
+                      "path": "/orders",
+                      "handler": "createOrder"
+                    }
+                  ]
+                }
+              }
+            },
+            "google_workspace": {
+              "model_storage_type": "google_workspace",
+              "scope": "Use a separate google_workspace model for Google Workspace resources and workflows.",
+              "rules": [
+                "Use only verified resources and operations or explicitly requested designs. Do not invent Workspace IDs, schemas, or connections; omit unknown optional metadata and ask for required information.",
+                "Prefer google_workspace for Sheets, Docs, Slides, Drive files, Gmail messages, Forms, and Workspace automation.",
+                "Use the model acceptable_entities and acceptable_processors to choose the matching Google resource or operation type.",
+                "Keep application classes in their application model; represent Workspace resources and operations in the Google Workspace model and connect the boundaries through transformations."
+              ],
+              "entity_type_examples": [
+                "google_sheet",
+                "google_document",
+                "google_slide",
+                "google_drive_file",
+                "google_gmail_message"
+              ],
+              "processor_type_examples": [
+                "google_form",
+                "google_read_sheet",
+                "google_write_sheet",
+                "google_search_drive",
+                "google_watch_drive_changes",
+                "google_update_document",
+                "google_send_gmail"
+              ]
+            },
+            "asp_net_application": {
+              "model_storage_type": "asp_net_application",
+              "title": "ASP.NET Application",
+              "scope": "ASP.NET Application architecture boundary",
+              "rules": [
+                "Use verified source/configuration. Physical module_name identifies the actual class, function or module; keep logical names business-facing. Record source_file and qualified identifiers in other_info when verified.",
+                "Extract independently identifiable architecture units, not every function. Choose the closest acceptable processor type by responsibility; use the framework general_module only for an in-scope unmatched module.",
+                "General modules are excluded from default parser extraction. include_general_modules must be explicitly enabled; still analyze their code to trace verified lineage.",
+                "Read is_module and use_lookup from the storage catalog. Module status does not imply HTTP routing or permission to create LOOKUP attributes.",
+                "Store verified HTTP routes in other_info.endpoints using method/path/handler. Read returned endpoint and contract IDs before edits; do not fabricate routes or handlers.",
+                "Store frameworkVersion, runtimeVersion, languageVersion and libraries in other_info only when verified; framework is the model framework field."
+              ],
+              "acceptable_processors": [
+                "asp_net_controller",
+                "asp_net_endpoint_handler",
+                "asp_net_page_handler",
+                "asp_net_view_handler",
+                "asp_net_middleware",
+                "asp_net_request_filter",
+                "asp_net_exception_handler",
+                "asp_net_http_handler",
+                "asp_net_http_module",
+                "asp_net_message_handler",
+                "asp_net_service",
+                "asp_net_repository",
+                "asp_net_data_context",
+                "asp_net_integration_adapter",
+                "asp_net_rpc_service",
+                "asp_net_realtime_handler",
+                "asp_net_job_event_handler",
+                "asp_net_general_module"
+              ]
+            },
+            "django_application": {
+              "model_storage_type": "django_application",
+              "title": "Django Application",
+              "scope": "Django Application architecture boundary",
+              "rules": [
+                "Use verified source/configuration. Physical module_name identifies the actual class, function or module; keep logical names business-facing. Record source_file and qualified identifiers in other_info when verified.",
+                "Extract independently identifiable architecture units, not every function. Choose the closest acceptable processor type by responsibility; use the framework general_module only for an in-scope unmatched module.",
+                "General modules are excluded from default parser extraction. include_general_modules must be explicitly enabled; still analyze their code to trace verified lineage.",
+                "Read is_module and use_lookup from the storage catalog. Module status does not imply HTTP routing or permission to create LOOKUP attributes.",
+                "Store verified HTTP routes in other_info.endpoints using method/path/handler. Read returned endpoint and contract IDs before edits; do not fabricate routes or handlers.",
+                "Store frameworkVersion, runtimeVersion, languageVersion and libraries in other_info only when verified; framework is the model framework field.",
+                "Django ORM models are data entities in an appropriate storage model. Only custom managers/querysets with independent data-access responsibility become repositories.",
+                "Flask Blueprints and FastAPI APIRouters describe membership/structure in other_info, not separate processors. Simple service/DB providers are not separate dependency handlers."
+              ],
+              "acceptable_processors": [
+                "django_endpoint_handler",
+                "python_view_handler",
+                "python_middleware",
+                "django_request_policy",
+                "python_service",
+                "django_repository",
+                "python_integration_adapter",
+                "django_realtime_handler",
+                "django_job_event_handler",
+                "python_general_module"
+              ]
+            },
+            "express_application": {
+              "model_storage_type": "express_application",
+              "title": "Express Application",
+              "scope": "Express Application architecture boundary",
+              "rules": [
+                "Use verified source/configuration. Physical module_name identifies the actual class, function or module; keep logical names business-facing. Record source_file and qualified identifiers in other_info when verified.",
+                "Extract independently identifiable architecture units, not every function. Choose the closest acceptable processor type by responsibility; use the framework general_module only for an in-scope unmatched module.",
+                "General modules are excluded from default parser extraction. include_general_modules must be explicitly enabled; still analyze their code to trace verified lineage.",
+                "Read is_module and use_lookup from the storage catalog. Module status does not imply HTTP routing or permission to create LOOKUP attributes.",
+                "Store verified HTTP routes in other_info.endpoints using method/path/handler. Read returned endpoint and contract IDs before edits; do not fabricate routes or handlers.",
+                "Store frameworkVersion, runtimeVersion, languageVersion and libraries in other_info only when verified; framework is the model framework field."
+              ],
+              "acceptable_processors": [
+                "express_endpoint_handler",
+                "express_controller",
+                "javascript_view_handler",
+                "express_middleware",
+                "express_exception_handler",
+                "javascript_service",
+                "javascript_repository",
+                "javascript_integration_adapter",
+                "express_realtime_handler",
+                "javascript_job_event_handler",
+                "javascript_general_module"
+              ]
+            },
+            "fastapi_application": {
+              "model_storage_type": "fastapi_application",
+              "title": "FastAPI Application",
+              "scope": "FastAPI Application architecture boundary",
+              "rules": [
+                "Use verified source/configuration. Physical module_name identifies the actual class, function or module; keep logical names business-facing. Record source_file and qualified identifiers in other_info when verified.",
+                "Extract independently identifiable architecture units, not every function. Choose the closest acceptable processor type by responsibility; use the framework general_module only for an in-scope unmatched module.",
+                "General modules are excluded from default parser extraction. include_general_modules must be explicitly enabled; still analyze their code to trace verified lineage.",
+                "Read is_module and use_lookup from the storage catalog. Module status does not imply HTTP routing or permission to create LOOKUP attributes.",
+                "Store verified HTTP routes in other_info.endpoints using method/path/handler. Read returned endpoint and contract IDs before edits; do not fabricate routes or handlers.",
+                "Store frameworkVersion, runtimeVersion, languageVersion and libraries in other_info only when verified; framework is the model framework field.",
+                "Django ORM models are data entities in an appropriate storage model. Only custom managers/querysets with independent data-access responsibility become repositories.",
+                "Flask Blueprints and FastAPI APIRouters describe membership/structure in other_info, not separate processors. Simple service/DB providers are not separate dependency handlers."
+              ],
+              "acceptable_processors": [
+                "fastapi_endpoint_handler",
+                "python_view_handler",
+                "python_middleware",
+                "fastapi_dependency_handler",
+                "fastapi_exception_handler",
+                "python_service",
+                "python_repository",
+                "python_integration_adapter",
+                "fastapi_realtime_handler",
+                "fastapi_job_event_handler",
+                "python_general_module"
+              ]
+            },
+            "flask_application": {
+              "model_storage_type": "flask_application",
+              "title": "Flask Application",
+              "scope": "Flask Application architecture boundary",
+              "rules": [
+                "Use verified source/configuration. Physical module_name identifies the actual class, function or module; keep logical names business-facing. Record source_file and qualified identifiers in other_info when verified.",
+                "Extract independently identifiable architecture units, not every function. Choose the closest acceptable processor type by responsibility; use the framework general_module only for an in-scope unmatched module.",
+                "General modules are excluded from default parser extraction. include_general_modules must be explicitly enabled; still analyze their code to trace verified lineage.",
+                "Read is_module and use_lookup from the storage catalog. Module status does not imply HTTP routing or permission to create LOOKUP attributes.",
+                "Store verified HTTP routes in other_info.endpoints using method/path/handler. Read returned endpoint and contract IDs before edits; do not fabricate routes or handlers.",
+                "Store frameworkVersion, runtimeVersion, languageVersion and libraries in other_info only when verified; framework is the model framework field.",
+                "Django ORM models are data entities in an appropriate storage model. Only custom managers/querysets with independent data-access responsibility become repositories.",
+                "Flask Blueprints and FastAPI APIRouters describe membership/structure in other_info, not separate processors. Simple service/DB providers are not separate dependency handlers."
+              ],
+              "acceptable_processors": [
+                "flask_endpoint_handler",
+                "python_view_handler",
+                "flask_request_hook",
+                "flask_middleware",
+                "flask_exception_handler",
+                "python_service",
+                "python_repository",
+                "python_integration_adapter",
+                "flask_realtime_handler",
+                "flask_job_event_handler",
+                "python_general_module"
+              ]
+            },
+            "nestjs_application": {
+              "model_storage_type": "nestjs_application",
+              "title": "NestJS Application",
+              "scope": "NestJS Application architecture boundary",
+              "rules": [
+                "Use verified source/configuration. Physical module_name identifies the actual class, function or module; keep logical names business-facing. Record source_file and qualified identifiers in other_info when verified.",
+                "Extract independently identifiable architecture units, not every function. Choose the closest acceptable processor type by responsibility; use the framework general_module only for an in-scope unmatched module.",
+                "General modules are excluded from default parser extraction. include_general_modules must be explicitly enabled; still analyze their code to trace verified lineage.",
+                "Read is_module and use_lookup from the storage catalog. Module status does not imply HTTP routing or permission to create LOOKUP attributes.",
+                "Store verified HTTP routes in other_info.endpoints using method/path/handler. Read returned endpoint and contract IDs before edits; do not fabricate routes or handlers.",
+                "Store frameworkVersion, runtimeVersion, languageVersion and libraries in other_info only when verified; framework is the model framework field."
+              ],
+              "acceptable_processors": [
+                "nestjs_controller",
+                "nestjs_graphql_resolver",
+                "javascript_view_handler",
+                "nestjs_middleware",
+                "nestjs_guard",
+                "nestjs_pipe",
+                "nestjs_interceptor",
+                "nestjs_exception_handler",
+                "javascript_service",
+                "javascript_repository",
+                "nestjs_integration_adapter",
+                "nestjs_rpc_service",
+                "nestjs_realtime_handler",
+                "javascript_job_event_handler",
+                "javascript_general_module"
+              ]
+            },
+            "nextjs_application": {
+              "model_storage_type": "nextjs_application",
+              "title": "Next.js Application",
+              "scope": "Next.js Application architecture boundary",
+              "rules": [
+                "Use verified source/configuration. Physical module_name identifies the actual class, function or module; keep logical names business-facing. Record source_file and qualified identifiers in other_info when verified.",
+                "Extract independently identifiable architecture units, not every function. Choose the closest acceptable processor type by responsibility; use the framework general_module only for an in-scope unmatched module.",
+                "General modules are excluded from default parser extraction. include_general_modules must be explicitly enabled; still analyze their code to trace verified lineage.",
+                "Read is_module and use_lookup from the storage catalog. Module status does not imply HTTP routing or permission to create LOOKUP attributes.",
+                "Store verified HTTP routes in other_info.endpoints using method/path/handler. Read returned endpoint and contract IDs before edits; do not fabricate routes or handlers.",
+                "Store frameworkVersion, runtimeVersion, languageVersion and libraries in other_info only when verified; framework is the model framework field.",
+                "Distinguish page/layout/UI components, server actions and endpoint handlers by verified responsibilities. Do not invent HTTP endpoints for UI components or ordinary functions."
+              ],
+              "acceptable_processors": [
+                "nextjs_page",
+                "nextjs_layout",
+                "nextjs_ui_component",
+                "nextjs_request_interceptor",
+                "nextjs_server_action",
+                "javascript_service",
+                "nextjs_endpoint_handler",
+                "javascript_repository",
+                "javascript_integration_adapter",
+                "nextjs_job_event_handler",
+                "javascript_general_module"
+              ]
+            }
+          },
+          "api_server_naming_contract": {
+            "title": "API Server Naming And HTTP Metadata Contract",
+            "processor_storage_type": "api_server",
+            "rules": [
+              "One api_server processor represents one Swagger/OpenAPI operation: one HTTP method + path. endpoints is an array with at most one item. Use separate processors for GET /orders and POST /orders; never group a server or router into one api_server processor.",
+              "processor_name is the human-readable logical/business operation name in the user's language. module_name is the verified operation identifier, such as operationId, controller method, option_id or function name; it is not the whole Controller class. The simple class-name rule applies to class-backed Spring processors, not api_server operations.",
+              "For new data use endpoints or other_info.endpoints. The explicit endpoints input takes precedence, including [] and null; nested endpoints takes precedence over legacy method/path. The server stores only other_info.endpoints and also exposes endpoints in read responses.",
+              "Legacy method/path, http_method/uri_path and other_info.method/path remain accepted and are converted. For each field, http_method/uri_path wins over method/path, which wins over legacy other_info fields. The old other_info.method/path keys are removed after conversion.",
+              "Omission preserves existing endpoints on update, a list replaces them, [] empties them and null clears them. Unrelated other_info keys are merged; other_info:null clears unrelated metadata but preserves omitted endpoints. Explicit endpoints:null clears routing.",
+              "Use only verified contract or source values. Unknown endpoints may be omitted, null or []; a partially known entry may omit unknown path/method/handler fields. Never guess GET or derive a URL from a name. Each entry must include at least one of path, method or handler; their values are strings or null.",
+              "The server rejects more than one endpoint on creation, modification and type changes to api_server, including nested inputs. Existing multi-endpoint API data is not automatically split or truncated; supply at most one endpoint explicitly to repair it before further edits and create separate processors for the remaining operations.",
+              "Inspect the Swagger/OpenAPI response status, content type, properties, required fields, array items and referenced components before defining OUTPUT attributes. Model the documented nested response structure; ask for missing contracts instead of inventing placeholder fields. This is design guidance, not automatic source verification by the server."
+            ],
+            "correct_processor_info_example": {
+              "processor_name": "관리자 로그인",
+              "module_name": "loginAdmin",
+              "processor_storage_type": "api_server",
+              "endpoints": [
+                {
+                  "method": "POST",
+                  "path": "/auth/login",
+                  "handler": "loginAdmin"
+                }
+              ],
+              "other_info": {
+                "operation_id": "loginAdmin",
+                "summary": "관리자 로그인",
+                "tags": [
+                  "Auth"
+                ]
+              }
+            },
+            "wrong_patterns": [
+              "Do not put HTTP method/path into processor_name or replace a verified operation identifier with a whole Controller class name.",
+              "Do not combine multiple Swagger/OpenAPI operations into one api_server processor.",
+              "Do not use legacy other_info.method/path for new designs; these are compatibility inputs only."
+            ]
+          }
+        },
+        "additionalProperties": true
+      },
+      "storage_type_option": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "entity_storage_type": {
+            "type": "string"
+          },
+          "processor_storage_type": {
+            "type": "string"
+          },
+          "data_types": {
+            "type": "array",
+            "items": {}
+          },
+          "is_module": {
+            "type": "boolean",
+            "description": "True only when this registered storage type is a module. Not client-configurable."
+          },
+          "max_endpoints": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "1 for processors; null means no count limit for modules."
+          },
+          "default_fields": {
+            "type": "array",
+            "description": "Entity creation automatically adds storage-type default_fields from acceptable_entities. Explicit root attributes matching column_name (trimmed, case-insensitive) take precedence. The response attributes includes all created attributes; auto_created_attributes and auto_created_attribute_ids identify added defaults. Do not add them again. Existing entities and storage-type updates are not backfilled.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "attribute_name": {
+                  "type": "string"
+                },
+                "column_name": {
+                  "type": "string"
+                },
+                "data_type": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "attribute_name",
+                "column_name",
+                "data_type"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "output_schema_declared": true
+}

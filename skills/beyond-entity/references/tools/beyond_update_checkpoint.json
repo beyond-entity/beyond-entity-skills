@@ -1,0 +1,47 @@
+{
+  "name": "beyond_update_checkpoint",
+  "description": "Update only CP_MESSAGE for an existing cp_at. ACTOR_NAME, ACTOR_TYPE, CP_AT, status snapshots, node history and scan references remain unchanged. Missing cp_at returns an error. No actor_name input. At run end update the open checkpoint then add the next checkpoint; add returns data.checkpoint.cp_at.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "required": [
+      "cp_at",
+      "cp_message"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "cp_at": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "cp_message": {
+        "type": "string",
+        "minLength": 1
+      },
+      "include_json_content": {
+        "type": "boolean",
+        "default": false
+      }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "type": "string"
+          },
+          "checkpoint": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  },
+  "output_schema_declared": true
+}

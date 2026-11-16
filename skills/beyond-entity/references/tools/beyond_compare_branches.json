@@ -1,0 +1,24 @@
+{
+  "name": "beyond_compare_branches",
+  "description": "Compare two branches.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "base_branch": {
+        "type": "string",
+        "description": "Base branch for comparison (e.g., 'main')"
+      },
+      "compare_branch": {
+        "type": "string",
+        "description": "Branch to compare. Defaults to current branch if not specified."
+      }
+    },
+    "required": [
+      "base_branch"
+    ]
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

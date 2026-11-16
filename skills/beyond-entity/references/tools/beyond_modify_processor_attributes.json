@@ -1,0 +1,164 @@
+{
+  "name": "beyond_modify_processor_attributes",
+  "description": "Batch modify processor attributes. Use attribute_ids with updates for selected attributes, processor_id plus from_io_type with updates.io_type to move all attributes from one processor IO port to another, or updates_by_attribute_id alone for per-attribute field changes such as assigning different logical names. When no explicit selection is supplied, its keys select the target attributes. Explicit attribute_ids or processor_id/from_io_type selections remain restrictive; update keys outside that selection are rejected. For pii_data_type and integer encryption_level, read beyond_get_usage_guide(workflow=\"attribute_security\") or beyond_get_definitions(definition_names=[\"attribute_security_guide\"]).",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "attribute_ids": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Processor attribute IDs to update. If omitted, provide processor_id and from_io_type."
+      },
+      "processor_id": {
+        "type": "string",
+        "description": "Processor ID used to filter attributes, or required with from_io_type when attribute_ids is omitted."
+      },
+      "from_io_type": {
+        "type": "string",
+        "enum": [
+          "INPUT",
+          "LOOKUP",
+          "OUTPUT"
+        ],
+        "description": "Move all matching attributes from this IO type. Requires processor_id when attribute_ids is omitted."
+      },
+      "updates": {
+        "type": "object",
+        "properties": {
+          "attribute_name": {
+            "type": "string"
+          },
+          "column_name": {
+            "type": "string"
+          },
+          "is_not_null": {
+            "type": "boolean"
+          },
+          "data_type": {
+            "type": "string",
+            "description": "Allowed physical type name. Updates the logical and physical types together in place, preserving attribute IDs and lineage. Scalar targets clear element metadata; changing a parent with nested children to a scalar is rejected."
+          },
+          "nested_physical_data_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Compatibility alias for nested_data_type; both supplied values must agree."
+          },
+          "encryption_level": {
+            "type": "integer",
+            "description": "Integer levelNumber: 0=NONE (None), 1=MASKED (Masked), 2=ENCRYPTED (Encrypted), 3=HASHED (Hashed; one-way hash), 4=KEYSERVER (Key Server; encryption key managed by a key server). Writes do not accept null; omission preserves the value on modification.",
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "pii_level": {
+            "type": "integer"
+          },
+          "sensitivity_level": {
+            "type": "integer"
+          },
+          "io_type": {
+            "type": "string",
+            "enum": [
+              "INPUT",
+              "LOOKUP",
+              "OUTPUT"
+            ],
+            "description": "Target IO type. For port moves, set this to the destination port, e.g. LOOKUP."
+          },
+          "attribute_description": {
+            "type": "string"
+          },
+          "other_info": {
+            "type": "object"
+          },
+          "data_depth": {
+            "type": "integer"
+          },
+          "upper_attribute_id": {
+            "type": "string"
+          },
+          "display_order": {
+            "type": "integer"
+          },
+          "nested_data_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Processor list/array element physical type from this storage type catalog, e.g. Object or String. Accepted on create/add/modify and returned on reads. nested_physical_data_type is an equivalent compatibility alias; if both are supplied they must agree. Null clears the element type."
+          },
+          "pii_data_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "NA",
+              "NAME",
+              "CONTACT",
+              "ADDRESS",
+              "FINANCIAL",
+              "SENSITIVE_GENERAL",
+              "LOCATION",
+              "ONLINE_ID",
+              "HEALTH",
+              "BIOMETRIC",
+              "EMPLOYMENT",
+              "DATE_OF_BIRTH",
+              "GENERAL_INFO",
+              "PASSPORT_NUMBER",
+              "NATIONAL_ID",
+              "DRIVER_LICENSE",
+              "ALIEN_ID",
+              "UNIQUE_ID_GENERAL",
+              null
+            ],
+            "description": "PII_DATA_TYPE enum name stored verbatim, e.g. DRIVER_LICENSE. Null clears the classification; this is independent of pii_level."
+          }
+        },
+        "description": "Fields to apply to every matched processor attribute. Optional when updates_by_attribute_id is provided."
+      },
+      "updates_by_attribute_id": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "description": "Per-attribute updates keyed by attribute_id, e.g. {\"attr_x\": {\"attribute_name\": \"대학교 코드\"}}. Values are merged over common updates for that attribute."
+      }
+    },
+    "required": []
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "attribute_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "updated_count": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  },
+  "output_schema_declared": true
+}

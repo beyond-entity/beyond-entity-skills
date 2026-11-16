@@ -1,0 +1,202 @@
+{
+  "guide_id": "development_planning_guide",
+  "guide_revision": "050424a4e7036358",
+  "source_mcp_version": "3.2.51",
+  "content": {
+    "guide_version": "1.4",
+    "section": "all",
+    "available_sections": [
+      "start",
+      "interview",
+      "requirements",
+      "reviews",
+      "items",
+      "estimation",
+      "confidence",
+      "report"
+    ],
+    "sections": {
+      "start": {
+        "entry": "For project setup with supplied requirements (Excel/docs/chat), do not stop at acknowledgement: check existing BE records, save traceable DRAFT requirements within the requested scope, verify saved IDs, then ask focused gap questions. Reuse prior agreement and answered questions. Reading/summarizing alone does not authorize writes. Without supplied requirements, offer an interview. Empty means verified empty, not inaccessible or a failed read. Follow the supplied_requirements workflow; do not block an explicit design/coding-only task.",
+        "supplied_requirements": {
+          "trigger": "When the user requests project setup, requirements organization/registration or an accepted interview and supplies requirements in a document, spreadsheet or chat, treat that scope as authorization for initial DRAFT registration. Do not ask again whether to start an interview. An attachment alone or a read/understand/summarize-only request does not authorize project creation or writes. Honor explicit no-save instructions and resolve an ambiguous target project before writing.",
+          "source": "The client AI must read accessible user-supplied files and chat context; MCP cannot infer attachments from project emptiness. Reuse already supplied answers. If a file cannot be read, report the exact blocker and ask for accessible content; do not claim it was understood or imported.",
+          "sequence": [
+            "Verify the target project and list existing development plans and requirements, following all pages. Reuse the relevant plan; create a DRAFT plan only within authorized setup scope. Do not create duplicates on retry or restart.",
+            "Extract distinct requirements from supported source statements. Preserve supplied source IDs and known scope, actors, behaviors and acceptance conditions. Keep assumptions and missing information explicit; do not invent decisions or approval.",
+            "Register usable requirements as DRAFT unless explicit confirmed status is supported. Record source file and sheet/row or section/page when available in requirement_content, and questions/already supplied answers in INTERVIEW_LISTS. Match existing source IDs/content first; preserve identities and existing statuses, and update only within authorized scope. A clarification gap is not a reason to withhold every usable draft.",
+            "Read back saved records and reconcile extracted, saved, reused and unresolved counts. Report saved requirement codes and which source entries remain unregistered. Reading a file is not registration; a tool call is not proof of persistence. After uncertain write failure, inspect saved state before retrying.",
+            "Ask 3-5 focused missing-information questions in the same response, or state that no material gaps remain. Prioritize scope, actors/permissions, exceptions, integrations, acceptance and constraints; skip questions already answered. Do not finish with only an acknowledgement or summary. Do not claim CONFIRMED or create participant approval on the user behalf."
+          ],
+          "continuation": "Reflect actual answers in INTERVIEW_LISTS and authorized requirement updates. Preserve unresolved questions. Decompose sufficiently defined scope into linked development items when requested; do not silently start implementation or invent estimates. If no supplied requirements and no prior agreement exist, offer the interview once and await consent."
+        },
+        "flow": [
+          "Read supplied requirements and reuse known answers; register authorized traceable drafts, then ask gaps.",
+          "Clarify purpose, users, existing system and constraints.",
+          "Create an initial-build or change development plan.",
+          "Interview and organize requirements.",
+          "Discuss each requirement through reviews and reflect confirmed answers.",
+          "Decompose and link development items.",
+          "Read the latest BE design, then estimate and write a report."
+        ],
+        "existing_tools": "Reuse existing project creation, Git branch, design read, checkpoint and code-analysis tools. DEV_PHASE is on each requirement; do not assume a Phase table/tool exists.",
+        "project_documents": "Read project documents including SYSTEM templates, not only HUMAN documents. For a new project, first read and fill about_this_system_{lang}.md from confirmed requirements, then write overall_architecture, then create models/entities, then save a checkpoint. Reuse existing completed documents; update them when scope changes. Do not treat an untouched SYSTEM template as completed documentation or invent missing facts. These steps do not authorize unrelated work or require repeating an accepted interview.",
+        "field_conventions": {
+          "policy": "Suggested defaults for new projects without an established convention; these are not enforced enums. Reuse existing project/user values and explain the defaults when applying them. Do not ask the user to invent technical codes.",
+          "values": {
+            "dev_plan_type": {
+              "NEW": "Initial build",
+              "CHANGE": "Change to an existing system"
+            },
+            "plan_status": {
+              "DRAFT": "Being prepared",
+              "ACTIVE": "In progress",
+              "DONE": "Completed",
+              "ON_HOLD": "Paused"
+            },
+            "requirement_status": {
+              "DRAFT": "Unconfirmed",
+              "CONFIRMED": "Agreed scope",
+              "ON_HOLD": "Deferred",
+              "EXCLUDED": "Out of scope"
+            },
+            "dev_status": {
+              "DRAFT": "Being prepared",
+              "READY": "Ready to implement",
+              "IN_PROGRESS": "In progress",
+              "DONE": "Completed",
+              "ON_HOLD": "Paused"
+            },
+            "dev_phase": {
+              "MVP": "Initial minimum scope",
+              "Phase 1": "First delivery",
+              "Phase 2": "Later delivery"
+            },
+            "requirement_priority": {
+              "ordering": "Lower numbers mean higher priority under this suggested convention.",
+              "examples": {
+                "1": "High",
+                "5": "Medium",
+                "10": "Normal (schema default)"
+              }
+            }
+          }
+        }
+      },
+      "interview": {
+        "supplied_requirements": "Retain source references and saved IDs; ask only unanswered gaps. Reuse authorized drafts and prior answers; never invent approval.",
+        "method": "Ask short, focused questions in the user language. Cover actors, business goals, normal/error flows, data, integrations, permissions, nonfunctional needs, exclusions, acceptance conditions, budget and deadlines. Distinguish facts, user decisions, assumptions and open questions; never invent an answer.",
+        "storage": "INTERVIEW_LISTS holds AI-organized interview questions/answers as text. RequirementReview holds actual participant discussion and replies, not an issue-resolution workflow.",
+        "review_feedback": "Read requirement review threads before revising interview notes or requirements. Only reflect confirmed conclusions; attribute sources and leave unresolved proposals as open questions. Do not impersonate another participant or invent their approval."
+      },
+      "requirements": {
+        "content": "Write distinct, testable requirements with purpose, actors, behavior, errors, constraints and acceptance conditions. Keep project-wide unique REQUIREMENT_CODE stable. Manage requirement status only on TB_REQUIREMENT. Reuse the project/user convention; if none exists, use the documented suggested defaults.",
+        "phases": "DEV_PHASE is requirement-level scope, not an independent Phase entity. Preserve existing phase names and priority ordering; for a new convention lower priority numbers mean higher priority, with schema default 10.",
+        "field_conventions": {
+          "dev_plan_type": {
+            "NEW": "Initial build",
+            "CHANGE": "Change to an existing system"
+          },
+          "plan_status": {
+            "DRAFT": "Being prepared",
+            "ACTIVE": "In progress",
+            "DONE": "Completed",
+            "ON_HOLD": "Paused"
+          },
+          "requirement_status": {
+            "DRAFT": "Unconfirmed",
+            "CONFIRMED": "Agreed scope",
+            "ON_HOLD": "Deferred",
+            "EXCLUDED": "Out of scope"
+          },
+          "dev_status": {
+            "DRAFT": "Being prepared",
+            "READY": "Ready to implement",
+            "IN_PROGRESS": "In progress",
+            "DONE": "Completed",
+            "ON_HOLD": "Paused"
+          },
+          "dev_phase": {
+            "MVP": "Initial minimum scope",
+            "Phase 1": "First delivery",
+            "Phase 2": "Later delivery"
+          },
+          "requirement_priority": {
+            "ordering": "Lower numbers mean higher priority under this suggested convention.",
+            "examples": {
+              "1": "High",
+              "5": "Medium",
+              "10": "Normal (schema default)"
+            }
+          }
+        }
+      },
+      "reviews": {
+        "purpose": "Informal requirement-specific opinions/questions/answers between the customer, sales and planning participants. There is no resolve tool or review status.",
+        "identity": "MCP writes are labeled AI (MCP), with the authenticated user ID; REVIEWER_NAME and CREATED_BY cannot be supplied as another participant. Record quoted external statements as attributed quotations, not as that participant posting. Only the authenticated author can edit/delete through these tools; normal project write permission is also required.",
+        "threading": "PARENT_REVIEW_ID identifies a reply in the same requirement. Parent deletion is rejected while replies exist. Questions and conclusions remain in the discussion; confirmed results belong in the requirement."
+      },
+      "items": {
+        "decomposition": "Produce implementable development items, completion conditions and resource forecasts from confirmed requirements and the latest available verified design. If no design exists, make a preliminary requirements-based estimate with evidence_level=requirements, explicitly record missing design and assumptions, and include design work as an item. Then create/verify the design within the authorized scope and create a new analysis at evidence_level=design. Do not invent a design or claim it was inspected. Include necessary design, implementation, test, integration, deployment and management work. Connect items to all requirements they serve.",
+        "resources": "RESOURCE_FORECAST may be structured JSON: schema_version (integer 1, not string \"1\"), effort_person_days, role_estimates, dependencies and phase_allocations. Each phase allocation has dev_phase and share (0..1). When allocations are supplied their shares must sum to 1. Record the agreed allocation basis.",
+        "no_double_counting": "A common DEV_ITEM_ID linked to multiple requirements/phases is counted once in the overall estimate. Use phase_allocations for Phase totals instead of counting the full cost in every Phase. Do not treat person-days as elapsed days.",
+        "ai_scenarios": {
+          "required": "Every new analysis report MUST show both without_ai (AI 미사용) and with_ai (AI 사용) side by side, under identical requirements, Phase, quality and acceptance conditions. Compare role-based staffing/person-days, duration low/recommended/high, labor cost, tool/runtime costs, contingency, total budget low/recommended/high, and separate Confidence with evidence and unknowns. AI use is not assumed to be cheaper or faster.",
+          "method": "Estimate each development item separately for both scenarios. Identify AI-assisted tasks and human implementation/review/rework/security/test work, then aggregate shared items only once per scenario. Never apply a blanket AI discount or an unsupported productivity multiplier. Derive elapsed duration from staffing, availability and dependencies, not by treating person-days as calendar days.",
+          "conditions": "State source/data access permissions, permitted AI tools/models and execution environment, team AI proficiency, human review responsibilities and adoption/setup costs. Include AI subscriptions, API/token usage and runtime/environment costs with pricing assumptions and calculation basis; unknown costs remain unknown, not zero. Use available trial-implementation/build/critical-flow evidence; without it, use conservative assumptions and disclose the limitation in the AI scenario Confidence.",
+          "unchanged_work": "Do not automatically reduce business discussions, external integration coordination, customer acceptance or other waiting/verification time. Any reduction requires item-specific evidence. Account for AI-specific review, correction, integration and quality work.",
+          "storage": "Store item scenario estimates in RESOURCE_FORECAST.scenarios.without_ai and .with_ai, and report totals/evidence in OTHER_INFO.scenarios with the same keys. Keep the full comparison table in ANALYSIS_CONTENT as Markdown. Use the same currency, rates and duration day_basis across scenarios, explicitly explaining any differences."
+        }
+      },
+      "estimation": {
+        "constraints": "DevelopmentPlan.DEV_BUDGET and DEV_DURATION_DAYS are customer goals/upper limits. Analysis.BUDGET_FORECASTED and DURATION_DAYS_FORECASTED are independent estimates, optional and nullable; unknown is null, never zero. Do not reduce estimates to fit the limits.",
+        "method": "Provide conservative low/recommended/high ranges with conditions, role effort/rates, availability, dependencies, parallelism, testing, deployment, external costs, contingency and assumptions. If limits are exceeded, explain the gap and propose scope/Phase/staffing alternatives. State currency and calendar-day/workday basis consistently.",
+        "better_evidence": "After design, recommend that the user quickly generate a first implementation from the latest design and request reanalysis, ideally after building/running and checking critical flows. Explain this can reduce uncertainty. Do not execute code generation solely because analysis was requested; follow the user authorized scope.",
+        "ai_scenarios": {
+          "required": "Every new analysis report MUST show both without_ai (AI 미사용) and with_ai (AI 사용) side by side, under identical requirements, Phase, quality and acceptance conditions. Compare role-based staffing/person-days, duration low/recommended/high, labor cost, tool/runtime costs, contingency, total budget low/recommended/high, and separate Confidence with evidence and unknowns. AI use is not assumed to be cheaper or faster.",
+          "method": "Estimate each development item separately for both scenarios. Identify AI-assisted tasks and human implementation/review/rework/security/test work, then aggregate shared items only once per scenario. Never apply a blanket AI discount or an unsupported productivity multiplier. Derive elapsed duration from staffing, availability and dependencies, not by treating person-days as calendar days.",
+          "conditions": "State source/data access permissions, permitted AI tools/models and execution environment, team AI proficiency, human review responsibilities and adoption/setup costs. Include AI subscriptions, API/token usage and runtime/environment costs with pricing assumptions and calculation basis; unknown costs remain unknown, not zero. Use available trial-implementation/build/critical-flow evidence; without it, use conservative assumptions and disclose the limitation in the AI scenario Confidence.",
+          "unchanged_work": "Do not automatically reduce business discussions, external integration coordination, customer acceptance or other waiting/verification time. Any reduction requires item-specific evidence. Account for AI-specific review, correction, integration and quality work.",
+          "storage": "Store item scenario estimates in RESOURCE_FORECAST.scenarios.without_ai and .with_ai, and report totals/evidence in OTHER_INFO.scenarios with the same keys. Keep the full comparison table in ANALYSIS_CONTENT as Markdown. Use the same currency, rates and duration day_basis across scenarios, explicitly explaining any differences.",
+          "representative": "Write OTHER_INFO.selected_scenario=without_ai or with_ai for the actually agreed delivery scenario, and name it at the top of the report. BUDGET_FORECASTED and DURATION_DAYS_FORECASTED must be that scenario recommended values, as must OTHER_INFO.estimates when supplied. Reuse an already agreed choice; do not silently select the cheaper scenario. If AI adoption is undecided, set selected_scenario=null, show both alternatives as comparison only, and leave representative forecast columns null. Do not put an arbitrary scenario or average into them. Change the selected scenario, representative forecasts and report labeling together."
+        }
+      },
+      "confidence": {
+        "meaning": "Confidence score 0..100 rates evidence completeness, not a calibrated probability of delivery success. Always explain the basis and unresolved uncertainty; do not invent precision.",
+        "evidence_levels": [
+          "requirements",
+          "design",
+          "first_code",
+          "verified_code"
+        ],
+        "structure": {
+          "score": "Number 0..100",
+          "basis": "Required non-empty evidence explanation",
+          "evidence_level": "requirements | design | first_code | verified_code"
+        },
+        "example": {
+          "score": 55,
+          "basis": "Design inspected; critical flows not executed.",
+          "evidence_level": "design"
+        },
+        "assessment": "Assess requirement clarity, design coverage, implementation completeness, build/test evidence, external dependencies, data migration and team assumptions per item. Generated code alone does not justify a higher score: inspect completeness and build/critical-flow verification. Unknowns may lower confidence even after generation.",
+        "scenario_evidence": "Assess without_ai and with_ai independently. AI scenario evidence must identify permitted tools/environment, team proficiency, item-specific human review and trial-implementation evidence or its absence. AI use alone never raises Confidence."
+      },
+      "report": {
+        "delivery_and_storage": "In the AI chat app, deliver the report in the format the user wants: HTML, PDF, PPT/PPTX, Markdown or another supported format. Independently, ALWAYS store the full readable report in BE ANALYSIS_CONTENT as Markdown text. Never store an HTML document, PDF/PPT binary, base64 content or merely an attachment URL in ANALYSIS_CONTENT. Convert/author an equivalent Markdown version, keeping figures, scope and conclusions consistent across deliverables.",
+        "content": "Include executive summary, scope/Phase, requirement coverage, design and implementation evidence, item breakdown, cost/duration ranges and recommended values, customer-limit comparison, confidence and evidence, assumptions/unknowns/risks, and next verification steps. Use the user language.",
+        "ai_scenarios": {
+          "required": "Every new analysis report MUST show both without_ai (AI 미사용) and with_ai (AI 사용) side by side, under identical requirements, Phase, quality and acceptance conditions. Compare role-based staffing/person-days, duration low/recommended/high, labor cost, tool/runtime costs, contingency, total budget low/recommended/high, and separate Confidence with evidence and unknowns. AI use is not assumed to be cheaper or faster.",
+          "method": "Estimate each development item separately for both scenarios. Identify AI-assisted tasks and human implementation/review/rework/security/test work, then aggregate shared items only once per scenario. Never apply a blanket AI discount or an unsupported productivity multiplier. Derive elapsed duration from staffing, availability and dependencies, not by treating person-days as calendar days.",
+          "conditions": "State source/data access permissions, permitted AI tools/models and execution environment, team AI proficiency, human review responsibilities and adoption/setup costs. Include AI subscriptions, API/token usage and runtime/environment costs with pricing assumptions and calculation basis; unknown costs remain unknown, not zero. Use available trial-implementation/build/critical-flow evidence; without it, use conservative assumptions and disclose the limitation in the AI scenario Confidence.",
+          "unchanged_work": "Do not automatically reduce business discussions, external integration coordination, customer acceptance or other waiting/verification time. Any reduction requires item-specific evidence. Account for AI-specific review, correction, integration and quality work.",
+          "storage": "Store item scenario estimates in RESOURCE_FORECAST.scenarios.without_ai and .with_ai, and report totals/evidence in OTHER_INFO.scenarios with the same keys. Keep the full comparison table in ANALYSIS_CONTENT as Markdown. Use the same currency, rates and duration day_basis across scenarios, explicitly explaining any differences.",
+          "representative": "Write OTHER_INFO.selected_scenario=without_ai or with_ai for the actually agreed delivery scenario, and name it at the top of the report. BUDGET_FORECASTED and DURATION_DAYS_FORECASTED must be that scenario recommended values, as must OTHER_INFO.estimates when supplied. Reuse an already agreed choice; do not silently select the cheaper scenario. If AI adoption is undecided, set selected_scenario=null, show both alternatives as comparison only, and leave representative forecast columns null. Do not put an arbitrary scenario or average into them. Change the selected scenario, representative forecasts and report labeling together."
+        },
+        "storage_policy": "Each new analysis gets a new ANALYSIS_CODE, preserving other reports. Modify an existing report only when the user explicitly asks. GIT_STAGE is absent; same-code Git conflict overwrites latest values, without conflict history. A creation collision must fail, never silently overwrite.",
+        "structured_data": "OTHER_INFO is optional JSON with schema_version=1, estimates.budget and estimates.duration_days (low/recommended/high; currency or day_basis), scenarios.without_ai and scenarios.with_ai (each with estimates and confidence), selected_scenario (without_ai|with_ai|null), phases, confidence, item_confidence, baseline, assumptions, unverified, guide_version and review_status. confidence is an object {score: number 0..100, basis: non-empty string, evidence_level: requirements|design|first_code|verified_code}; each item_confidence entry adds dev_item_id. Only top-level estimates and the selected scenario recommended values must match table forecasts; unselected scenario estimates remain independent. If undecided, leave representative forecast columns null. Optional forecast columns contain report representative values, not customer limits.",
+        "consistency": "Before saving, check all report tables/conclusions against structured values, including both scenario totals and selected_scenario. Server validation checks supplied scenario/representative values and range/Confidence/allocation constraints; it cannot infer every number or the presence of comparison tables in free Markdown. Save body and forecasts together. On update, omitted fields preserve values and explicit null clears optional values; when changing the report recommendations or selected scenario, update forecasts and matching OTHER_INFO in the same call. Existing reports without scenario metadata remain readable and editable; never invent historical comparisons."
+      }
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "name": "beyond_finish_code_analysis",
+  "description": "Atomically finalize a run and update latest node states. COMPLETED requires every planned node; PARTIAL records unresolved coverage; FAILED/CANCELLED preserves previous results. Exact retries are idempotent; stale revisions are rejected.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "run_id": {
+        "type": "string"
+      },
+      "execution_status": {
+        "type": "string",
+        "enum": [
+          "COMPLETED",
+          "PARTIAL",
+          "FAILED",
+          "CANCELLED"
+        ]
+      },
+      "results": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "node_type": {
+              "type": "string"
+            },
+            "result_status": {
+              "type": "string"
+            },
+            "source_file": {
+              "type": "string"
+            },
+            "symbol_key": {
+              "type": "string"
+            },
+            "input_fingerprint": {
+              "type": "string"
+            },
+            "node_key": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object"
+                }
+              ]
+            },
+            "coverage_summary": {
+              "type": "object"
+            },
+            "unresolved_summary": {
+              "oneOf": [
+                {
+                  "type": "object"
+                },
+                {
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          "required": [
+            "node_type",
+            "node_key",
+            "result_status"
+          ],
+          "additionalProperties": false
+        },
+        "maxItems": 200
+      },
+      "result_summary": {
+        "type": "object"
+      },
+      "error_summary": {
+        "oneOf": [
+          {
+            "type": "object"
+          },
+          {
+            "type": "array"
+          }
+        ]
+      }
+    },
+    "required": [
+      "run_id",
+      "execution_status"
+    ],
+    "additionalProperties": false
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

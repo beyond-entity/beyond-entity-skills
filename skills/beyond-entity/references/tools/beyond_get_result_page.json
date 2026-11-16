@@ -1,0 +1,33 @@
+{
+  "name": "beyond_get_result_page",
+  "description": "Return the next page of an automatically paged MCP tool result. Use paging.result_id and paging.next_cursor from the prior response. Large responses use paged delivery even when the operation partially or fully failed. In a paged response outer success is page-delivery status only; inspect data.operation_status.success/is_error, failed_count and bounded failed_preview immediately. Retrieve and assemble ALL page_content fragments to obtain complete created objects, ID mappings and failed entries. Retry only failed items, never the entire partially successful batch.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "result_id": {
+        "type": "string",
+        "description": "Paged result identifier returned in paging.result_id."
+      },
+      "cursor": {
+        "type": [
+          "string",
+          "integer"
+        ],
+        "default": "0",
+        "description": "Next page cursor returned in paging.next_cursor. Numeric page indexes are also accepted."
+      },
+      "include_json_content": {
+        "type": "boolean",
+        "default": false,
+        "description": "When false, omit duplicated JSON from text content and rely on structuredContent."
+      }
+    },
+    "required": [
+      "result_id"
+    ]
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

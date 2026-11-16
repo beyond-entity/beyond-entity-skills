@@ -1,0 +1,48 @@
+{
+  "name": "beyond_reorder_transformations",
+  "description": "Change processing order of transformations. Provide all transformation IDs in new order.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "processor_id": {
+        "type": "string",
+        "description": "Target processor ID"
+      },
+      "transformation_order": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Transformation IDs in new processing order. All existing IDs must be included."
+      }
+    },
+    "required": [
+      "processor_id",
+      "transformation_order"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "processor_id": {
+            "type": "string"
+          },
+          "transformation_order": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "output_schema_declared": true
+}

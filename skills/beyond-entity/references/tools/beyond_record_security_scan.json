@@ -1,0 +1,426 @@
+{
+  "name": "beyond_record_security_scan",
+  "description": "Record scan detections by project-unique fingerprint. Scan items do not accept manual status decisions or branch. Default re-detection preserves metadata; refresh_scanner_fields=true refreshes supplied scanner fields/mappings. Human ACCEPTED_RISK/FALSE_POSITIVE decisions always survive. complete=true resolves absent results only in the explicit rule/file/model scope and scan branch; never use for partial/failed scans. Read beyond_get_usage_guide(workflow=\"security_findings\") or beyond_get_definitions(definition_names=[\"security_findings_guide\"]) first. With analysis_run_id, atomically finalize SECURITY coverage and findings. Planned rule/file/model scope, source commit and checkpoint must match; scan branch retains its existing BE finding lifecycle meaning, independent of SOURCE_BRANCH. complete=true additionally requires completed CHECKED coverage for all nodes/rules. Legacy scans retain their explicit complete contract.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "findings": {
+        "type": "array",
+        "minItems": 0,
+        "maxItems": 200,
+        "items": {
+          "$ref": "#/definitions/security_scan_finding"
+        }
+      },
+      "scope": {
+        "$ref": "#/definitions/security_scan_scope"
+      },
+      "detected_by": {
+        "type": "string",
+        "minLength": 1
+      },
+      "complete": {
+        "type": "boolean",
+        "default": false
+      },
+      "checkpoint_id": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "commit": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "branch": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Omitted/null uses active current_branch (desktop local projects: local). Fingerprints are project-unique across branches. Re-detection preserves original stored branch; absence resolution matches that stored branch exactly."
+      },
+      "refresh_scanner_fields": {
+        "type": "boolean",
+        "default": false,
+        "description": "Opt in to refreshing explicitly supplied scanner metadata and target/standard mappings for repeated fingerprints. Omitted fields/mappings preserve existing values; [] clears mappings. Never changes human status decisions or first-detected history. Can overwrite human edits to refreshed fields."
+      },
+      "analysis_run_id": {
+        "type": "string"
+      },
+      "analysis_results": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "node_type": {
+              "type": "string"
+            },
+            "result_status": {
+              "type": "string"
+            },
+            "source_file": {
+              "type": "string"
+            },
+            "symbol_key": {
+              "type": "string"
+            },
+            "input_fingerprint": {
+              "type": "string"
+            },
+            "node_key": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object"
+                }
+              ]
+            },
+            "coverage_summary": {
+              "type": "object"
+            },
+            "unresolved_summary": {
+              "oneOf": [
+                {
+                  "type": "object"
+                },
+                {
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          "required": [
+            "node_type",
+            "node_key",
+            "result_status"
+          ],
+          "additionalProperties": false
+        },
+        "maxItems": 200
+      },
+      "analysis_execution_status": {
+        "type": "string",
+        "enum": [
+          "COMPLETED",
+          "PARTIAL",
+          "FAILED",
+          "CANCELLED"
+        ]
+      }
+    },
+    "required": [
+      "findings",
+      "scope",
+      "detected_by"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+      "security_finding_standard": {
+        "type": "object",
+        "properties": {
+          "standard_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "standard_version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "item_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "is_primary": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "standard_id",
+          "standard_version",
+          "item_id"
+        ],
+        "additionalProperties": false
+      },
+      "security_finding_target": {
+        "type": "object",
+        "properties": {
+          "object_type": {
+            "type": "string",
+            "enum": [
+              "ATTRIBUTE",
+              "ENTITY",
+              "MODEL",
+              "PROCESSOR",
+              "PROJECT",
+              "TRANSFORMATION"
+            ]
+          },
+          "object_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "owner",
+              "source",
+              "via",
+              "sink",
+              null
+            ]
+          },
+          "handler": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "attribute_ids": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "roles": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "owner",
+                "source",
+                "via",
+                "sink"
+              ]
+            },
+            "description": "All roles for this target object. Combined with singular role; duplicates removed."
+          },
+          "handlers": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "All handlers for this target object. Combined with singular handler; independent of roles, not paired by position."
+          }
+        },
+        "required": [
+          "object_type",
+          "object_id"
+        ],
+        "additionalProperties": false
+      },
+      "security_scan_finding": {
+        "type": "object",
+        "properties": {
+          "evidence_path": {
+            "type": [
+              "object",
+              "array",
+              "string",
+              "null"
+            ],
+            "description": "JSON source -> via -> sink steps with files/lines; a string must contain valid JSON. Mask secrets."
+          },
+          "line_start": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "rule_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "confidence": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "flow",
+              "pattern",
+              null
+            ]
+          },
+          "source_file": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "detected_by": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "cwe_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rule_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "last_detected_commit": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "fingerprint": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Project-unique scanner fingerprint, or omit to SHA-256 [rule_id, source_file, symbol]. Line numbers are excluded."
+          },
+          "severity": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "high",
+              "medium",
+              "low",
+              null
+            ]
+          },
+          "message": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "code_snippet": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Mask all secret values before submitting (e.g. password = ****)."
+          },
+          "line_end": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "first_detected_commit": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "symbol": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "model_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/security_finding_target"
+            },
+            "description": "On modify, omitted preserves, [] clears, an array replaces all targets."
+          },
+          "standards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/security_finding_standard"
+            },
+            "description": "Finding-time standard version snapshots. Omitted preserves on modify; [] clears."
+          }
+        },
+        "required": [
+          "rule_id",
+          "title"
+        ],
+        "additionalProperties": false,
+        "description": "Scan detection only: manual status/status_reason/accepted_until and per-finding branch are forbidden, including null. Use top-level branch and modify for human decisions."
+      },
+      "security_scan_scope": {
+        "type": "object",
+        "properties": {
+          "rule_ids": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "source_files": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Exact file paths actually scanned. Omit only for a complete rule scan across the intended project/model."
+          },
+          "model_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "rule_ids"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object"
+      }
+    },
+    "required": [
+      "success",
+      "data"
+    ]
+  },
+  "output_schema_declared": true
+}

@@ -1,0 +1,484 @@
+{
+  "name": "beyond_create_relationships",
+  "description": "Create FK relationships. Prefer explicit child_entity_id/child_attribute_ids and parent_entity_id/parent_attribute_ids, plus required relationship_type. Parent IDs must cover the complete PK; child IDs are reused, not duplicated. Legacy from_entity_id=child, to_entity_id=parent; legacy to_attribute_ids (without from_attribute_ids) unusually denotes CHILD FK IDs. Paired from_attribute_ids/to_attribute_ids instead belongs to each matching entity. cardinality alone is insufficient; choose optional/mandatory/identifying explicitly. The tool creates the FK constraint and RELATION references; do not duplicate them with beyond_add_constraints. Each relationship is atomic; inspect created_relationships and failed, retry only failed items. on_delete/on_update are NOT supported BE relationship behavior settings. Inputs are preserved only as reference metadata in relationship other_info. Creation and FK/relationship reads return other_info and metadata_guide when these keys are present. They may inform source SQL analysis or code/DDL authoring; BE does not apply or guarantee these rules. relationship_description remains the separate supported relationship description. Large responses use paged delivery even when the operation partially or fully failed. In a paged response outer success is page-delivery status only; inspect data.operation_status.success/is_error, failed_count and bounded failed_preview immediately. Retrieve and assemble ALL page_content fragments to obtain complete created objects, ID mappings and failed entries. Retry only failed items, never the entire partially successful batch.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "model_id": {
+        "type": "string",
+        "description": "Target model ID"
+      },
+      "relationships": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "relationship_name": {
+              "type": "string",
+              "description": "Logical relationship name"
+            },
+            "constraint_name": {
+              "type": "string",
+              "description": "Physical FK constraint name"
+            },
+            "relationship_type": {
+              "type": "string",
+              "enum": [
+                "one_to_many_optional",
+                "one_to_many_mandatory",
+                "one_to_many_identifying",
+                "one_to_one_mandatory",
+                "one_to_one_identifying",
+                "1_TO_M_OPT",
+                "1_TO_M_MAN",
+                "1_TO_M_IDE",
+                "1_TO_1_MAN",
+                "1_TO_1_IDE"
+              ],
+              "description": "Required. Cardinality alone cannot determine optionality or identifying semantics. Choose one of the listed values explicitly."
+            },
+            "from_table_name": {
+              "type": "string",
+              "description": "Child/referencing table name"
+            },
+            "from_entity_id": {
+              "type": "string",
+              "description": "Child/referencing entity ID. Use this instead of from_table_name when you already have the entity ID."
+            },
+            "to_table_name": {
+              "type": "string",
+              "description": "Parent/referenced table name"
+            },
+            "to_entity_id": {
+              "type": "string",
+              "description": "Parent/referenced entity ID. Use this instead of to_table_name when you already have the entity ID."
+            },
+            "to_column_name": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "description": "(Optional) Existing child table column name(s) to reuse for FK mapping. If omitted, new child FK columns are created based on the parent PK."
+            },
+            "to_attribute_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Legacy form (no from_attribute_ids): CHILD FK IDs, despite the to_ prefix. Paired form with from_attribute_ids: PARENT PK IDs. Prefer explicit parent_attribute_ids/child_attribute_ids."
+            },
+            "relationship_description": {
+              "type": "string",
+              "description": "Description of the relationship"
+            },
+            "other_info": {
+              "type": "object"
+            },
+            "parent_entity_id": {
+              "type": "string",
+              "description": "Explicit parent entity ID. Parent owns the PK; child owns the FK."
+            },
+            "parent_attribute_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "uniqueItems": true,
+              "description": "Existing parent attribute IDs, in matching pair order. Parent must supply the complete PK."
+            },
+            "parent_attribute_id": {
+              "type": "string",
+              "description": "Singular alias for parent_attribute_ids."
+            },
+            "child_entity_id": {
+              "type": "string",
+              "description": "Explicit child entity ID. Parent owns the PK; child owns the FK."
+            },
+            "child_attribute_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "uniqueItems": true,
+              "description": "Existing child attribute IDs, in matching pair order. Parent must supply the complete PK."
+            },
+            "child_attribute_id": {
+              "type": "string",
+              "description": "Singular alias for child_attribute_ids."
+            },
+            "from_attribute_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "uniqueItems": true,
+              "description": "Paired from/to form: CHILD FK IDs; to_attribute_ids then denotes PARENT PK IDs. Without this field, legacy to_attribute_ids denotes CHILD FK IDs."
+            },
+            "on_delete": {
+              "type": "string",
+              "enum": [
+                "CASCADE",
+                "SET_NULL",
+                "SET_DEFAULT",
+                "RESTRICT",
+                "NO_ACTION"
+              ],
+              "description": "on_delete/on_update are NOT supported BE relationship behavior settings. Inputs are preserved only as reference metadata in relationship other_info. Creation and FK/relationship reads return other_info and metadata_guide when these keys are present. They may inform source SQL analysis or code/DDL authoring; BE does not apply or guarantee these rules. relationship_description remains the separate supported relationship description."
+            },
+            "on_update": {
+              "type": "string",
+              "enum": [
+                "CASCADE",
+                "SET_NULL",
+                "SET_DEFAULT",
+                "RESTRICT",
+                "NO_ACTION"
+              ],
+              "description": "on_delete/on_update are NOT supported BE relationship behavior settings. Inputs are preserved only as reference metadata in relationship other_info. Creation and FK/relationship reads return other_info and metadata_guide when these keys are present. They may inform source SQL analysis or code/DDL authoring; BE does not apply or guarantee these rules. relationship_description remains the separate supported relationship description."
+            }
+          },
+          "required": [
+            "relationship_type"
+          ],
+          "allOf": [
+            {
+              "anyOf": [
+                {
+                  "required": [
+                    "child_entity_id"
+                  ]
+                },
+                {
+                  "required": [
+                    "from_entity_id"
+                  ]
+                },
+                {
+                  "required": [
+                    "from_table_name"
+                  ]
+                }
+              ]
+            },
+            {
+              "anyOf": [
+                {
+                  "required": [
+                    "parent_entity_id"
+                  ]
+                },
+                {
+                  "required": [
+                    "to_entity_id"
+                  ]
+                },
+                {
+                  "required": [
+                    "to_table_name"
+                  ]
+                }
+              ]
+            }
+          ],
+          "examples": [
+            {
+              "relationship_name": "chat_memory_session_id_fkey",
+              "relationship_type": "one_to_many_mandatory",
+              "child_entity_id": "ent_chat_memory",
+              "child_attribute_ids": [
+                "attr_memory_session_id"
+              ],
+              "parent_entity_id": "ent_chat_sessions",
+              "parent_attribute_ids": [
+                "attr_session_pk"
+              ],
+              "on_delete": "CASCADE"
+            },
+            {
+              "relationship_name": "fk_child_parent",
+              "relationship_type": "1_TO_M_MAN",
+              "from_entity_id": "ent_child",
+              "to_entity_id": "ent_parent",
+              "to_attribute_ids": [
+                "attr_child_fk"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "required": [
+      "model_id",
+      "relationships"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "relationship_id": {
+            "type": "string"
+          },
+          "constraint_id": {
+            "type": "string"
+          },
+          "relationship_name": {
+            "type": "string"
+          },
+          "constraint_name": {
+            "type": "string"
+          },
+          "relationship_type": {
+            "type": "string"
+          },
+          "from_entity_id": {
+            "type": "string"
+          },
+          "from_entity_name": {
+            "type": "string"
+          },
+          "to_entity_id": {
+            "type": "string"
+          },
+          "to_entity_name": {
+            "type": "string"
+          },
+          "attribute_mappings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/relationship_attribute_mapping"
+            }
+          },
+          "auto_created_child_attribute_ids": {
+            "type": "array",
+            "description": "Child FK attributes automatically created by beyond_create_relationships. Do not create these again.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reused_child_attribute_ids": {
+            "type": "array",
+            "description": "Existing child attributes reused for the FK mapping.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "foreign_key": {
+            "$ref": "#/definitions/relationship_foreign_key"
+          },
+          "created_relationships": {
+            "type": "array",
+            "description": "Batch-created relationships. Each item includes foreign_key when the relationship was created successfully.",
+            "items": {
+              "type": "object"
+            }
+          },
+          "failed": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "relationship_description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Stored relationship description, separate from referential-action metadata."
+          },
+          "other_info": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Preserved relationship metadata. on_delete/on_update are reference annotations, not supported BE behaviors.",
+            "additionalProperties": true
+          },
+          "metadata_guide": {
+            "type": "string",
+            "description": "Present when on_delete or on_update metadata exists; explains that BE does not support or apply these behavior settings."
+          }
+        }
+      }
+    },
+    "definitions": {
+      "relationship_attribute_mapping": {
+        "type": "object",
+        "properties": {
+          "parent_attribute_id": {
+            "type": "string"
+          },
+          "child_attribute_id": {
+            "type": "string"
+          }
+        }
+      },
+      "relationship_foreign_key": {
+        "type": "object",
+        "description": "ForeignKey constraint and child FK attributes created or reused by beyond_create_relationships. This FK is relationship-owned; do not recreate it with beyond_add_constraints.",
+        "properties": {
+          "constraint_id": {
+            "type": "string"
+          },
+          "constraint_name": {
+            "type": "string"
+          },
+          "constraint_type": {
+            "type": "string",
+            "const": "ForeignKey"
+          },
+          "child_entity_id": {
+            "type": "string"
+          },
+          "child_entity_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "child_table_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "parent_entity_id": {
+            "type": "string"
+          },
+          "parent_entity_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "parent_table_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "child_attribute_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "auto_created_child_attribute_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "attribute_mappings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/relationship_foreign_key_attribute_mapping"
+            }
+          },
+          "owned_by_relationship": {
+            "type": "boolean"
+          },
+          "relationship_description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Stored relationship description, separate from referential-action metadata."
+          },
+          "other_info": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Preserved relationship metadata. on_delete/on_update are reference annotations, not supported BE behaviors.",
+            "additionalProperties": true
+          },
+          "metadata_guide": {
+            "type": "string",
+            "description": "Present when on_delete or on_update metadata exists; explains that BE does not support or apply these behavior settings."
+          }
+        }
+      },
+      "relationship_foreign_key_attribute_mapping": {
+        "type": "object",
+        "properties": {
+          "parent_attribute_id": {
+            "type": "string"
+          },
+          "parent_attribute_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "parent_column_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "child_attribute_id": {
+            "type": "string"
+          },
+          "child_attribute_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "child_column_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "child_data_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "child_data_length": {
+            "type": [
+              "string",
+              "number",
+              "null"
+            ]
+          },
+          "child_is_primary_key": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "child_is_not_null": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "child_attribute_auto_created": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  },
+  "output_schema_declared": true
+}

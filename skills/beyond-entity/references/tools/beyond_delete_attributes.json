@@ -1,0 +1,37 @@
+{
+  "name": "beyond_delete_attributes",
+  "description": "Delete attributes. Cascades to constraints and lineages involving these attributes.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "attribute_ids": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Attribute IDs to delete"
+      }
+    },
+    "required": [
+      "attribute_ids"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "cascade_deleted": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  },
+  "output_schema_declared": true
+}

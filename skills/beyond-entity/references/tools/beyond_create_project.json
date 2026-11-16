@@ -1,0 +1,107 @@
+{
+  "name": "beyond_create_project",
+  "description": "Create a new Platform project in an organization, clone its repository into the user's workspace, and set it as the active checked-out Platform project. If organization_id is omitted, the server falls back to the user's default organization (user_id_org when available, otherwise the first linked organization).For project setup with supplied requirements (Excel/docs/chat), do not stop at acknowledgement: check existing BE records, save traceable DRAFT requirements within the requested scope, verify saved IDs, then ask focused gap questions. Reuse prior agreement and answered questions. Reading/summarizing alone does not authorize writes. Without supplied requirements, offer an interview. Applicable intake and next-stage guides are inline. ALWAYS save BE ANALYSIS_CONTENT as Markdown.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "project_name": {
+        "type": "string",
+        "description": "Human-readable Platform project name."
+      },
+      "organization_id": {
+        "type": "string",
+        "description": "Organization where the project will be created. Prefer one of the organization_id values returned by beyond_get_my_organizations with can_create_project=true; never use placeholder values such as 'default'. If omitted, the server uses the user's default organization, marked by is_default=true when listed."
+      },
+      "project_description": {
+        "type": "string",
+        "description": "Optional project description."
+      }
+    },
+    "required": [
+      "project_name"
+    ],
+    "examples": [
+      {
+        "project_name": "Delivery Operations",
+        "organization_id": "org_123",
+        "project_description": "Design workspace for delivery business data and APIs"
+      }
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "$ref": "#/definitions/project_summary"
+          },
+          "active_context": {
+            "type": "object",
+            "description": "Current checked-out project context after the project has been created, cloned, and activated."
+          }
+        }
+      }
+    },
+    "definitions": {
+      "project_summary": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "type": "string"
+          },
+          "project_name": {
+            "type": "string"
+          },
+          "project_description": {
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "string"
+          },
+          "organization_name": {
+            "type": "string"
+          },
+          "user_role": {
+            "type": "string"
+          },
+          "last_accessed_at": {
+            "type": "integer"
+          },
+          "access_all_canvases": {
+            "type": "boolean"
+          },
+          "can_push": {
+            "type": "boolean"
+          },
+          "cloned": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "project_id",
+          "project_name"
+        ],
+        "examples": [
+          {
+            "project_id": "proj_A1b2C3d4E5f6",
+            "project_name": "Order Platform",
+            "project_description": "Customer ordering and fulfillment design",
+            "organization_id": "org_123",
+            "organization_name": "Beyond Entity",
+            "user_role": "admin",
+            "access_all_canvases": true,
+            "can_push": true,
+            "cloned": true
+          }
+        ]
+      }
+    }
+  },
+  "output_schema_declared": true
+}

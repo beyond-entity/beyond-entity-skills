@@ -1,0 +1,135 @@
+{
+  "name": "beyond_modify_processor_attribute",
+  "description": "Modify processor attribute properties. For pii_data_type and integer encryption_level, read beyond_get_usage_guide(workflow=\"attribute_security\") or beyond_get_definitions(definition_names=[\"attribute_security_guide\"]).",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "attribute_id": {
+        "type": "string",
+        "description": "Attribute ID to update"
+      },
+      "updates": {
+        "type": "object",
+        "properties": {
+          "attribute_name": {
+            "type": "string"
+          },
+          "column_name": {
+            "type": "string"
+          },
+          "is_not_null": {
+            "type": "boolean"
+          },
+          "data_type": {
+            "type": "string",
+            "description": "Allowed physical type name. Updates the logical and physical types together in place, preserving attribute IDs and lineage. Scalar targets clear element metadata; changing a parent with nested children to a scalar is rejected."
+          },
+          "nested_physical_data_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Compatibility alias for nested_data_type; both supplied values must agree."
+          },
+          "encryption_level": {
+            "type": "integer",
+            "description": "Integer levelNumber: 0=NONE (None), 1=MASKED (Masked), 2=ENCRYPTED (Encrypted), 3=HASHED (Hashed; one-way hash), 4=KEYSERVER (Key Server; encryption key managed by a key server). Writes do not accept null; omission preserves the value on modification.",
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "pii_level": {
+            "type": "integer"
+          },
+          "sensitivity_level": {
+            "type": "integer"
+          },
+          "io_type": {
+            "type": "string",
+            "enum": [
+              "INPUT",
+              "LOOKUP",
+              "OUTPUT"
+            ]
+          },
+          "attribute_description": {
+            "type": "string"
+          },
+          "other_info": {
+            "type": "object"
+          },
+          "data_depth": {
+            "type": "integer"
+          },
+          "upper_attribute_id": {
+            "type": "string"
+          },
+          "display_order": {
+            "type": "integer"
+          },
+          "nested_data_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Processor list/array element physical type from this storage type catalog, e.g. Object or String. Accepted on create/add/modify and returned on reads. nested_physical_data_type is an equivalent compatibility alias; if both are supplied they must agree. Null clears the element type."
+          },
+          "pii_data_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "NA",
+              "NAME",
+              "CONTACT",
+              "ADDRESS",
+              "FINANCIAL",
+              "SENSITIVE_GENERAL",
+              "LOCATION",
+              "ONLINE_ID",
+              "HEALTH",
+              "BIOMETRIC",
+              "EMPLOYMENT",
+              "DATE_OF_BIRTH",
+              "GENERAL_INFO",
+              "PASSPORT_NUMBER",
+              "NATIONAL_ID",
+              "DRIVER_LICENSE",
+              "ALIEN_ID",
+              "UNIQUE_ID_GENERAL",
+              null
+            ],
+            "description": "PII_DATA_TYPE enum name stored verbatim, e.g. DRIVER_LICENSE. Null clears the classification; this is independent of pii_level."
+          }
+        }
+      }
+    },
+    "required": [
+      "attribute_id",
+      "updates"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "attribute_id": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "output_schema_declared": true
+}

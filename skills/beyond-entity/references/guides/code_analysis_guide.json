@@ -1,0 +1,65 @@
+{
+  "guide_id": "code_analysis_guide",
+  "guide_revision": "a1ea96aee698a47d",
+  "source_mcp_version": "3.2.51",
+  "content": {
+    "workflow": "start_code_analysis -> analyze -> finish_code_analysis -> get_code_analysis",
+    "identity": "RUN_ID is independent; CP_AT groups work. source_commit is source repository Git, never BE Git.",
+    "storage": "Latest-only node observations (two kinds). Every finish retains the latest 100 run summaries plus RUNNING/referenced runs, deleting at most 200 obsolete summaries per call; prune permits earlier cleanup. No result snapshots or finding observation history.",
+    "scope": "Explicit scope nodes required; failures update last attempt only; increments exclude unrelated nodes.",
+    "freshness": "Hash comparison is only input freshness; analyzer/rules/config currency needs separate caller comparison.",
+    "coverage": "CHECKED needs rule_ids and all_applicable_checks_completed=true with no unresolved boundaries. Zero findings never means safe. Linked complete scans require an explicitly CHECKED PROJECT root or matching scoped MODEL root. Incremental absence reconciliation requires exact source_files; individual nodes never authorize broader resolution.",
+    "limits": "200 nodes per run, 32KiB scope, 4KiB summaries. Put detailed reports externally.",
+    "git": "Excluded from BE Git CSV staging, commit, merge and restore. Restore preserves local analysis rows and includes them in websocket replacement data. Full database export includes them.",
+    "ai_workflow": "AI must start a separate AI/HYBRID run with explicit existing targets, source basis and limits. Finish after architecture writes, report unsupported paths as PARTIAL, never infer CHECKED from zero findings. Link security scan via analysis_run_id for atomic finding/coverage saves. Use report_ref for detail.",
+    "parser": "Parser facts hash is scope evidence, not a source snapshot hash. Dirty/source snapshot freshness stays unknown unless actual source provenance is supplied. Security parser runs cover supported catalog rules at project scope; object coverage is not inferred from findings.",
+    "synchronization": "Server retains exact analysis-bearing transactions in the existing TB_C_TRANSACTION synchronization journal across reconnects, independently of bounded run summaries. Exact retries skip all units, including pruned runs; reused IDs with changed contents and new optimistic-lock conflicts fail. Journal payloads are excluded from Git CSV but contribute to full database size.",
+    "checkpoint_relationship": "CP_AT groups architecture changes and may link multiple independent RUN_IDs. Analysis states are latest observations, not checkpoint snapshots. beyond_get_architecture_diff reports architecture node changes only; it cannot reconstruct historical analysis states or security coverage.",
+    "retry": "Retry the same run_id with identical inputs. Reused IDs with changed payloads and stale revisions fail; re-read current state and start a new run instead of overwriting newer observations.",
+    "examples": [
+      {
+        "note": "Replace project_id and source provenance with values verified from the active project and source repository.",
+        "tool": "beyond_start_code_analysis",
+        "arguments": {
+          "run_id": "analysis-unique-run-id",
+          "metadata": {
+            "analysis_kind": "EXTRACTION",
+            "analyzer_kind": "AI",
+            "analyzer_id": "architecture-review",
+            "source_repository_key": "verified-source-repository",
+            "scope_mode": "FULL",
+            "scope_summary": {
+              "nodes": [
+                {
+                  "node_type": "PROJECT",
+                  "node_key": "verified-active-project-id"
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "tool": "beyond_finish_code_analysis",
+        "arguments": {
+          "run_id": "analysis-unique-run-id",
+          "execution_status": "COMPLETED",
+          "results": [
+            {
+              "node_type": "PROJECT",
+              "node_key": "verified-active-project-id",
+              "result_status": "EXTRACTED"
+            }
+          ]
+        }
+      },
+      {
+        "tool": "beyond_get_code_analysis",
+        "arguments": {
+          "node_type": "PROJECT",
+          "node_key": "verified-active-project-id"
+        }
+      }
+    ]
+  }
+}

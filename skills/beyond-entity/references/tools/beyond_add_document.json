@@ -1,0 +1,52 @@
+{
+  "name": "beyond_add_document",
+  "description": "Add a shared markdown-style project document to TB_DOCUMENT. DOC_ID is generated as doc_{random}. ACTOR_TYPE is always AI, and actor_name must identify the LLM model name and version.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "required": [
+      "file_name",
+      "doc_content",
+      "actor_name"
+    ],
+    "properties": {
+      "file_name": {
+        "type": "string",
+        "description": "Document file name, such as AGENTS.md, CLAUDE.md, README.md, business_requirements.md, or test_scenario.md."
+      },
+      "doc_content": {
+        "type": "string",
+        "description": "Full markdown document content to store."
+      },
+      "actor_name": {
+        "type": "string",
+        "description": "LLM model name and version, such as GPT-5 Codex 2026-08-12 or the exact MCP client model identifier."
+      },
+      "include_json_content": {
+        "type": "boolean",
+        "default": false,
+        "description": "When false, omit duplicated JSON from text content and rely on structuredContent."
+      }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "type": "string"
+          },
+          "document": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  },
+  "output_schema_declared": true
+}

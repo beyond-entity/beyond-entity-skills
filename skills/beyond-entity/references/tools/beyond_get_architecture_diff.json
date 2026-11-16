@@ -1,0 +1,130 @@
+{
+  "name": "beyond_get_architecture_diff",
+  "description": "Return changes in [from_cp_at, to_cp_at), ordered by node_type and node_id. Both checkpoints must exist; equal endpoints return no changes. Combine first/last ACTION to classify insert/update/delete across the interval and keep the last record values. Omit nodes inserted then deleted within the interval. Reverted updates remain because field values are not compared. Delete values describe the node immediately before its final deletion, not the interval starting state. Return last_changed_cp_at, action, node_json and deleted. node_values is no longer returned. summary contains changed_node_count, inserted_node_count, updated_node_count and deleted_node_count. Missing node history is reported by history_available=false. Historical rows without ACTION are unsupported; do not infer actions from empty strings. Assemble all transport pages with beyond_get_result_page.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "required": [
+      "from_cp_at",
+      "to_cp_at"
+    ],
+    "properties": {
+      "from_cp_at": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9223372036854775807
+      },
+      "to_cp_at": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9223372036854775807
+      },
+      "include_json_content": {
+        "type": "boolean",
+        "default": false
+      },
+      "response_format": {
+        "type": "string",
+        "enum": [
+          "auto",
+          "full",
+          "paged"
+        ],
+        "default": "auto"
+      },
+      "max_inline_bytes": {
+        "type": "integer",
+        "minimum": 4096,
+        "maximum": 512000
+      },
+      "page_size_bytes": {
+        "type": "integer",
+        "minimum": 4096,
+        "maximum": 512000
+      }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "type": "string"
+          },
+          "from_cp_at": {
+            "type": "integer"
+          },
+          "to_cp_at": {
+            "type": "integer"
+          },
+          "interval": {
+            "type": "string"
+          },
+          "diff_kind": {
+            "type": "string"
+          },
+          "history_available": {
+            "type": "boolean"
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "changed_node_count": {
+                "type": "integer"
+              },
+              "deleted_node_count": {
+                "type": "integer"
+              },
+              "inserted_node_count": {
+                "type": "integer"
+              },
+              "updated_node_count": {
+                "type": "integer"
+              }
+            }
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "node_type": {
+                  "type": "string"
+                },
+                "node_id": {
+                  "type": "string"
+                },
+                "last_changed_cp_at": {
+                  "type": "integer"
+                },
+                "node_json": {
+                  "type": [
+                    "object",
+                    "null"
+                  ]
+                },
+                "deleted": {
+                  "type": "boolean"
+                },
+                "action": {
+                  "type": "string",
+                  "enum": [
+                    "insert",
+                    "update",
+                    "delete"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "output_schema_declared": true
+}

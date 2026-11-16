@@ -1,0 +1,97 @@
+{
+  "name": "beyond_create_development_plan",
+  "description": "Create an initial-build or change plan. Optional dev_plan_id is generated if omitted; existing identity is rejected. DEV_BUDGET/DEV_DURATION_DAYS are customer goals/upper limits, not forecast results. Default response_detail=compact; use full only when complete saved records are needed. Responses embed current/next-stage guide text and disclose server-generated values; no separate guide query is required.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "plan": {
+        "type": "object",
+        "properties": {
+          "dev_plan_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dev_plan_name": {
+            "type": "string"
+          },
+          "dev_plan_type": {
+            "type": "string",
+            "description": "Suggested convention when the project/user has none; custom existing values remain valid: {'NEW': 'Initial build', 'CHANGE': 'Change to an existing system'}"
+          },
+          "plan_status": {
+            "type": "string",
+            "description": "Suggested convention when the project/user has none; custom existing values remain valid: {'DRAFT': 'Being prepared', 'ACTIVE': 'In progress', 'DONE': 'Completed', 'ON_HOLD': 'Paused'}"
+          },
+          "dev_budget": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "dev_duration_days": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "dev_start_at": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "client_company_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "client_contact_info": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "dev_overall_description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "other_info": {
+            "type": [
+              "object",
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "dev_plan_name",
+          "dev_plan_type",
+          "plan_status"
+        ],
+        "additionalProperties": false
+      },
+      "response_detail": {
+        "type": "string",
+        "enum": [
+          "compact",
+          "full"
+        ],
+        "default": "compact",
+        "description": "Compact returns identities and automatic-value receipts without echoing input bodies. Full returns complete saved records."
+      }
+    },
+    "required": [
+      "plan"
+    ],
+    "additionalProperties": false
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

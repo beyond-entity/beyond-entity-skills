@@ -1,0 +1,24 @@
+{
+  "guide_id": "sqlite_storage_boundary_guide",
+  "guide_revision": "fce22b33434f1f62",
+  "source_mcp_version": "3.2.51",
+  "content": {
+    "rule": "Use a sqlite model when the SQLite database is physically or logically separate from the application. For SQLite used as an application-internal cache, create a sqlite_cache entity inside the application model when its acceptable_entities allows sqlite_cache. A .db file or SQLite library alone does not establish a separate model boundary.",
+    "separate_database": {
+      "model_storage_type": "sqlite",
+      "entity_storage_type": "sqlite",
+      "when": "The verified SQLite database is a physically or logically separate storage boundary from the application. A separately managed logical database may reside on the same device."
+    },
+    "internal_cache": {
+      "model": "The existing application model; respect its acceptable_entities.",
+      "entity_storage_type": "sqlite_cache",
+      "when": "SQLite stores cache data inside the application boundary. Model its cache tables as sqlite_cache entities inside that application, including supported Tauri presets."
+    },
+    "selection_rules": [
+      "Determine the database purpose and physical/logical boundary from verified requirements, source or configuration. Do not infer cache semantics from SQLite, a local path or offline persistence alone.",
+      "An internal cache does not require a separate sqlite model. A separately managed database remains a sqlite model even when the application also uses it.",
+      "Tauri presets remain flat application models. Create a separate sqlite model only for a verified separate database; do not auto-create one for sqlite_cache.",
+      "Preserve existing models/entities unless the user authorizes restructuring. This guide does not migrate data or change IDs."
+    ]
+  }
+}

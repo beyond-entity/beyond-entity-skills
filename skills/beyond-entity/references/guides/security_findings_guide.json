@@ -1,0 +1,75 @@
+{
+  "guide_id": "security_findings_guide",
+  "guide_revision": "7c4843e2b6447638",
+  "source_mcp_version": "3.2.51",
+  "content": {
+    "tools": [
+      "beyond_add_security_findings",
+      "beyond_list_security_findings",
+      "beyond_modify_security_finding",
+      "beyond_delete_security_findings",
+      "beyond_record_security_scan"
+    ],
+    "scope": "Active project only. Requires full project canvas access; writes also require project write permission.",
+    "fingerprint": "Unique within the project. Supply a scanner fingerprint or let the server SHA-256 hash [rule_id, source_file, symbol]. Line numbers are excluded. Auto-generation requires source_file and symbol.",
+    "display_key": "Server-managed readable identifier such as BESEC-00001. Numbers increase within each project and are never reused after deletion. Existing findings receive keys in created_at/finding_id order during migration. Re-detection, updates and status changes preserve the key. Use beyond_list_security_findings(display_key=\"BESEC-00001\") to find its internal finding_id; mutations still use finding_id. display_key and display_sequence are output-only fields.",
+    "storage_aliases": {
+      "object_type/object_id": "NODE_TYPE/NODE_ID",
+      "resolved_checkpoint_id": "RESOLVED_DETECTED_CHECKPOINT_ID"
+    },
+    "status_rules": [
+      "By default a repeated fingerprint updates only last_detected_checkpoint_id and last_detected_commit; metadata and related targets/standards remain unchanged.",
+      "Set refresh_scanner_fields=true to refresh explicitly supplied scanner metadata (model, title/message, rule version/CWE, severity/confidence, location/snippet/evidence) and detected_by. Supplied targets/standards replace mappings, [] clears them, omission preserves them. This option can overwrite human edits to those fields; use it only when the scanner owns them. Status decisions, reasons, accepted_until and first-detected history are always preserved.",
+      "A previously FIXED finding becomes REOPENED when detected again, and its resolved_checkpoint_id is cleared.",
+      "ACCEPTED_RISK and FALSE_POSITIVE are preserved by scans, including an expired accepted_until value. Human review decides changes.",
+      "Absence resolves OPEN/REOPENED findings only when complete=true. Explicit scope.rule_ids is required; optional scope.source_files and scope.model_id narrow the scan. Reconciliation is also restricted to the current scan branch.",
+      "Linked analysis runs authorize absence reconciliation only with a CHECKED PROJECT root or the matching explicitly scoped MODEL root. Individual node results cannot authorize wider model/project resolution. Incremental reconciliation requires exact source_files. Planned rule/file/model scope must match the scan.",
+      "Never set complete=true for failed, partial, cancelled or sampled scans. No findings with complete=false never resolves existing findings.",
+      "Each request supports at most 200 findings. For larger scans split exact rule/file/model scopes; a complete request must contain all detections for that scope, never only the last batch.",
+      "Explicit status changes to ACCEPTED_RISK/FALSE_POSITIVE require status_reason; status_by is the authenticated user and status_at is set by the server."
+    ],
+    "relations": "targets/standards on add create related rows. On modify, omission preserves them, an array replaces them, and [] clears them. Deletion removes all three tables atomically.",
+    "checkpoint": "Scan checkpoint_id defaults to MAX(CP_AT) and must exist in the active project. Create a checkpoint first if none exists.",
+    "defaults": {
+      "branch": "Omission or null uses the active project current_branch (desktop local projects use \"local\"); if the context has no branch, null is stored. An explicit string selects that scan branch. Fingerprints are project-wide unique across branches: re-detection reuses the same row and preserves its original branch. Absence reconciliation matches the stored branch exactly; a main scan will not resolve an absent local/null-branch row.",
+      "status_by": "Scan-created OPEN and automated FIXED/REOPENED transitions have status_by=null; detected_by identifies the scanner. Manual add/modify decisions record the authenticated user. status_at records the status transition time in both cases."
+    },
+    "input_contract": "Scan findings exclude status, status_reason, accepted_until and branch, including null-valued instances. Use beyond_modify_security_finding for human decisions and the top-level scan branch for branch selection. See definitions.security_scan_finding.",
+    "fetch": {
+      "tool": "beyond_get_usage_guide",
+      "arguments": {
+        "workflow": "security_findings"
+      }
+    },
+    "target_types": [
+      "ATTRIBUTE",
+      "ENTITY",
+      "MODEL",
+      "PROCESSOR",
+      "PROJECT",
+      "TRANSFORMATION"
+    ],
+    "target_roles": [
+      "owner",
+      "source",
+      "via",
+      "sink"
+    ],
+    "target_identity": "One target per (object_type, object_id) within a finding. For multiple roles/handlers on the same object, send roles:[\"source\",\"sink\"] and handlers:[\"insertMber\",\"updateMberView\"] on that target. These are independent sets, not role-to-handler pairs. Legacy role/handler remain supported and are included in the returned arrays. When both singular and plural inputs are supplied, their values are combined, removing duplicates. Empty arrays mean no plural values; singular values still apply. Omission/null falls back to singular values. Duplicate target objects are rejected; combine their values into one target.",
+    "evidence": "evidence_path may be a JSON object or array containing source -> via -> sink steps with file and line. Mask secrets in code_snippet/message/evidence before sending; do not store passwords, tokens or keys.",
+    "standards": "Store standard_id, standard_version and item_id as the finding-time snapshot. At most one mapping may have is_primary=true.",
+    "scan_example": {
+      "detected_by": "be-code-parser 0.1.0",
+      "scope": {
+        "rule_ids": [
+          "SEC-SQL-MYBATIS-DOLLAR"
+        ],
+        "source_files": [
+          "Mapper.xml"
+        ]
+      },
+      "complete": false,
+      "findings": []
+    }
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "name": "beyond_mcp_review_search",
+  "description": "Search the central MCP Review Board for known tool issues, ambiguity reports, workaround notes, and resolved maintainer-agent decisions. This does not require a checked-out project.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "tool_name": {
+        "type": "string",
+        "description": "Optional MCP tool name to filter by, such as beyond_create_entities."
+      },
+      "category": {
+        "type": "string",
+        "enum": [
+          "bug",
+          "ambiguity",
+          "missing_capability",
+          "inefficiency",
+          "suggestion"
+        ]
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "open",
+          "investigating",
+          "fixed",
+          "verified",
+          "resolved",
+          "reopened",
+          "dismissed"
+        ]
+      },
+      "severity": {
+        "type": "string",
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "critical"
+        ]
+      },
+      "keyword": {
+        "type": "string",
+        "description": "Search text applied to summary, tool_name, and fingerprint."
+      },
+      "limit": {
+        "type": "integer",
+        "default": 20,
+        "minimum": 1,
+        "maximum": 100
+      },
+      "offset": {
+        "type": "integer",
+        "default": 0,
+        "minimum": 0
+      }
+    },
+    "required": []
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

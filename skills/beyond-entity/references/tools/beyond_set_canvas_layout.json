@@ -1,0 +1,316 @@
+{
+  "name": "beyond_set_canvas_layout",
+  "description": "Set positions for entities and processors on canvas.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "canvas_id": {
+        "type": "string",
+        "description": "Target canvas ID. Required because layout is canvas-specific."
+      },
+      "logical_canvas": {
+        "type": "object",
+        "description": "Layout for logical canvas sheet (logical ERD view). Omit to leave unchanged.",
+        "properties": {
+          "models": {
+            "type": "array",
+            "description": "Model box positions and their entity/processor positions within",
+            "items": {
+              "type": "object",
+              "properties": {
+                "model_id": {
+                  "type": "string"
+                },
+                "offset_x": {
+                  "type": "number",
+                  "description": "Model box X position on canvas. Always 0 for single_model canvas."
+                },
+                "offset_y": {
+                  "type": "number",
+                  "description": "Model box Y position on canvas. Always 0 for single_model canvas."
+                },
+                "width": {
+                  "type": "number",
+                  "description": "Model box width. Optional - platform auto-calculates from contents."
+                },
+                "height": {
+                  "type": "number",
+                  "description": "Model box height. Optional - platform auto-calculates from contents."
+                },
+                "entities": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "entity_id": {
+                        "type": "string"
+                      },
+                      "position_x": {
+                        "type": "number",
+                        "description": "X position RELATIVE to model box, not absolute on canvas"
+                      },
+                      "position_y": {
+                        "type": "number",
+                        "description": "Y position RELATIVE to model box, not absolute on canvas"
+                      },
+                      "width": {
+                        "type": "number",
+                        "description": "Optional - platform auto-calculates based on attribute count"
+                      },
+                      "height": {
+                        "type": "number",
+                        "description": "Optional - platform auto-calculates. Hint: (attribute_count + 1) * 24.0"
+                      }
+                    },
+                    "required": [
+                      "entity_id",
+                      "position_x",
+                      "position_y"
+                    ]
+                  }
+                },
+                "processors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "processor_id": {
+                        "type": "string"
+                      },
+                      "position_x": {
+                        "type": "number",
+                        "description": "X position RELATIVE to model box"
+                      },
+                      "position_y": {
+                        "type": "number",
+                        "description": "Y position RELATIVE to model box"
+                      },
+                      "width": {
+                        "type": "number",
+                        "description": "Optional"
+                      },
+                      "height": {
+                        "type": "number",
+                        "description": "Optional - platform auto-calculates. Hint: (total_attributes_across_all_ports + 4) * 24.0"
+                      }
+                    },
+                    "required": [
+                      "processor_id",
+                      "position_x",
+                      "position_y"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "model_id",
+                "offset_x",
+                "offset_y"
+              ]
+            }
+          }
+        },
+        "required": [
+          "models"
+        ]
+      },
+      "physical_canvas": {
+        "type": "object",
+        "description": "Layout for physical canvas sheet (physical ERD view). Omit to leave unchanged.",
+        "properties": {
+          "models": {
+            "type": "array",
+            "description": "Same structure as logical_canvas.models",
+            "items": {
+              "type": "object",
+              "properties": {
+                "model_id": {
+                  "type": "string"
+                },
+                "offset_x": {
+                  "type": "number",
+                  "description": "Model box X position on canvas. Always 0 for single_model canvas."
+                },
+                "offset_y": {
+                  "type": "number",
+                  "description": "Model box Y position on canvas. Always 0 for single_model canvas."
+                },
+                "width": {
+                  "type": "number",
+                  "description": "Model box width. Optional - platform auto-calculates from contents."
+                },
+                "height": {
+                  "type": "number",
+                  "description": "Model box height. Optional - platform auto-calculates from contents."
+                },
+                "entities": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "entity_id": {
+                        "type": "string"
+                      },
+                      "position_x": {
+                        "type": "number",
+                        "description": "X position RELATIVE to model box, not absolute on canvas"
+                      },
+                      "position_y": {
+                        "type": "number",
+                        "description": "Y position RELATIVE to model box, not absolute on canvas"
+                      },
+                      "width": {
+                        "type": "number",
+                        "description": "Optional - platform auto-calculates based on attribute count"
+                      },
+                      "height": {
+                        "type": "number",
+                        "description": "Optional - platform auto-calculates based on attribute count"
+                      }
+                    },
+                    "required": [
+                      "entity_id",
+                      "position_x",
+                      "position_y"
+                    ]
+                  }
+                },
+                "processors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "processor_id": {
+                        "type": "string"
+                      },
+                      "position_x": {
+                        "type": "number",
+                        "description": "X position RELATIVE to model box"
+                      },
+                      "position_y": {
+                        "type": "number",
+                        "description": "Y position RELATIVE to model box"
+                      },
+                      "width": {
+                        "type": "number",
+                        "description": "Optional"
+                      },
+                      "height": {
+                        "type": "number",
+                        "description": "Optional"
+                      }
+                    },
+                    "required": [
+                      "processor_id",
+                      "position_x",
+                      "position_y"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "model_id",
+                "offset_x",
+                "offset_y"
+              ]
+            }
+          }
+        },
+        "required": [
+          "models"
+        ]
+      },
+      "recalculate": {
+        "type": "object",
+        "description": "Instead of providing positions, ask server to auto-calculate layout. Cannot be combined with logical_canvas/physical_canvas.",
+        "properties": {
+          "target": {
+            "type": "string",
+            "enum": [
+              "both",
+              "logical_only",
+              "physical_only"
+            ],
+            "default": "both",
+            "description": "Which sheet(s) to recalculate"
+          },
+          "algorithm": {
+            "type": "string",
+            "enum": [
+              "hierarchical",
+              "force_directed",
+              "grid"
+            ],
+            "default": "hierarchical"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "top_down",
+              "left_right",
+              "bottom_up"
+            ],
+            "default": "top_down"
+          },
+          "spacing": {
+            "type": "object",
+            "properties": {
+              "horizontal": {
+                "type": "number",
+                "default": 150
+              },
+              "vertical": {
+                "type": "number",
+                "default": 100
+              }
+            }
+          }
+        }
+      }
+    },
+    "required": [
+      "canvas_id"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "canvas_id": {
+            "type": "string"
+          },
+          "models_updated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "entities_updated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "models": {
+                "type": "integer"
+              },
+              "entities": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "output_schema_declared": true
+}

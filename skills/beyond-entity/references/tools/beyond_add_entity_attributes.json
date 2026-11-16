@@ -1,0 +1,349 @@
+{
+  "name": "beyond_add_entity_attributes",
+  "description": "Add new attributes to an existing entity. If an added attribute has is_primary_key or default_value, PrimaryKey or Default constraints may be auto-created; read auto_created_constraints and do not create duplicate PK/Default constraints afterward. For nested structures (MongoDB, Elasticsearch, JSON, API), use upper_attribute_id. For pii_data_type and integer encryption_level, read beyond_get_usage_guide(workflow=\"attribute_security\") or beyond_get_definitions(definition_names=[\"attribute_security_guide\"]).",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "entity_id": {
+        "type": "string",
+        "description": "Target entity ID"
+      },
+      "attributes": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/entity_attribute"
+        }
+      }
+    },
+    "required": [
+      "entity_id",
+      "attributes"
+    ],
+    "definitions": {
+      "entity_attribute": {
+        "type": "object",
+        "description": "Attribute schema for data entities.",
+        "properties": {
+          "attribute_id": {
+            "type": "string",
+            "description": "Beyond Entity attribute ID"
+          },
+          "attribute_name": {
+            "type": "string",
+            "description": "Logical attribute name. Use a human-friendly business/property name in the user's language, not a physical identifier."
+          },
+          "column_name": {
+            "type": "string",
+            "description": "Physical column name"
+          },
+          "is_primary_key": {
+            "type": "boolean",
+            "default": false
+          },
+          "is_not_null": {
+            "type": "boolean",
+            "default": false
+          },
+          "is_auto_increment": {
+            "type": "boolean",
+            "default": false
+          },
+          "domain_id": {
+            "type": "string",
+            "description": "Optional domain ID applied to this attribute"
+          },
+          "data_length": {
+            "type": "integer",
+            "description": "Physical length/size for the data type. For vector-like types this is the embedding dimension; for bit and bit varying this is the bit length."
+          },
+          "decimal_points": {
+            "type": "integer",
+            "description": "Scale / decimal precision for numeric data types. Do not use this for vector, bit, or bit varying."
+          },
+          "data_type": {
+            "type": "string",
+            "description": "Physical data type exposed as data_type"
+          },
+          "nested_data_type": {
+            "type": "string",
+            "description": "Logical nested element type for complex attributes"
+          },
+          "nested_physical_data_type": {
+            "type": "string",
+            "description": "Stored physical data type for nested values"
+          },
+          "default_value": {
+            "type": "string",
+            "description": "Default value expression"
+          },
+          "enum_values": {
+            "type": "string",
+            "description": "Comma-separated allowed values as stored"
+          },
+          "example_values": {
+            "type": "string",
+            "description": "Example values as stored"
+          },
+          "encryption_level": {
+            "type": "integer",
+            "default": 0,
+            "description": "Integer levelNumber: 0=NONE (None), 1=MASKED (Masked), 2=ENCRYPTED (Encrypted), 3=HASHED (Hashed; one-way hash), 4=KEYSERVER (Key Server; encryption key managed by a key server). Writes do not accept null; omission preserves the value on modification.",
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "pii_level": {
+            "type": "integer",
+            "default": 0,
+            "description": "0 = none, 1 = low, 2 = medium, 3 = high"
+          },
+          "sensitivity_level": {
+            "type": "integer",
+            "default": 0,
+            "description": "Custom sensitivity level defined by the organization. 0 = not specified, 1 = public, 2 = internal, 3 = confidential, 4 = restricted"
+          },
+          "confidentiality": {
+            "type": "string",
+            "enum": [
+              "L",
+              "M",
+              "H",
+              "S"
+            ],
+            "description": "TARA confidentiality classification. L = Low, M = Medium, H = High, S = Safety Critical."
+          },
+          "integrity": {
+            "type": "string",
+            "enum": [
+              "L",
+              "M",
+              "H",
+              "S"
+            ],
+            "description": "TARA integrity classification. L = Low, M = Medium, H = High, S = Safety Critical."
+          },
+          "availability": {
+            "type": "string",
+            "enum": [
+              "L",
+              "M",
+              "H",
+              "S"
+            ],
+            "description": "TARA availability classification. L = Low, M = Medium, H = High, S = Safety Critical."
+          },
+          "attribute_description": {
+            "type": "string",
+            "description": "Human-readable attribute description"
+          },
+          "other_info": {
+            "type": "object",
+            "description": "Additional JSON metadata for the attribute"
+          },
+          "data_depth": {
+            "type": "integer",
+            "default": 0,
+            "description": "Nesting depth. 0 for root attributes."
+          },
+          "upper_attribute_id": {
+            "type": "string",
+            "description": "Parent attribute ID for nested structures. Null for root-level attributes."
+          },
+          "display_order": {
+            "type": "integer",
+            "description": "Display order within the entity"
+          },
+          "pii_data_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "NA",
+              "NAME",
+              "CONTACT",
+              "ADDRESS",
+              "FINANCIAL",
+              "SENSITIVE_GENERAL",
+              "LOCATION",
+              "ONLINE_ID",
+              "HEALTH",
+              "BIOMETRIC",
+              "EMPLOYMENT",
+              "DATE_OF_BIRTH",
+              "GENERAL_INFO",
+              "PASSPORT_NUMBER",
+              "NATIONAL_ID",
+              "DRIVER_LICENSE",
+              "ALIEN_ID",
+              "UNIQUE_ID_GENERAL",
+              null
+            ],
+            "description": "PII_DATA_TYPE enum name stored verbatim, e.g. DRIVER_LICENSE. Null clears the classification; this is independent of pii_level."
+          },
+          "encryption_level_desc": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "readOnly": true,
+            "description": "Human-readable encryption_level: None, Masked, Encrypted, Hashed, Key Server; null for an undeclared value."
+          }
+        },
+        "required": [
+          "attribute_name",
+          "column_name",
+          "data_type"
+        ],
+        "examples": [
+          {
+            "attribute_id": "attr_c3SpXfySa6",
+            "attribute_name": "코드그룹ID",
+            "column_name": "code_group_id",
+            "is_primary_key": true,
+            "is_not_null": true,
+            "is_auto_increment": false,
+            "data_length": 20,
+            "data_type": "varchar",
+            "encryption_level": 0,
+            "pii_level": 0,
+            "sensitivity_level": 0,
+            "attribute_description": "코드그룹ID",
+            "other_info": {},
+            "data_depth": 0,
+            "display_order": 0
+          },
+          {
+            "attribute_id": "attr_wrh7pEDzPK",
+            "attribute_name": "사용여부",
+            "column_name": "use_yn",
+            "is_primary_key": false,
+            "is_not_null": true,
+            "is_auto_increment": false,
+            "data_length": 1,
+            "data_type": "char",
+            "default_value": "Y",
+            "enum_values": "Y, N",
+            "encryption_level": 0,
+            "pii_level": 0,
+            "sensitivity_level": 0,
+            "attribute_description": "사용여부",
+            "other_info": {},
+            "data_depth": 0,
+            "display_order": 3
+          }
+        ]
+      }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "object_id": {
+            "type": "string"
+          },
+          "object_type": {
+            "type": "string"
+          },
+          "added_attributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/attribute_summary"
+            }
+          },
+          "auto_created_constraints": {
+            "type": "array",
+            "description": "Constraints automatically created from added attribute metadata, such as PrimaryKey from is_primary_key or Default from default_value. Do not create these constraints again.",
+            "items": {
+              "$ref": "#/definitions/constraint_summary"
+            }
+          },
+          "auto_created_constraint_ids": {
+            "type": "array",
+            "description": "IDs of constraints automatically created from added attribute metadata.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "failed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/operation_failure"
+            }
+          }
+        }
+      }
+    },
+    "definitions": {
+      "attribute_summary": {
+        "type": "object",
+        "properties": {
+          "attribute_id": {
+            "type": "string"
+          },
+          "attribute_name": {
+            "type": "string"
+          },
+          "column_name": {
+            "type": "string"
+          }
+        }
+      },
+      "constraint_summary": {
+        "type": "object",
+        "properties": {
+          "constraint_id": {
+            "type": "string"
+          },
+          "constraint_name": {
+            "type": "string"
+          },
+          "constraint_type": {
+            "type": "string"
+          },
+          "attribute_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "other_info": {
+            "type": "object"
+          }
+        }
+      },
+      "operation_failure": {
+        "type": "object",
+        "properties": {
+          "object_type": {
+            "type": "string"
+          },
+          "object_name": {
+            "type": "string"
+          },
+          "transformation_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "error_message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "output_schema_declared": true
+}

@@ -1,0 +1,18 @@
+{
+  "name": "beyond_git_push",
+  "description": "Push local commits from the active branch to the remote.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "branch_name": {
+        "type": "string",
+        "description": "Optional branch name to push. Defaults to the current branch."
+      }
+    },
+    "required": []
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

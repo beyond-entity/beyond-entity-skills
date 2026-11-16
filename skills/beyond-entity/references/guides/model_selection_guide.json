@@ -1,0 +1,1356 @@
+{
+  "guide_id": "model_selection_guide",
+  "guide_revision": "74622f62b151544f",
+  "source_mcp_version": "3.2.51",
+  "content": {
+    "spring_boot_application": {
+      "model_storage_type": "spring_boot_application",
+      "scope": "Use Spring Boot Application for legacy Spring Boot, Spring AI, and Spring MVC applications, including traditional Spring MVC applications without Spring Boot.",
+      "rules": [
+        "Read the returned model guide and acceptable_processors before creating or updating architecture. Use source code, configuration, specifications, existing verified design, or explicit user requirements as evidence. Never invent classes, endpoints, subtypes, frameworks, attributes, or connections to fill a catalog. Omit unknown optional values; ask when required information is missing. Clearly distinguish proposed designs from extracted facts.",
+        "Prefer spring_boot_application for these Spring architectures when creating models; record the actual framework in framework.",
+        "Select architecture management scope before processor type. Create a node only for a system boundary, business responsibility, storage/external contract, material data transformation, or explicit requirement; a call, class, annotation, or I/O value alone is insufficient.",
+        "Keep guards, validators, helpers, local policy checks, exception objects, and boundary-free adapters in the owner's implementation or other_info. Do not use module_general for an out-of-scope class.",
+        "Do not model Logger/SLF4J/Log4j as processors. Model a log file as a general_file entity only when a File/RollingFile appender or equivalent persisted log destination is verified; record active profile, level, path and retention in other_info.",
+        "Create log lineage only for verified request or personal-data fields written to that file, at the event or operation level rather than for every log statement. Console-only logging has no log-file entity; database logs remain ordinary database entities.",
+        "When extracting architecture from source code, set each processor physical name (module_name) to its actual class name so the architecture can be traced back to the class.",
+        "Use the simple class name without its package for class/module nodes. module_name must be unique within the model physical-name namespace. One class with several roles is one module: reuse it and record processing stages in transformation/implementation or other_info; do not create a second module merely for its ETL role. If document ETL is the existing class main responsibility, classify that one node as spring_boot_data_processor (use_lookup=true) and use LOOKUP for verified intermediate chunks, embeddings and processing state; keep only externally emitted results in OUTPUT. A service class name or annotation does not force spring_boot_service. Choose the type from its architecture responsibility, not merely to obtain LOOKUP. Record verified package_name, qualified_class_name and source_file in other_info for tracing; these do not permit duplicate module_name values. For distinct same-named classes in different packages, resolve model boundaries/naming with the user instead of inventing names or assuming duplicates are allowed. Do not replace a class name with an endpoint path, HTTP verb, business label or method name.",
+        "Keep processor_name as a human-readable logical/business name. Record source file paths and method details in other_info; use endpoints for endpoint routing metadata.",
+        "After a component passes the management-scope test, choose the closest matching allowed processor type for its architecture responsibility, such as spring_boot_controller or spring_boot_service. Use module_general only for an in-scope class/module with no closer type, or processor_general for an in-scope individual operation; check the model allowlist.",
+        "Read use_lookup on each acceptable processor type. Spring class modules and module_general disable LOOKUP; spring_boot_data_processor enables LOOKUP for document/data processing stages. Do not infer the flag from is_module.",
+        "Check the model acceptable_processors before creation; keep database storage entities in their own database models and connect them to the Spring processors.",
+        "For JMS/SQS, create jms/sqs message queue entities inside this application model and connect the verified publisher/listener processors through transformations. Do not create independent JMS/SQS models; jms/sqs are entity_storage_type IDs.",
+        "Use sub_type (alias subType) for storage-type details. Subtype examples are recommendations, not an exhaustive enum.",
+        "Keep DAO and Mapper as spring_boot_repository subtypes by default. Consider a separate Mapper node only if the project has independently identifiable connections and contracts for it.",
+        "Do not register Query Transformer, Document Retriever, Document Post Processor, or ETL Reader/Transformer/Writer as default processor types. Record internal stages as Transformations and Implementation information within their owning processor.",
+        "Represent such a stage as a node only when it is an independent architectural component that must be identified and connected and passes the management-scope test; choose the closest existing type, or module_general for an in-scope class/module and processor_general for an in-scope individual operation.",
+        "Exception handlers are behavior; Throwable is input data (Object), not a processor type. Use spring_boot_controller_advice for annotated advice, and module_general only for an independently managed handler with an architectural boundary; keep local handling, guards and fallback helpers in their owner. Add only verified fields and connections; follow query_dependency_guide.",
+        "Filter, Handler Interceptor, Controller Advice, View Renderer, and Job / Handler are optional catalog types. Do not create them on the canvas when the project has no such component. Never create every catalog type merely to complete a diagram.",
+        "Recommended layers do not automatically assign a layer. New processors have no assigned layer; property updates preserve existing assignments."
+      ],
+      "processor_type_guidance": {
+        "spring_boot_controller": {
+          "recommended_layer": "Controller",
+          "subtype_examples": [
+            "REST",
+            "MVC"
+          ],
+          "purpose": "External request/response entry point",
+          "create_only_when_present": false
+        },
+        "spring_boot_service": {
+          "recommended_layer": "Service",
+          "subtype_examples": [
+            "Application",
+            "Domain",
+            "Facade",
+            "AI Service"
+          ],
+          "purpose": "Business processing and component coordination",
+          "create_only_when_present": false
+        },
+        "spring_boot_repository": {
+          "recommended_layer": "Data Access",
+          "subtype_examples": [
+            "Repository",
+            "DAO",
+            "Mapper",
+            "Memory Repository"
+          ],
+          "purpose": "Data access and persistence boundary",
+          "create_only_when_present": false
+        },
+        "spring_boot_integration_client": {
+          "recommended_layer": "Integration",
+          "subtype_examples": [
+            "HTTP",
+            "SOAP",
+            "Messaging",
+            "MCP"
+          ],
+          "purpose": "Outbound application calls",
+          "create_only_when_present": false
+        },
+        "spring_boot_chat_client": {
+          "recommended_layer": "Spring AI",
+          "subtype_examples": [
+            "Chat",
+            "Streaming"
+          ],
+          "purpose": "Composes prompts, advisors, and model calls",
+          "create_only_when_present": false
+        },
+        "spring_boot_adviser": {
+          "recommended_layer": "Spring AI",
+          "subtype_examples": [
+            "RAG",
+            "Memory",
+            "Tool Calling",
+            "Custom"
+          ],
+          "purpose": "Independent component around AI invocation",
+          "create_only_when_present": false
+        },
+        "spring_boot_tool": {
+          "recommended_layer": "Spring AI",
+          "subtype_examples": [
+            "Local",
+            "External",
+            "MCP"
+          ],
+          "purpose": "Function executed at the AI's request",
+          "create_only_when_present": false
+        },
+        "spring_boot_chat_memory": {
+          "recommended_layer": "Spring AI",
+          "subtype_examples": [
+            "Window",
+            "Persistent",
+            "Custom"
+          ],
+          "purpose": "Conversation history management",
+          "create_only_when_present": false
+        },
+        "spring_boot_ai_model_client": {
+          "recommended_layer": "Spring AI",
+          "subtype_examples": [
+            "Chat",
+            "Embedding",
+            "Image",
+            "Audio"
+          ],
+          "purpose": "In-application model invocation boundary",
+          "create_only_when_present": false
+        },
+        "spring_boot_data_processor": {
+          "recommended_layer": "Document ETL",
+          "subtype_examples": [
+            "Document ETL"
+          ],
+          "purpose": "Independent document ingestion flow",
+          "create_only_when_present": false
+        },
+        "spring_boot_filter": {
+          "recommended_layer": "Web Entry",
+          "subtype_examples": [
+            "Servlet",
+            "Security"
+          ],
+          "purpose": "Request filtering",
+          "create_only_when_present": true
+        },
+        "spring_boot_handler_interceptor": {
+          "recommended_layer": "Web Entry",
+          "subtype_examples": [
+            "Request",
+            "Session",
+            "Audit"
+          ],
+          "purpose": "Request interception",
+          "create_only_when_present": true
+        },
+        "spring_boot_controller_advice": {
+          "recommended_layer": "Controller",
+          "subtype_examples": [
+            "Exception",
+            "Request",
+            "Response"
+          ],
+          "purpose": "Cross-controller advice",
+          "create_only_when_present": true
+        },
+        "spring_boot_view_renderer": {
+          "recommended_layer": "View",
+          "subtype_examples": [
+            "JSP",
+            "Template"
+          ],
+          "purpose": "View rendering",
+          "create_only_when_present": true
+        },
+        "spring_boot_job": {
+          "recommended_layer": "Background",
+          "subtype_examples": [
+            "Scheduled",
+            "Event",
+            "Message Consumer",
+            "Batch"
+          ],
+          "purpose": "Job / Handler",
+          "create_only_when_present": true
+        }
+      },
+      "sub_type_guide": {
+        "field": "sub_type",
+        "alias": "subType",
+        "input_location": "processors[].processor_info.sub_type on creation; updates.sub_type on processor modification",
+        "meaning": "Optional free-text specialization of a processor_storage_type, describing the component's actual responsibility or implementation style.",
+        "rules": [
+          "Choose the closest allowed processor_storage_type first, then use sub_type to refine it. Do not invent a storage type such as spring_boot_mapper or spring_boot_rest_controller.",
+          "The model framework describes the application technology (Spring Boot, Spring MVC, Spring AI); sub_type describes an individual processor (REST, MVC, DAO, RAG). It is not a model field, class name, layer assignment, or HTTP route.",
+          "Choose a subtype only when supported by the source architecture. Examples are suggestions, not an enum; use a project-specific value when appropriate, or omit it when unknown.",
+          "Creation without sub_type stores null. Updates without sub_type preserve it; explicit null clears it. If both sub_type and subType are supplied, sub_type takes precedence.",
+          "Keep DAO and Mapper under spring_boot_repository by default. Internal AI and ETL stages belong in Transformations and Implementation information unless independently identifiable architectural components."
+        ],
+        "by_processor_type": {
+          "spring_boot_controller": {
+            "recommended_layer": "Controller",
+            "subtype_examples": [
+              "REST",
+              "MVC"
+            ],
+            "purpose": "External request/response entry point",
+            "create_only_when_present": false
+          },
+          "spring_boot_service": {
+            "recommended_layer": "Service",
+            "subtype_examples": [
+              "Application",
+              "Domain",
+              "Facade",
+              "AI Service"
+            ],
+            "purpose": "Business processing and component coordination",
+            "create_only_when_present": false
+          },
+          "spring_boot_repository": {
+            "recommended_layer": "Data Access",
+            "subtype_examples": [
+              "Repository",
+              "DAO",
+              "Mapper",
+              "Memory Repository"
+            ],
+            "purpose": "Data access and persistence boundary",
+            "create_only_when_present": false
+          },
+          "spring_boot_integration_client": {
+            "recommended_layer": "Integration",
+            "subtype_examples": [
+              "HTTP",
+              "SOAP",
+              "Messaging",
+              "MCP"
+            ],
+            "purpose": "Outbound application calls",
+            "create_only_when_present": false
+          },
+          "spring_boot_chat_client": {
+            "recommended_layer": "Spring AI",
+            "subtype_examples": [
+              "Chat",
+              "Streaming"
+            ],
+            "purpose": "Composes prompts, advisors, and model calls",
+            "create_only_when_present": false
+          },
+          "spring_boot_adviser": {
+            "recommended_layer": "Spring AI",
+            "subtype_examples": [
+              "RAG",
+              "Memory",
+              "Tool Calling",
+              "Custom"
+            ],
+            "purpose": "Independent component around AI invocation",
+            "create_only_when_present": false
+          },
+          "spring_boot_tool": {
+            "recommended_layer": "Spring AI",
+            "subtype_examples": [
+              "Local",
+              "External",
+              "MCP"
+            ],
+            "purpose": "Function executed at the AI's request",
+            "create_only_when_present": false
+          },
+          "spring_boot_chat_memory": {
+            "recommended_layer": "Spring AI",
+            "subtype_examples": [
+              "Window",
+              "Persistent",
+              "Custom"
+            ],
+            "purpose": "Conversation history management",
+            "create_only_when_present": false
+          },
+          "spring_boot_ai_model_client": {
+            "recommended_layer": "Spring AI",
+            "subtype_examples": [
+              "Chat",
+              "Embedding",
+              "Image",
+              "Audio"
+            ],
+            "purpose": "In-application model invocation boundary",
+            "create_only_when_present": false
+          },
+          "spring_boot_data_processor": {
+            "recommended_layer": "Document ETL",
+            "subtype_examples": [
+              "Document ETL"
+            ],
+            "purpose": "Independent document ingestion flow",
+            "create_only_when_present": false
+          },
+          "spring_boot_filter": {
+            "recommended_layer": "Web Entry",
+            "subtype_examples": [
+              "Servlet",
+              "Security"
+            ],
+            "purpose": "Request filtering",
+            "create_only_when_present": true
+          },
+          "spring_boot_handler_interceptor": {
+            "recommended_layer": "Web Entry",
+            "subtype_examples": [
+              "Request",
+              "Session",
+              "Audit"
+            ],
+            "purpose": "Request interception",
+            "create_only_when_present": true
+          },
+          "spring_boot_controller_advice": {
+            "recommended_layer": "Controller",
+            "subtype_examples": [
+              "Exception",
+              "Request",
+              "Response"
+            ],
+            "purpose": "Cross-controller advice",
+            "create_only_when_present": true
+          },
+          "spring_boot_view_renderer": {
+            "recommended_layer": "View",
+            "subtype_examples": [
+              "JSP",
+              "Template"
+            ],
+            "purpose": "View rendering",
+            "create_only_when_present": true
+          },
+          "spring_boot_job": {
+            "recommended_layer": "Background",
+            "subtype_examples": [
+              "Scheduled",
+              "Event",
+              "Message Consumer",
+              "Batch"
+            ],
+            "purpose": "Job / Handler",
+            "create_only_when_present": true
+          }
+        },
+        "examples": [
+          {
+            "processor_storage_type": "spring_boot_controller",
+            "module_name": "OrderController",
+            "sub_type": "REST",
+            "endpoints": [
+              {
+                "method": "POST",
+                "path": "/orders",
+                "handler": "createOrder"
+              }
+            ]
+          },
+          {
+            "processor_storage_type": "spring_boot_repository",
+            "module_name": "OrderMapper",
+            "sub_type": "Mapper"
+          },
+          {
+            "processor_storage_type": "spring_boot_service",
+            "module_name": "ChatService",
+            "sub_type": "AI Service"
+          }
+        ]
+      },
+      "framework_guide": {
+        "field": "framework",
+        "required": false,
+        "type": [
+          "string",
+          "null"
+        ],
+        "examples": [
+          "Spring Boot",
+          "Spring MVC",
+          "Spring Boot + Spring AI"
+        ],
+        "rule": "Pass framework to beyond_create_model when known; omission stores null. This metadata does not change the model_storage_type or its allowed processor types."
+      },
+      "http_metadata": {
+        "processor_types": [
+          "actix_web_endpoint_handler",
+          "api_server",
+          "asp_net_controller",
+          "asp_net_endpoint_handler",
+          "asp_net_http_handler",
+          "asp_net_page_handler",
+          "asp_net_view_handler",
+          "axum_endpoint_handler",
+          "django_endpoint_handler",
+          "express_controller",
+          "express_endpoint_handler",
+          "external_api",
+          "fastapi_endpoint_handler",
+          "flask_endpoint_handler",
+          "nestjs_controller",
+          "nextjs_endpoint_handler",
+          "rocket_endpoint_handler",
+          "spring_boot_controller"
+        ],
+        "controller_endpoint_contract": {
+          "applies_to": [
+            "actix_web_endpoint_handler",
+            "asp_net_controller",
+            "asp_net_endpoint_handler",
+            "asp_net_http_handler",
+            "asp_net_page_handler",
+            "asp_net_view_handler",
+            "axum_endpoint_handler",
+            "django_endpoint_handler",
+            "express_controller",
+            "express_endpoint_handler",
+            "fastapi_endpoint_handler",
+            "flask_endpoint_handler",
+            "nestjs_controller",
+            "nextjs_endpoint_handler",
+            "rocket_endpoint_handler",
+            "spring_boot_controller"
+          ],
+          "rules": [
+            "Each verified handler gets one INPUT and one OUTPUT OBJECT container using the catalog physical object type. Same-handler routes share a pair; attribute and column names equal the handler.",
+            "Unknown handlers create no containers. These empty IO groupings imply no HTTP body schema; add only verified children. Reads do not backfill contracts.",
+            "Read returned endpoints, auto_created_attributes and IDs. Updates replace the endpoints list: preserve endpoint_id, input_attribute_id and output_attribute_id on retained routes; omit IDs on new routes.",
+            "Preserving endpoint_id preserves contract and child IDs and ID-based lineage during handler/route renames. Raw SQL text is not rewritten. Rename shared-handler routes together; split a route by submitting it without old IDs.",
+            "Reuse one same-handler root OBJECT in the same IO port. Non-object or duplicate roots, foreign IDs and inconsistent shared handlers fail; inspect current attributes before editing.",
+            "Omitted endpoints preserves routing, [] removes routes and null clears routing. Route removal retains contracts, children and lineage for explicit review and cleanup.",
+            "Use existing handler OUTPUT contracts for SQL results. Create verified child fields first and address them by full handler.field path. Never invent top-level results or copy caller arguments into response fields."
+          ],
+          "example": {
+            "note": "Illustrative verified design only. Replace angle-bracket IDs with actual server-returned IDs; never send these placeholders literally.",
+            "create_endpoint": {
+              "method": "GET",
+              "path": "/orders/{id}",
+              "handler": "getOrder"
+            },
+            "returned_endpoint_shape": {
+              "method": "GET",
+              "path": "/orders/{id}",
+              "handler": "getOrder",
+              "endpoint_id": "<returned endpoint_id>",
+              "input_attribute_id": "<returned INPUT Object ID>",
+              "output_attribute_id": "<returned OUTPUT Object ID>"
+            },
+            "add_verified_children": {
+              "tool": "beyond_add_processor_attributes",
+              "arguments": {
+                "processor_id": "<Controller ID>",
+                "input_attributes": [
+                  {
+                    "attribute_name": "Order ID",
+                    "column_name": "id",
+                    "data_type": "string",
+                    "upper_attribute_id": "<returned INPUT Object ID>"
+                  }
+                ],
+                "output_attributes": [
+                  {
+                    "attribute_name": "Status",
+                    "column_name": "status",
+                    "data_type": "string",
+                    "upper_attribute_id": "<returned OUTPUT Object ID>"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "endpoint_cardinality": {
+          "source": "processor_storage_types catalog is_module flag; not a client-supplied processor property",
+          "rules": [
+            "Only storage types whose is_module is exactly true allow multiple endpoints. False, null or omitted is_module means a processor and allows at most one endpoint.",
+            "Read acceptable_processors or the processor_storage_types catalog for is_module and max_endpoints before creation. Do not infer module status from a type name or override it in processor_info/other_info.",
+            "This applies to every processor storage type on creation, modification and type changes, for both endpoints and other_info.endpoints. Missing endpoints, null and [] are allowed. A module-to-processor change must supply at most one endpoint if multiple endpoints exist.",
+            "Store only in other_info.endpoints; top-level endpoints is an input and output convenience. Explicit endpoints wins over nested endpoints. Omitted routing preserves it, a list replaces it, [] empties it and null clears it.",
+            "Module status permits multiple endpoints but does not imply that a component exposes HTTP. Record verified endpoints only. Filter matchers, Interceptor patterns and Advice scope remain separate metadata.",
+            "Modules start collapsed on canvases. Module status does not change the parent model or require creating a separate model."
+          ]
+        },
+        "inputs": {
+          "endpoints": "Array of objects containing path, method, and optional handler; null clears all endpoints."
+        },
+        "rules": [
+          "One Spring Controller class is one processor, even when it handles several HTTP routes. Use its simple class name without package as module_name; do not split it into processors merely by endpoint.",
+          "Use endpoints for registered HTTP entry processors, including the framework types in processor_types. One API Server processor represents exactly one Swagger/OpenAPI operation (one HTTP method + path), never a server/router grouping. Its endpoints array allows at most one item; use separate processors for GET and POST even on the same path. Empty or null routing is allowed when unknown.",
+          "Use only verified mappings from source annotations, configuration, an API specification, or explicit user requirements. Combine class-level and handler-level mappings only when resolved. Never guess GET, a URL, or a handler from a class or business name. Omit unknown fields; ask for missing evidence when required.",
+          "For HTTP modules whose catalog is_module=true, record multiple verified path/method combinations with their handlers. For api_server use a separate processor for each combination. An unspecified HTTP method must not be guessed as GET; record only the known mapping.",
+          "Service, Repository, and Spring AI components do not acquire HTTP endpoints merely because a Controller calls them.",
+          "Each endpoint groups its path, HTTP method and optional handler name. Preserve their correspondence instead of separate path/method arrays.",
+          "For a processor listed in controller_endpoint_contract_guide.applies_to with a verified handler, the server creates empty INPUT and OUTPUT containers using the catalog OBJECT physical type named after that handler. Same-handler routes share the pair. Read auto_created_attributes and returned endpoint_id/input_attribute_id/output_attribute_id; preserve IDs when editing. Add only verified request/response child fields; do not guess handlers or schemas. The Object is an IO grouping, not an asserted HTTP body type. Types with use_lookup=false map directly to OUTPUT. Removing routing does not delete contracts or lineage.",
+          "On update, omitted endpoints preserves the list; a supplied list replaces it, [] empties it, and null clears it.",
+          "Legacy method/path, http_method/uri_path, and other_info.method/path inputs are converted into one endpoint. Explicit endpoints takes precedence.",
+          "Legacy partial updates preserve the other values of a single endpoint. For multiple endpoints, supply the endpoints array explicitly; ambiguous single-route updates are rejected.",
+          "New clients send endpoints as an array or null. Legacy JSON strings encoding an array or null are accepted for explicit endpoints and other_info.endpoints; the decoded value is validated and new writes persist arrays or null. Top-level endpoints read projections are arrays or null; existing raw other_info may retain legacy strings until updated. Malformed or non-array strings fail without clearing metadata. Preserve all returned endpoint IDs and unknown per-endpoint fields when editing; do not double-encode new values.",
+          "The server stores routing only in other_info.endpoints. Use the explicit endpoints input; direct other_info.endpoints input is also accepted. Explicit endpoints wins over nested endpoints, which wins over legacy method/path. Legacy method/path keys are removed after conversion. Read responses also expose endpoints as a projection of other_info.endpoints. For Filter use other_info.matchers with pattern and optional method, plus order and dispatcher_types when known. For Handler Interceptor use other_info.include_paths, exclude_paths and order. For Controller Advice use other_info.controller_scope and exception_types. These are applicability conditions, not endpoints."
+        ]
+      },
+      "module_io_policy": {
+        "controller_endpoint_contract_guide": "Read http_metadata.controller_endpoint_contract in the model guide, or beyond_get_definitions(definition_names=[\"controller_endpoint_contract_guide\"]).",
+        "use_lookup": false,
+        "allowed_io_types": [
+          "INPUT",
+          "OUTPUT"
+        ],
+        "automatic_target_io_type": "OUTPUT",
+        "rules": [
+          "use_lookup is a storage-type catalog policy, not an instance override. Missing or null preserves the legacy enabled behavior.",
+          "When use_lookup=false, never create LOOKUP attributes or change an attribute to LOOKUP. SQL-generated targets go directly to OUTPUT; explicit LOOKUP requests fail. Existing LOOKUP data is retained for compatibility and is not silently migrated.",
+          "When use_lookup=true, LOOKUP is allowed, not a requirement to add an extra transformation. Reuse a confirmed existing OUTPUT target for final results.",
+          "For Controller endpoints with a verified handler, the server creates an INPUT Object and an OUTPUT Object named after the handler. Empty contracts represent no known fields; they do not assert an Object-shaped HTTP body.",
+          "Preserve returned endpoint_id, input_attribute_id and output_attribute_id on endpoint edits. Same-handler routes share a contract pair; distinct handlers have separate pairs. Removed routes do not automatically delete their attributes or transformations.",
+          "Do not invent a handler or request/response fields. Legacy endpoints without a handler remain unchanged until a verified handler is supplied. Add confirmed nested fields under the returned contract attribute IDs.",
+          "Read a source child using alias.OUTPUT.handler.field (or alias.INPUT.handler.field for request bindings). Target an existing Controller response field using AS \"handler.field\"; create confirmed nested fields before SQL. Never combine unrelated endpoint contracts into common ports."
+        ]
+      },
+      "processor_type_examples": {
+        "filter": "spring_boot_filter",
+        "handler interceptor": "spring_boot_handler_interceptor",
+        "MVC or REST controller": "spring_boot_controller",
+        "@ControllerAdvice / @RestControllerAdvice class": "spring_boot_controller_advice",
+        "independent exception/fallback class without a closer type": "module_general",
+        "MVC view renderer": "spring_boot_view_renderer",
+        "service": "spring_boot_service",
+        "repository / DAO": "spring_boot_repository",
+        "external integration client": "spring_boot_integration_client",
+        "Spring AI chat client": "spring_boot_chat_client",
+        "Spring AI advisor": "spring_boot_adviser",
+        "Spring AI tool": "spring_boot_tool",
+        "Spring AI chat memory": "spring_boot_chat_memory",
+        "Spring AI model client": "spring_boot_ai_model_client",
+        "data processor": "spring_boot_data_processor",
+        "scheduled / batch job": "spring_boot_job",
+        "no suitable specialized type": "module_general",
+        "individual operation without a specialized type": "processor_general"
+      },
+      "example": {
+        "model_storage_type": "spring_boot_application",
+        "framework": "Spring MVC",
+        "processor_info": {
+          "processor_name": "Order request controller",
+          "module_name": "OrderController",
+          "processor_storage_type": "spring_boot_controller",
+          "sub_type": "MVC",
+          "other_info": {
+            "package_name": "com.example.orders",
+            "qualified_class_name": "com.example.orders.OrderController",
+            "source_file": "src/main/java/com/example/orders/OrderController.java"
+          },
+          "endpoints": [
+            {
+              "method": "GET",
+              "path": "/orders",
+              "handler": "listOrders"
+            },
+            {
+              "method": "POST",
+              "path": "/orders",
+              "handler": "createOrder"
+            }
+          ]
+        }
+      },
+      "messaging_design": {
+        "model_storage_type": "spring_boot_application",
+        "rule": "jms/sqs are message queue entity types, not models. Use the current model acceptable_entities; connect verified publishers/consumers through SQL transformations.",
+        "details": {
+          "tool": "beyond_get_definitions",
+          "arguments": {
+            "definition_names": [
+              "messaging_design_guide"
+            ],
+            "mode": "full"
+          }
+        }
+      }
+    },
+    "google_workspace": {
+      "model_storage_type": "google_workspace",
+      "scope": "Use a separate google_workspace model for Google Workspace resources and workflows.",
+      "rules": [
+        "Use only verified resources and operations or explicitly requested designs. Do not invent Workspace IDs, schemas, or connections; omit unknown optional metadata and ask for required information.",
+        "Prefer google_workspace for Sheets, Docs, Slides, Drive files, Gmail messages, Forms, and Workspace automation.",
+        "Use the model acceptable_entities and acceptable_processors to choose the matching Google resource or operation type.",
+        "Keep application classes in their application model; represent Workspace resources and operations in the Google Workspace model and connect the boundaries through transformations."
+      ],
+      "entity_type_examples": [
+        "google_sheet",
+        "google_document",
+        "google_slide",
+        "google_drive_file",
+        "google_gmail_message"
+      ],
+      "processor_type_examples": [
+        "google_form",
+        "google_read_sheet",
+        "google_write_sheet",
+        "google_search_drive",
+        "google_watch_drive_changes",
+        "google_update_document",
+        "google_send_gmail"
+      ]
+    },
+    "actix_web_application": {
+      "model_storage_type": "actix_web_application",
+      "title": "Actix Web Application",
+      "scope": "Actix Web Application architecture boundary",
+      "rules": [
+        "Use verified source/configuration. Physical module_name identifies the actual class, function or module; keep logical names business-facing. Record source_file and qualified identifiers in other_info when verified.",
+        "Extract independently identifiable architecture units, not every function. Choose the closest acceptable processor type by responsibility; use the framework general_module only for an in-scope unmatched module.",
+        "General modules are excluded from default parser extraction. include_general_modules must be explicitly enabled; still analyze their code to trace verified lineage.",
+        "Read is_module and use_lookup from the storage catalog. Module status does not imply HTTP routing or permission to create LOOKUP attributes.",
+        "Store verified HTTP routes in other_info.endpoints using method/path/handler. Read returned endpoint and contract IDs before edits; do not fabricate routes or handlers.",
+        "Store frameworkVersion, runtimeVersion, languageVersion and libraries in other_info only when verified; framework is the model framework field.",
+        "Record verified edition and targetPlatform alongside frameworkVersion/runtimeVersion/languageVersion/libraries. Vite is buildTool metadata, not an application model. Standalone Dioxus/Leptos/Yew/Iced/Ratatui/Clap application models remain excluded. Use dedicated Clap/Ratatui processors only where the current model allowlist permits them; use allowed generic processors, tasks or app_lang_rust for other general CLI/UI modules.",
+        "Use Rust physical data types from the selected processor catalog. Shared rust_* processors belong to the verified framework model.",
+        "Only verified HTTP handlers have HTTP route contracts. Keep Tonic RPC methods in their verified RPC roles. Use app_lang_rust in General System or tauri_react_rust_application for general Rust modules; do not invent HTTP routes."
+      ],
+      "acceptable_processors": [
+        "actix_web_endpoint_handler",
+        "actix_web_middleware",
+        "actix_web_extractor",
+        "actix_web_exception_handler",
+        "rust_service",
+        "rust_repository",
+        "rust_integration_adapter",
+        "rust_job_event_handler",
+        "rust_general_module"
+      ],
+      "messaging_design": {
+        "model_storage_type": "actix_web_application",
+        "rule": "jms/sqs are message queue entity types, not models. Use the current model acceptable_entities; connect verified publishers/consumers through SQL transformations.",
+        "details": {
+          "tool": "beyond_get_definitions",
+          "arguments": {
+            "definition_names": [
+              "messaging_design_guide"
+            ],
+            "mode": "full"
+          }
+        }
+      }
+    },
+    "asp_net_application": {
+      "model_storage_type": "asp_net_application",
+      "title": "ASP.NET Application",
+      "scope": "ASP.NET Application architecture boundary",
+      "rules": [
+        "Use verified source/configuration. Physical module_name identifies the actual class, function or module; keep logical names business-facing. Record source_file and qualified identifiers in other_info when verified.",
+        "Extract independently identifiable architecture units, not every function. Choose the closest acceptable processor type by responsibility; use the framework general_module only for an in-scope unmatched module.",
+        "General modules are excluded from default parser extraction. include_general_modules must be explicitly enabled; still analyze their code to trace verified lineage.",
+        "Read is_module and use_lookup from the storage catalog. Module status does not imply HTTP routing or permission to create LOOKUP attributes.",
+        "Store verified HTTP routes in other_info.endpoints using method/path/handler. Read returned endpoint and contract IDs before edits; do not fabricate routes or handlers.",
+        "Store frameworkVersion, runtimeVersion, languageVersion and libraries in other_info only when verified; framework is the model framework field."
+      ],
+      "acceptable_processors": [
+        "asp_net_controller",
+        "asp_net_endpoint_handler",
+        "asp_net_page_handler",
+        "asp_net_view_handler",
+        "asp_net_middleware",
+        "asp_net_request_filter",
+        "asp_net_exception_handler",
+        "asp_net_http_handler",
+        "asp_net_http_module",
+        "asp_net_message_handler",
+        "asp_net_service",
+        "asp_net_repository",
+        "asp_net_data_context",
+        "asp_net_integration_adapter",
+        "asp_net_rpc_service",
+        "asp_net_realtime_handler",
+        "asp_net_job_event_handler",
+        "asp_net_general_module"
+      ],
+      "messaging_design": {
+        "model_storage_type": "asp_net_application",
+        "rule": "jms/sqs are message queue entity types, not models. Use the current model acceptable_entities; connect verified publishers/consumers through SQL transformations.",
+        "details": {
+          "tool": "beyond_get_definitions",
+          "arguments": {
+            "definition_names": [
+              "messaging_design_guide"
+            ],
+            "mode": "full"
+          }
+        }
+      }
+    },
+    "axum_application": {
+      "model_storage_type": "axum_application",
+      "title": "Axum Application",
+      "scope": "Axum Application architecture boundary",
+      "rules": [
+        "Use verified source/configuration. Physical module_name identifies the actual class, function or module; keep logical names business-facing. Record source_file and qualified identifiers in other_info when verified.",
+        "Extract independently identifiable architecture units, not every function. Choose the closest acceptable processor type by responsibility; use the framework general_module only for an in-scope unmatched module.",
+        "General modules are excluded from default parser extraction. include_general_modules must be explicitly enabled; still analyze their code to trace verified lineage.",
+        "Read is_module and use_lookup from the storage catalog. Module status does not imply HTTP routing or permission to create LOOKUP attributes.",
+        "Store verified HTTP routes in other_info.endpoints using method/path/handler. Read returned endpoint and contract IDs before edits; do not fabricate routes or handlers.",
+        "Store frameworkVersion, runtimeVersion, languageVersion and libraries in other_info only when verified; framework is the model framework field.",
+        "Record verified edition and targetPlatform alongside frameworkVersion/runtimeVersion/languageVersion/libraries. Vite is buildTool metadata, not an application model. Standalone Dioxus/Leptos/Yew/Iced/Ratatui/Clap application models remain excluded. Use dedicated Clap/Ratatui processors only where the current model allowlist permits them; use allowed generic processors, tasks or app_lang_rust for other general CLI/UI modules.",
+        "Use Rust physical data types from the selected processor catalog. Shared rust_* processors belong to the verified framework model.",
+        "Only verified HTTP handlers have HTTP route contracts. Keep Tonic RPC methods in their verified RPC roles. Use app_lang_rust in General System or tauri_react_rust_application for general Rust modules; do not invent HTTP routes."
+      ],
+      "acceptable_processors": [
+        "axum_endpoint_handler",
+        "axum_middleware",
+        "axum_extractor",
+        "axum_exception_handler",
+        "rust_service",
+        "rust_repository",
+        "rust_integration_adapter",
+        "rust_job_event_handler",
+        "rust_general_module"
+      ],
+      "messaging_design": {
+        "model_storage_type": "axum_application",
+        "rule": "jms/sqs are message queue entity types, not models. Use the current model acceptable_entities; connect verified publishers/consumers through SQL transformations.",
+        "details": {
+          "tool": "beyond_get_definitions",
+          "arguments": {
+            "definition_names": [
+              "messaging_design_guide"
+            ],
+            "mode": "full"
+          }
+        }
+      }
+    },
+    "django_application": {
+      "model_storage_type": "django_application",
+      "title": "Django Application",
+      "scope": "Django Application architecture boundary",
+      "rules": [
+        "Use verified source/configuration. Physical module_name identifies the actual class, function or module; keep logical names business-facing. Record source_file and qualified identifiers in other_info when verified.",
+        "Extract independently identifiable architecture units, not every function. Choose the closest acceptable processor type by responsibility; use the framework general_module only for an in-scope unmatched module.",
+        "General modules are excluded from default parser extraction. include_general_modules must be explicitly enabled; still analyze their code to trace verified lineage.",
+        "Read is_module and use_lookup from the storage catalog. Module status does not imply HTTP routing or permission to create LOOKUP attributes.",
+        "Store verified HTTP routes in other_info.endpoints using method/path/handler. Read returned endpoint and contract IDs before edits; do not fabricate routes or handlers.",
+        "Store frameworkVersion, runtimeVersion, languageVersion and libraries in other_info only when verified; framework is the model framework field.",
+        "Django ORM models are data entities in an appropriate storage model. Only custom managers/querysets with independent data-access responsibility become repositories.",
+        "Flask Blueprints and FastAPI APIRouters describe membership/structure in other_info, not separate processors. Simple service/DB providers are not separate dependency handlers."
+      ],
+      "acceptable_processors": [
+        "django_endpoint_handler",
+        "python_view_handler",
+        "python_middleware",
+        "django_request_policy",
+        "python_service",
+        "django_repository",
+        "python_integration_adapter",
+        "django_realtime_handler",
+        "django_job_event_handler",
+        "python_general_module"
+      ],
+      "messaging_design": {
+        "model_storage_type": "django_application",
+        "rule": "jms/sqs are message queue entity types, not models. Use the current model acceptable_entities; connect verified publishers/consumers through SQL transformations.",
+        "details": {
+          "tool": "beyond_get_definitions",
+          "arguments": {
+            "definition_names": [
+              "messaging_design_guide"
+            ],
+            "mode": "full"
+          }
+        }
+      }
+    },
+    "express_application": {
+      "model_storage_type": "express_application",
+      "title": "Express Application",
+      "scope": "Express Application architecture boundary",
+      "rules": [
+        "Use verified source/configuration. Physical module_name identifies the actual class, function or module; keep logical names business-facing. Record source_file and qualified identifiers in other_info when verified.",
+        "Extract independently identifiable architecture units, not every function. Choose the closest acceptable processor type by responsibility; use the framework general_module only for an in-scope unmatched module.",
+        "General modules are excluded from default parser extraction. include_general_modules must be explicitly enabled; still analyze their code to trace verified lineage.",
+        "Read is_module and use_lookup from the storage catalog. Module status does not imply HTTP routing or permission to create LOOKUP attributes.",
+        "Store verified HTTP routes in other_info.endpoints using method/path/handler. Read returned endpoint and contract IDs before edits; do not fabricate routes or handlers.",
+        "Store frameworkVersion, runtimeVersion, languageVersion and libraries in other_info only when verified; framework is the model framework field."
+      ],
+      "acceptable_processors": [
+        "express_endpoint_handler",
+        "express_controller",
+        "javascript_view_handler",
+        "express_middleware",
+        "express_exception_handler",
+        "javascript_service",
+        "javascript_repository",
+        "javascript_integration_adapter",
+        "express_realtime_handler",
+        "javascript_job_event_handler",
+        "javascript_general_module"
+      ],
+      "messaging_design": {
+        "model_storage_type": "express_application",
+        "rule": "jms/sqs are message queue entity types, not models. Use the current model acceptable_entities; connect verified publishers/consumers through SQL transformations.",
+        "details": {
+          "tool": "beyond_get_definitions",
+          "arguments": {
+            "definition_names": [
+              "messaging_design_guide"
+            ],
+            "mode": "full"
+          }
+        }
+      }
+    },
+    "fastapi_application": {
+      "model_storage_type": "fastapi_application",
+      "title": "FastAPI Application",
+      "scope": "FastAPI Application architecture boundary",
+      "rules": [
+        "Use verified source/configuration. Physical module_name identifies the actual class, function or module; keep logical names business-facing. Record source_file and qualified identifiers in other_info when verified.",
+        "Extract independently identifiable architecture units, not every function. Choose the closest acceptable processor type by responsibility; use the framework general_module only for an in-scope unmatched module.",
+        "General modules are excluded from default parser extraction. include_general_modules must be explicitly enabled; still analyze their code to trace verified lineage.",
+        "Read is_module and use_lookup from the storage catalog. Module status does not imply HTTP routing or permission to create LOOKUP attributes.",
+        "Store verified HTTP routes in other_info.endpoints using method/path/handler. Read returned endpoint and contract IDs before edits; do not fabricate routes or handlers.",
+        "Store frameworkVersion, runtimeVersion, languageVersion and libraries in other_info only when verified; framework is the model framework field.",
+        "Django ORM models are data entities in an appropriate storage model. Only custom managers/querysets with independent data-access responsibility become repositories.",
+        "Flask Blueprints and FastAPI APIRouters describe membership/structure in other_info, not separate processors. Simple service/DB providers are not separate dependency handlers."
+      ],
+      "acceptable_processors": [
+        "fastapi_endpoint_handler",
+        "python_view_handler",
+        "python_middleware",
+        "fastapi_dependency_handler",
+        "fastapi_exception_handler",
+        "python_service",
+        "python_repository",
+        "python_integration_adapter",
+        "fastapi_realtime_handler",
+        "fastapi_job_event_handler",
+        "python_general_module"
+      ],
+      "messaging_design": {
+        "model_storage_type": "fastapi_application",
+        "rule": "jms/sqs are message queue entity types, not models. Use the current model acceptable_entities; connect verified publishers/consumers through SQL transformations.",
+        "details": {
+          "tool": "beyond_get_definitions",
+          "arguments": {
+            "definition_names": [
+              "messaging_design_guide"
+            ],
+            "mode": "full"
+          }
+        }
+      }
+    },
+    "flask_application": {
+      "model_storage_type": "flask_application",
+      "title": "Flask Application",
+      "scope": "Flask Application architecture boundary",
+      "rules": [
+        "Use verified source/configuration. Physical module_name identifies the actual class, function or module; keep logical names business-facing. Record source_file and qualified identifiers in other_info when verified.",
+        "Extract independently identifiable architecture units, not every function. Choose the closest acceptable processor type by responsibility; use the framework general_module only for an in-scope unmatched module.",
+        "General modules are excluded from default parser extraction. include_general_modules must be explicitly enabled; still analyze their code to trace verified lineage.",
+        "Read is_module and use_lookup from the storage catalog. Module status does not imply HTTP routing or permission to create LOOKUP attributes.",
+        "Store verified HTTP routes in other_info.endpoints using method/path/handler. Read returned endpoint and contract IDs before edits; do not fabricate routes or handlers.",
+        "Store frameworkVersion, runtimeVersion, languageVersion and libraries in other_info only when verified; framework is the model framework field.",
+        "Django ORM models are data entities in an appropriate storage model. Only custom managers/querysets with independent data-access responsibility become repositories.",
+        "Flask Blueprints and FastAPI APIRouters describe membership/structure in other_info, not separate processors. Simple service/DB providers are not separate dependency handlers."
+      ],
+      "acceptable_processors": [
+        "flask_endpoint_handler",
+        "python_view_handler",
+        "flask_request_hook",
+        "flask_middleware",
+        "flask_exception_handler",
+        "python_service",
+        "python_repository",
+        "python_integration_adapter",
+        "flask_realtime_handler",
+        "flask_job_event_handler",
+        "python_general_module"
+      ],
+      "messaging_design": {
+        "model_storage_type": "flask_application",
+        "rule": "jms/sqs are message queue entity types, not models. Use the current model acceptable_entities; connect verified publishers/consumers through SQL transformations.",
+        "details": {
+          "tool": "beyond_get_definitions",
+          "arguments": {
+            "definition_names": [
+              "messaging_design_guide"
+            ],
+            "mode": "full"
+          }
+        }
+      }
+    },
+    "nestjs_application": {
+      "model_storage_type": "nestjs_application",
+      "title": "NestJS Application",
+      "scope": "NestJS Application architecture boundary",
+      "rules": [
+        "Use verified source/configuration. Physical module_name identifies the actual class, function or module; keep logical names business-facing. Record source_file and qualified identifiers in other_info when verified.",
+        "Extract independently identifiable architecture units, not every function. Choose the closest acceptable processor type by responsibility; use the framework general_module only for an in-scope unmatched module.",
+        "General modules are excluded from default parser extraction. include_general_modules must be explicitly enabled; still analyze their code to trace verified lineage.",
+        "Read is_module and use_lookup from the storage catalog. Module status does not imply HTTP routing or permission to create LOOKUP attributes.",
+        "Store verified HTTP routes in other_info.endpoints using method/path/handler. Read returned endpoint and contract IDs before edits; do not fabricate routes or handlers.",
+        "Store frameworkVersion, runtimeVersion, languageVersion and libraries in other_info only when verified; framework is the model framework field."
+      ],
+      "acceptable_processors": [
+        "nestjs_controller",
+        "nestjs_graphql_resolver",
+        "javascript_view_handler",
+        "nestjs_middleware",
+        "nestjs_guard",
+        "nestjs_pipe",
+        "nestjs_interceptor",
+        "nestjs_exception_handler",
+        "javascript_service",
+        "javascript_repository",
+        "nestjs_integration_adapter",
+        "nestjs_rpc_service",
+        "nestjs_realtime_handler",
+        "javascript_job_event_handler",
+        "javascript_general_module"
+      ],
+      "messaging_design": {
+        "model_storage_type": "nestjs_application",
+        "rule": "jms/sqs are message queue entity types, not models. Use the current model acceptable_entities; connect verified publishers/consumers through SQL transformations.",
+        "details": {
+          "tool": "beyond_get_definitions",
+          "arguments": {
+            "definition_names": [
+              "messaging_design_guide"
+            ],
+            "mode": "full"
+          }
+        }
+      }
+    },
+    "nextjs_application": {
+      "model_storage_type": "nextjs_application",
+      "title": "Next.js Application",
+      "scope": "Next.js Application architecture boundary",
+      "rules": [
+        "Use verified source/configuration. Physical module_name identifies the actual class, function or module; keep logical names business-facing. Record source_file and qualified identifiers in other_info when verified.",
+        "Extract independently identifiable architecture units, not every function. Choose the closest acceptable processor type by responsibility; use the framework general_module only for an in-scope unmatched module.",
+        "General modules are excluded from default parser extraction. include_general_modules must be explicitly enabled; still analyze their code to trace verified lineage.",
+        "Read is_module and use_lookup from the storage catalog. Module status does not imply HTTP routing or permission to create LOOKUP attributes.",
+        "Store verified HTTP routes in other_info.endpoints using method/path/handler. Read returned endpoint and contract IDs before edits; do not fabricate routes or handlers.",
+        "Store frameworkVersion, runtimeVersion, languageVersion and libraries in other_info only when verified; framework is the model framework field.",
+        "Distinguish page/layout/UI components, server actions and endpoint handlers by verified responsibilities. Do not invent HTTP endpoints for UI components or ordinary functions."
+      ],
+      "acceptable_processors": [
+        "nextjs_page",
+        "nextjs_layout",
+        "nextjs_ui_component",
+        "nextjs_request_interceptor",
+        "nextjs_server_action",
+        "javascript_service",
+        "nextjs_endpoint_handler",
+        "javascript_repository",
+        "javascript_integration_adapter",
+        "nextjs_job_event_handler",
+        "javascript_general_module"
+      ],
+      "messaging_design": {
+        "model_storage_type": "nextjs_application",
+        "rule": "jms/sqs are message queue entity types, not models. Use the current model acceptable_entities; connect verified publishers/consumers through SQL transformations.",
+        "details": {
+          "tool": "beyond_get_definitions",
+          "arguments": {
+            "definition_names": [
+              "messaging_design_guide"
+            ],
+            "mode": "full"
+          }
+        }
+      }
+    },
+    "react_application": {
+      "model_storage_type": "react_application",
+      "title": "React Application",
+      "scope": "React Application application boundary",
+      "rules": [
+        "Choose processors only from this model acceptable_processors; do not infer framework membership from implementation language.",
+        "Classify Hooks by actual responsibility (interaction, application, state, integration or data access); Hook is not a separate processor type. Extract meaningful lineage units only. General modules require explicit include_general_modules opt-in.",
+        "React processors use exactly string, number, Boolean, Object and Array. React modules have INPUT/OUTPUT only; use_lookup=false rejects LOOKUP. Model persistent/local state data as allowed entities and reducers/actions as state processors.",
+        "Represent only verified API/IPC/WASM client boundaries as integration adapters. UI callbacks, forms and pages do not gain HTTP contracts merely by being modules.",
+        "Use General Cache, Local Storage, Session Storage and IndexedDB only when listed in acceptable_entities; Tauri General has its own storage allowlist.",
+        "Use verified other_info sourceFile/sourceLine/exportName for React processors and frameworkVersion/runtimeVersion/languageVersion/libraries/targetPlatform/include_general_modules/description for the model. Omit unknown settings.",
+        "React Application allows the 9 React processor responsibilities only. Use the React model for client UI and local processing, with external backend boundaries modeled only when independently verified."
+      ],
+      "acceptable_processors": [
+        "react_page",
+        "react_ui_component",
+        "react_event_handler",
+        "react_form_handler",
+        "react_use_case",
+        "react_state_handler",
+        "react_integration_adapter",
+        "react_data_access",
+        "react_general_module"
+      ],
+      "acceptable_entities": [
+        "general_cache",
+        "local_storage",
+        "session_storage",
+        "indexed_db",
+        "ai_model",
+        "ai_file"
+      ],
+      "other_info_keys": [
+        "frameworkVersion",
+        "runtimeVersion",
+        "languageVersion",
+        "libraries",
+        "targetPlatform",
+        "include_general_modules",
+        "description"
+      ]
+    },
+    "rocket_application": {
+      "model_storage_type": "rocket_application",
+      "title": "Rocket Application",
+      "scope": "Rocket Application architecture boundary",
+      "rules": [
+        "Use verified source/configuration. Physical module_name identifies the actual class, function or module; keep logical names business-facing. Record source_file and qualified identifiers in other_info when verified.",
+        "Extract independently identifiable architecture units, not every function. Choose the closest acceptable processor type by responsibility; use the framework general_module only for an in-scope unmatched module.",
+        "General modules are excluded from default parser extraction. include_general_modules must be explicitly enabled; still analyze their code to trace verified lineage.",
+        "Read is_module and use_lookup from the storage catalog. Module status does not imply HTTP routing or permission to create LOOKUP attributes.",
+        "Store verified HTTP routes in other_info.endpoints using method/path/handler. Read returned endpoint and contract IDs before edits; do not fabricate routes or handlers.",
+        "Store frameworkVersion, runtimeVersion, languageVersion and libraries in other_info only when verified; framework is the model framework field.",
+        "Record verified edition and targetPlatform alongside frameworkVersion/runtimeVersion/languageVersion/libraries. Vite is buildTool metadata, not an application model. Standalone Dioxus/Leptos/Yew/Iced/Ratatui/Clap application models remain excluded. Use dedicated Clap/Ratatui processors only where the current model allowlist permits them; use allowed generic processors, tasks or app_lang_rust for other general CLI/UI modules.",
+        "Use Rust physical data types from the selected processor catalog. Shared rust_* processors belong to the verified framework model.",
+        "Only verified HTTP handlers have HTTP route contracts. Keep Tonic RPC methods in their verified RPC roles. Use app_lang_rust in General System or tauri_react_rust_application for general Rust modules; do not invent HTTP routes."
+      ],
+      "acceptable_processors": [
+        "rocket_endpoint_handler",
+        "rocket_fairing",
+        "rocket_request_guard",
+        "rocket_exception_handler",
+        "rust_service",
+        "rust_repository",
+        "rust_integration_adapter",
+        "rust_job_event_handler",
+        "rust_general_module"
+      ],
+      "messaging_design": {
+        "model_storage_type": "rocket_application",
+        "rule": "jms/sqs are message queue entity types, not models. Use the current model acceptable_entities; connect verified publishers/consumers through SQL transformations.",
+        "details": {
+          "tool": "beyond_get_definitions",
+          "arguments": {
+            "definition_names": [
+              "messaging_design_guide"
+            ],
+            "mode": "full"
+          }
+        }
+      }
+    },
+    "tauri_general_application": {
+      "model_storage_type": "tauri_general_application",
+      "title": "Tauri General",
+      "scope": "Tauri General application boundary",
+      "rules": [
+        "Choose processors only from this model acceptable_processors; do not infer framework membership from implementation language.",
+        "Classify Hooks by actual responsibility (interaction, application, state, integration or data access); Hook is not a separate processor type. Extract meaningful lineage units only. General modules require explicit include_general_modules opt-in.",
+        "React processors use exactly string, number, Boolean, Object and Array. React modules have INPUT/OUTPUT only; use_lookup=false rejects LOOKUP. Model persistent/local state data as allowed entities and reducers/actions as state processors.",
+        "Represent only verified API/IPC/WASM client boundaries as integration adapters. UI callbacks, forms and pages do not gain HTTP contracts merely by being modules.",
+        "Use General Cache, Local Storage, Session Storage and IndexedDB only when listed in acceptable_entities; Tauri General has its own storage allowlist.",
+        "Use verified other_info sourceFile/sourceLine/exportName for React processors and frameworkVersion/runtimeVersion/languageVersion/libraries/targetPlatform/include_general_modules/description for the model. Omit unknown settings.",
+        "Use a sqlite model when the SQLite database is physically or logically separate from the application. For SQLite used as an application-internal cache, create a sqlite_cache entity inside the application model when its acceptable_entities allows sqlite_cache. A .db file or SQLite library alone does not establish a separate model boundary.",
+        "This is one flat application model with a combined processor allowlist. It does not contain, create or require a separate backend model. Create an external backend model only when an independent application is verified.",
+        "This preset exposes 3 processor types from its current acceptable_processors. Preserve each selected processor own data types and IO policy.",
+        "Record verified tauriVersion and buildTool in other_info; Vite is buildTool metadata, never a separate model. Tauri + React + Rust may record rustVersion and edition. No standalone tauri_application exists.",
+        "Rust framework handlers inside Tauri + React + Rust describe embedded processing in this same model; their presence does not auto-create an Axum/Actix/Rocket/Tonic backend model."
+      ],
+      "acceptable_processors": [
+        "processor_general",
+        "webapp_task",
+        "app_task"
+      ],
+      "acceptable_entities": [
+        "redis",
+        "sqlite_cache",
+        "general_cache",
+        "jms",
+        "sqs",
+        "ai_model",
+        "ai_file"
+      ],
+      "other_info_keys": [
+        "frameworkVersion",
+        "runtimeVersion",
+        "languageVersion",
+        "libraries",
+        "targetPlatform",
+        "include_general_modules",
+        "description",
+        "tauriVersion",
+        "buildTool"
+      ],
+      "messaging_design": {
+        "model_storage_type": "tauri_general_application",
+        "rule": "jms/sqs are message queue entity types, not models. Use the current model acceptable_entities; connect verified publishers/consumers through SQL transformations.",
+        "details": {
+          "tool": "beyond_get_definitions",
+          "arguments": {
+            "definition_names": [
+              "messaging_design_guide"
+            ],
+            "mode": "full"
+          }
+        }
+      }
+    },
+    "tauri_react_application": {
+      "model_storage_type": "tauri_react_application",
+      "title": "Tauri + React",
+      "scope": "Tauri + React application boundary",
+      "rules": [
+        "Choose processors only from this model acceptable_processors; do not infer framework membership from implementation language.",
+        "Classify Hooks by actual responsibility (interaction, application, state, integration or data access); Hook is not a separate processor type. Extract meaningful lineage units only. General modules require explicit include_general_modules opt-in.",
+        "React processors use exactly string, number, Boolean, Object and Array. React modules have INPUT/OUTPUT only; use_lookup=false rejects LOOKUP. Model persistent/local state data as allowed entities and reducers/actions as state processors.",
+        "Represent only verified API/IPC/WASM client boundaries as integration adapters. UI callbacks, forms and pages do not gain HTTP contracts merely by being modules.",
+        "Use General Cache, Local Storage, Session Storage and IndexedDB only when listed in acceptable_entities; Tauri General has its own storage allowlist.",
+        "Use verified other_info sourceFile/sourceLine/exportName for React processors and frameworkVersion/runtimeVersion/languageVersion/libraries/targetPlatform/include_general_modules/description for the model. Omit unknown settings.",
+        "Use a sqlite model when the SQLite database is physically or logically separate from the application. For SQLite used as an application-internal cache, create a sqlite_cache entity inside the application model when its acceptable_entities allows sqlite_cache. A .db file or SQLite library alone does not establish a separate model boundary.",
+        "This is one flat application model with a combined processor allowlist. It does not contain, create or require a separate backend model. Create an external backend model only when an independent application is verified.",
+        "This preset exposes 13 processor types from its current acceptable_processors. Preserve each selected processor own data types and IO policy.",
+        "Record verified tauriVersion and buildTool in other_info; Vite is buildTool metadata, never a separate model. Tauri + React + Rust may record rustVersion and edition. No standalone tauri_application exists.",
+        "Rust framework handlers inside Tauri + React + Rust describe embedded processing in this same model; their presence does not auto-create an Axum/Actix/Rocket/Tonic backend model.",
+        "Tauri Command Handler is an Integration-layer IPC boundary with IPC Arguments / IPC Result and 47 Rust data types. It is allowed in both Tauri + React and Tauri + React + Rust. Connect it to a General Processor for verified internal processing when appropriate; no separate Rust model or Rust-specific internal processor is required. Store verified commandName/sourceFile/sourceLine in other_info."
+      ],
+      "acceptable_processors": [
+        "react_page",
+        "react_ui_component",
+        "react_event_handler",
+        "react_form_handler",
+        "react_use_case",
+        "react_state_handler",
+        "react_integration_adapter",
+        "react_data_access",
+        "react_general_module",
+        "tauri_command_handler",
+        "processor_general",
+        "webapp_task",
+        "app_task"
+      ],
+      "acceptable_entities": [
+        "general_cache",
+        "local_storage",
+        "session_storage",
+        "indexed_db",
+        "sqlite_cache",
+        "ai_model",
+        "ai_file"
+      ],
+      "other_info_keys": [
+        "frameworkVersion",
+        "runtimeVersion",
+        "languageVersion",
+        "libraries",
+        "targetPlatform",
+        "include_general_modules",
+        "description",
+        "tauriVersion",
+        "buildTool"
+      ]
+    },
+    "tauri_react_rust_application": {
+      "model_storage_type": "tauri_react_rust_application",
+      "title": "Tauri + React + Rust",
+      "scope": "Tauri + React + Rust application boundary",
+      "rules": [
+        "Choose processors only from this model acceptable_processors; do not infer framework membership from implementation language.",
+        "Classify Hooks by actual responsibility (interaction, application, state, integration or data access); Hook is not a separate processor type. Extract meaningful lineage units only. General modules require explicit include_general_modules opt-in.",
+        "React processors use exactly string, number, Boolean, Object and Array. React modules have INPUT/OUTPUT only; use_lookup=false rejects LOOKUP. Model persistent/local state data as allowed entities and reducers/actions as state processors.",
+        "Represent only verified API/IPC/WASM client boundaries as integration adapters. UI callbacks, forms and pages do not gain HTTP contracts merely by being modules.",
+        "Use General Cache, Local Storage, Session Storage and IndexedDB only when listed in acceptable_entities; Tauri General has its own storage allowlist.",
+        "Use verified other_info sourceFile/sourceLine/exportName for React processors and frameworkVersion/runtimeVersion/languageVersion/libraries/targetPlatform/include_general_modules/description for the model. Omit unknown settings.",
+        "Use a sqlite model when the SQLite database is physically or logically separate from the application. For SQLite used as an application-internal cache, create a sqlite_cache entity inside the application model when its acceptable_entities allows sqlite_cache. A .db file or SQLite library alone does not establish a separate model boundary.",
+        "This is one flat application model with a combined processor allowlist. It does not contain, create or require a separate backend model. Create an external backend model only when an independent application is verified.",
+        "This preset exposes 37 processor types from its current acceptable_processors. Preserve each selected processor own data types and IO policy.",
+        "Record verified tauriVersion and buildTool in other_info; Vite is buildTool metadata, never a separate model. Tauri + React + Rust may record rustVersion and edition. No standalone tauri_application exists.",
+        "Rust framework handlers inside Tauri + React + Rust describe embedded processing in this same model; their presence does not auto-create an Axum/Actix/Rocket/Tonic backend model.",
+        "Tauri Command Handler is an Integration-layer IPC boundary with IPC Arguments / IPC Result and 47 Rust data types. It is allowed in both Tauri + React and Tauri + React + Rust. Connect it to a General Processor for verified internal processing when appropriate; no separate Rust model or Rust-specific internal processor is required. Store verified commandName/sourceFile/sourceLine in other_info.",
+        "Within this flat model, use Clap Command Handler and Clap Argument Validator for verified CLI entry/validation responsibilities (Command Entry Layer); use Ratatui View for terminal rendering (Presentation Layer) and Ratatui Update Handler for terminal event/state updates (Interaction Layer). Their IO follows CLI/terminal contracts, not Tauri IPC. Check each processor guide for labels and metadata. Standalone Clap/Ratatui application models remain excluded; these processor types do not auto-create models."
+      ],
+      "acceptable_processors": [
+        "react_page",
+        "react_ui_component",
+        "react_event_handler",
+        "react_form_handler",
+        "react_use_case",
+        "react_state_handler",
+        "react_integration_adapter",
+        "react_data_access",
+        "react_general_module",
+        "clap_command_handler",
+        "clap_argument_validator",
+        "ratatui_view",
+        "ratatui_update_handler",
+        "app_lang_rust",
+        "axum_endpoint_handler",
+        "axum_middleware",
+        "axum_extractor",
+        "axum_exception_handler",
+        "rust_service",
+        "rust_repository",
+        "rust_integration_adapter",
+        "rust_job_event_handler",
+        "rust_general_module",
+        "actix_web_endpoint_handler",
+        "actix_web_middleware",
+        "actix_web_extractor",
+        "actix_web_exception_handler",
+        "rocket_endpoint_handler",
+        "rocket_fairing",
+        "rocket_request_guard",
+        "rocket_exception_handler",
+        "tonic_rpc_handler",
+        "tonic_interceptor",
+        "tauri_command_handler",
+        "processor_general",
+        "webapp_task",
+        "app_task"
+      ],
+      "acceptable_entities": [
+        "general_cache",
+        "local_storage",
+        "session_storage",
+        "indexed_db",
+        "sqlite_cache",
+        "ai_model",
+        "ai_file"
+      ],
+      "other_info_keys": [
+        "frameworkVersion",
+        "runtimeVersion",
+        "languageVersion",
+        "libraries",
+        "targetPlatform",
+        "include_general_modules",
+        "description",
+        "tauriVersion",
+        "buildTool",
+        "rustVersion",
+        "edition"
+      ]
+    },
+    "tonic_application": {
+      "model_storage_type": "tonic_application",
+      "title": "Tonic Application",
+      "scope": "Tonic Application architecture boundary",
+      "rules": [
+        "Use verified source/configuration. Physical module_name identifies the actual class, function or module; keep logical names business-facing. Record source_file and qualified identifiers in other_info when verified.",
+        "Extract independently identifiable architecture units, not every function. Choose the closest acceptable processor type by responsibility; use the framework general_module only for an in-scope unmatched module.",
+        "General modules are excluded from default parser extraction. include_general_modules must be explicitly enabled; still analyze their code to trace verified lineage.",
+        "Read is_module and use_lookup from the storage catalog. Module status does not imply HTTP routing or permission to create LOOKUP attributes.",
+        "Store verified HTTP routes in other_info.endpoints using method/path/handler. Read returned endpoint and contract IDs before edits; do not fabricate routes or handlers.",
+        "Store frameworkVersion, runtimeVersion, languageVersion and libraries in other_info only when verified; framework is the model framework field.",
+        "Record verified edition and targetPlatform alongside frameworkVersion/runtimeVersion/languageVersion/libraries. Vite is buildTool metadata, not an application model. Standalone Dioxus/Leptos/Yew/Iced/Ratatui/Clap application models remain excluded. Use dedicated Clap/Ratatui processors only where the current model allowlist permits them; use allowed generic processors, tasks or app_lang_rust for other general CLI/UI modules.",
+        "Use Rust physical data types from the selected processor catalog. Shared rust_* processors belong to the verified framework model.",
+        "Only verified HTTP handlers have HTTP route contracts. Keep Tonic RPC methods in their verified RPC roles. Use app_lang_rust in General System or tauri_react_rust_application for general Rust modules; do not invent HTTP routes."
+      ],
+      "acceptable_processors": [
+        "tonic_rpc_handler",
+        "tonic_interceptor",
+        "rust_service",
+        "rust_repository",
+        "rust_integration_adapter",
+        "rust_job_event_handler",
+        "rust_general_module"
+      ],
+      "messaging_design": {
+        "model_storage_type": "tonic_application",
+        "rule": "jms/sqs are message queue entity types, not models. Use the current model acceptable_entities; connect verified publishers/consumers through SQL transformations.",
+        "details": {
+          "tool": "beyond_get_definitions",
+          "arguments": {
+            "definition_names": [
+              "messaging_design_guide"
+            ],
+            "mode": "full"
+          }
+        }
+      }
+    },
+    "external_system": {
+      "model_storage_type": "external_system",
+      "scope": "External provider/service boundary, independent of the caller framework.",
+      "details": {
+        "tool": "beyond_get_definitions",
+        "arguments": {
+          "definition_names": [
+            "external_api_design_guide"
+          ],
+          "mode": "full"
+        }
+      }
+    },
+    "sqlite": {
+      "model_storage_type": "sqlite",
+      "scope": "SQLite database physically or logically separate from the application.",
+      "rules": [
+        "Use a sqlite model when the SQLite database is physically or logically separate from the application. For SQLite used as an application-internal cache, create a sqlite_cache entity inside the application model when its acceptable_entities allows sqlite_cache. A .db file or SQLite library alone does not establish a separate model boundary."
+      ],
+      "details": {
+        "definition_name": "sqlite_storage_boundary_guide",
+        "tool": "beyond_get_definitions",
+        "arguments": {
+          "definition_names": [
+            "sqlite_storage_boundary_guide"
+          ],
+          "mode": "full"
+        }
+      }
+    },
+    "rabbitmq": {
+      "model_storage_type": "rabbitmq",
+      "scope": "Use the verified RabbitMQ system boundary.",
+      "rules": [],
+      "messaging_design": {
+        "model_storage_type": "rabbitmq",
+        "rule": "jms/sqs are message queue entity types, not models. Use the current model acceptable_entities; connect verified publishers/consumers through SQL transformations.",
+        "details": {
+          "tool": "beyond_get_definitions",
+          "arguments": {
+            "definition_names": [
+              "messaging_design_guide"
+            ],
+            "mode": "full"
+          }
+        }
+      }
+    },
+    "general_system": {
+      "model_storage_type": "general_system",
+      "scope": "Use the verified General System system boundary.",
+      "rules": [],
+      "messaging_design": {
+        "model_storage_type": "general_system",
+        "rule": "jms/sqs are message queue entity types, not models. Use the current model acceptable_entities; connect verified publishers/consumers through SQL transformations.",
+        "details": {
+          "tool": "beyond_get_definitions",
+          "arguments": {
+            "definition_names": [
+              "messaging_design_guide"
+            ],
+            "mode": "full"
+          }
+        }
+      }
+    }
+  }
+}

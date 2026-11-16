@@ -1,0 +1,227 @@
+{
+  "name": "beyond_get_implementation_status",
+  "description": "Get implementation status for entities, processors, and processor UX. If model_id is omitted, returns all accessible models. Transformation implementation status is intentionally not exposed at this time.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "model_id": {
+        "type": "string",
+        "description": "Optional model unique identifier. Omit to return all accessible models."
+      },
+      "response_format": {
+        "type": "string",
+        "enum": [
+          "auto",
+          "full",
+          "paged"
+        ],
+        "default": "auto",
+        "description": "auto returns inline when small and switches to paged delivery when the response exceeds max_inline_bytes. full disables automatic paging. paged forces paged delivery."
+      },
+      "max_inline_bytes": {
+        "type": "integer",
+        "default": 30000,
+        "description": "Maximum serialized structuredContent size to return inline when response_format is auto."
+      },
+      "page_size_bytes": {
+        "type": "integer",
+        "default": 30000,
+        "description": "Maximum JSON text fragment size per page when paged delivery is used."
+      },
+      "include_json_content": {
+        "type": "boolean",
+        "default": false,
+        "description": "When false, omit duplicated JSON from text content and rely on structuredContent."
+      }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "type": "string"
+          },
+          "filters": {
+            "type": "object",
+            "properties": {
+              "model_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "model_count": {
+                "type": "integer"
+              },
+              "entity_count": {
+                "type": "integer"
+              },
+              "processor_count": {
+                "type": "integer"
+              }
+            }
+          },
+          "models": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/model_implementation_status"
+            }
+          }
+        }
+      }
+    },
+    "definitions": {
+      "entity_implementation_status": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "entity"
+            ]
+          },
+          "entity_id": {
+            "type": "string"
+          },
+          "entity_name": {
+            "type": "string"
+          },
+          "implementation_status": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/implementation_status"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "canvas_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "implementation_status": {
+        "type": "string",
+        "enum": [
+          "NOT_APPLICABLE",
+          "DESIGNING",
+          "DESIGNED",
+          "IMPLEMENTING",
+          "DRAFT_IMPLEMENTED",
+          "TESTING",
+          "IMPLEMENTED",
+          "MODIFICATION_REQUESTED",
+          "MODIFICATION_APPROVED",
+          "MODIFICATION_REJECTED",
+          "MODIFICATION_IMPLEMENTING",
+          "MODIFICATION_TESTING",
+          "USER_DEFINED"
+        ],
+        "description": "Implementation workflow status shared by entities, processors, and processor UX."
+      },
+      "model_implementation_status": {
+        "type": "object",
+        "properties": {
+          "model_id": {
+            "type": "string"
+          },
+          "model_name": {
+            "type": "string"
+          },
+          "canvas_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/entity_implementation_status"
+            }
+          },
+          "processors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/processor_implementation_status"
+            }
+          },
+          "objects": {
+            "type": "array",
+            "description": "Entities and processors in display order. Processor entries include transformations.",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/entity_implementation_status"
+                },
+                {
+                  "$ref": "#/definitions/processor_implementation_status"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "processor_implementation_status": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "processor"
+            ]
+          },
+          "processor_id": {
+            "type": "string"
+          },
+          "processor_name": {
+            "type": "string"
+          },
+          "implementation_status": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/implementation_status"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ux_implementation_status": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/implementation_status"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "canvas_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "output_schema_declared": true
+}

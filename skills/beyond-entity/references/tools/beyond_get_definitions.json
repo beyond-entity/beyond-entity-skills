@@ -1,0 +1,34 @@
+{
+  "name": "beyond_get_definitions",
+  "description": "Discover supported technologies with beyond_get_definitions(definition_names=[\"design_navigation_guide\"]). React frontend uses react_application. Read only the selected model_design_guide:<type> and processor_design_guide:<type>. Verify the current runtime catalog before claiming a technology is unsupported. Get MCP tool/schema definitions. Without definition_names, returns a compact index. With tool names such as beyond_create_entities, returns tool schemas. With schema names such as entity_info_create, returns JSON schema definitions. Query beyond_get_definitions(definition_names=[\"processor_storage_types\"]) for the exhaustive global processor ID/title catalog with allowed model types. A model acceptable_processors list is only its allowed subset, not the global catalog. Guide delivery is session-scoped by guide_id and guide_revision: first delivery includes delivery=full and content, subsequent responses use delivery=reference without content. MUST read and follow full content. A paged guide counts as delivered only after every page is returned. If context was lost, use the details call (beyond_get_definitions, mode=full, include_examples=true) to retrieve the full guide again. A new session, changed revision or expired delivery cache resends content. Delivery records do not prove the AI read it. Never retry model creation merely to recover expired pages; re-read the model.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "definition_names": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Tool names or JSON schema definition names to retrieve"
+      },
+      "mode": {
+        "type": "string",
+        "enum": [
+          "input_schema",
+          "full"
+        ],
+        "default": "input_schema",
+        "description": "input_schema returns compact tool input/output schemas. full returns full matching tool and JSON schema definitions."
+      },
+      "include_examples": {
+        "type": "boolean",
+        "default": true,
+        "description": "Include sample data"
+      }
+    }
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

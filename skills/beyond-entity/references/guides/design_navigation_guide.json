@@ -1,0 +1,287 @@
+{
+  "guide_id": "design_navigation_guide",
+  "guide_revision": "b97c841e87e104f3",
+  "source_mcp_version": "3.2.51",
+  "content": {
+    "rules": [
+      "Check this current-runtime catalog before claiming a technology is unsupported. A current model allowlist is not the global catalog.",
+      "Select the requested technology, then read only model_design_guide:<model_storage_type>. Read processor_design_guide:<processor_storage_type> for the types actually used. Do not load every technology manual.",
+      "React frontend uses react_application, not a backend framework model. Tauri presets are separate choices; do not introduce Tauri unless requested or verified.",
+      "For remote projects the active remote catalog is authoritative. Missing types there may require server deployment; a local source catalog alone does not prove remote support."
+    ],
+    "models": [
+      {
+        "model_storage_type": "mysql",
+        "title": "MySQL",
+        "details": "model_design_guide:mysql"
+      },
+      {
+        "model_storage_type": "mariadb",
+        "title": "MariaDB",
+        "details": "model_design_guide:mariadb"
+      },
+      {
+        "model_storage_type": "pgvector",
+        "title": "PGVector",
+        "details": "model_design_guide:pgvector"
+      },
+      {
+        "model_storage_type": "postgresql",
+        "title": "PostgreSQL",
+        "details": "model_design_guide:postgresql"
+      },
+      {
+        "model_storage_type": "supabase",
+        "title": "Supabase(PostgreSQL)",
+        "details": "model_design_guide:supabase"
+      },
+      {
+        "model_storage_type": "hive",
+        "title": "Hive",
+        "details": "model_design_guide:hive"
+      },
+      {
+        "model_storage_type": "athena",
+        "title": "Athena",
+        "details": "model_design_guide:athena"
+      },
+      {
+        "model_storage_type": "inceptor",
+        "title": "Inceptor",
+        "details": "model_design_guide:inceptor"
+      },
+      {
+        "model_storage_type": "redshift",
+        "title": "Redshift",
+        "details": "model_design_guide:redshift"
+      },
+      {
+        "model_storage_type": "netezza",
+        "title": "Netezza",
+        "details": "model_design_guide:netezza"
+      },
+      {
+        "model_storage_type": "vertica",
+        "title": "Vertica",
+        "details": "model_design_guide:vertica"
+      },
+      {
+        "model_storage_type": "snowflake",
+        "title": "Snowflake",
+        "details": "model_design_guide:snowflake"
+      },
+      {
+        "model_storage_type": "databricks",
+        "title": "Databricks",
+        "details": "model_design_guide:databricks"
+      },
+      {
+        "model_storage_type": "mongodb",
+        "title": "MongoDB",
+        "details": "model_design_guide:mongodb"
+      },
+      {
+        "model_storage_type": "cassandra",
+        "title": "Cassandra",
+        "details": "model_design_guide:cassandra"
+      },
+      {
+        "model_storage_type": "scylladb",
+        "title": "ScyllaDB",
+        "details": "model_design_guide:scylladb"
+      },
+      {
+        "model_storage_type": "hbase",
+        "title": "HBase",
+        "details": "model_design_guide:hbase"
+      },
+      {
+        "model_storage_type": "bigtable",
+        "title": "BigTable",
+        "details": "model_design_guide:bigtable"
+      },
+      {
+        "model_storage_type": "bigquery",
+        "title": "BigQuery",
+        "details": "model_design_guide:bigquery"
+      },
+      {
+        "model_storage_type": "elasticsearch",
+        "title": "Elasticsearch",
+        "details": "model_design_guide:elasticsearch"
+      },
+      {
+        "model_storage_type": "opensearch",
+        "title": "OpenSearch",
+        "details": "model_design_guide:opensearch"
+      },
+      {
+        "model_storage_type": "oracle",
+        "title": "Oracle",
+        "details": "model_design_guide:oracle"
+      },
+      {
+        "model_storage_type": "sqlserver",
+        "title": "Microsoft SQL Server",
+        "details": "model_design_guide:sqlserver"
+      },
+      {
+        "model_storage_type": "sybase",
+        "title": "Sybase",
+        "details": "model_design_guide:sybase"
+      },
+      {
+        "model_storage_type": "db2",
+        "title": "DB2",
+        "details": "model_design_guide:db2"
+      },
+      {
+        "model_storage_type": "influxdb",
+        "title": "InfluxDB",
+        "details": "model_design_guide:influxdb"
+      },
+      {
+        "model_storage_type": "saphana",
+        "title": "SAPHANA",
+        "details": "model_design_guide:saphana"
+      },
+      {
+        "model_storage_type": "sqlite",
+        "title": "SQLite",
+        "details": "model_design_guide:sqlite"
+      },
+      {
+        "model_storage_type": "hsqldb",
+        "title": "HSQLDB",
+        "details": "model_design_guide:hsqldb"
+      },
+      {
+        "model_storage_type": "h2",
+        "title": "H2",
+        "details": "model_design_guide:h2"
+      },
+      {
+        "model_storage_type": "derby",
+        "title": "Apache Derby",
+        "details": "model_design_guide:derby"
+      },
+      {
+        "model_storage_type": "webapp",
+        "title": "Web Browser",
+        "details": "model_design_guide:webapp"
+      },
+      {
+        "model_storage_type": "app",
+        "title": "App",
+        "details": "model_design_guide:app"
+      },
+      {
+        "model_storage_type": "rabbitmq",
+        "title": "RabbitMQ",
+        "details": "model_design_guide:rabbitmq"
+      },
+      {
+        "model_storage_type": "kafka",
+        "title": "Kafka",
+        "details": "model_design_guide:kafka"
+      },
+      {
+        "model_storage_type": "spring_boot_application",
+        "title": "Spring Boot Application",
+        "details": "model_design_guide:spring_boot_application"
+      },
+      {
+        "model_storage_type": "google_workspace",
+        "title": "Google Workspace",
+        "details": "model_design_guide:google_workspace"
+      },
+      {
+        "model_storage_type": "general_system",
+        "title": "General System",
+        "details": "model_design_guide:general_system"
+      },
+      {
+        "model_storage_type": "asp_net_application",
+        "title": "ASP.NET Application",
+        "details": "model_design_guide:asp_net_application"
+      },
+      {
+        "model_storage_type": "django_application",
+        "title": "Django Application",
+        "details": "model_design_guide:django_application"
+      },
+      {
+        "model_storage_type": "flask_application",
+        "title": "Flask Application",
+        "details": "model_design_guide:flask_application"
+      },
+      {
+        "model_storage_type": "fastapi_application",
+        "title": "FastAPI Application",
+        "details": "model_design_guide:fastapi_application"
+      },
+      {
+        "model_storage_type": "express_application",
+        "title": "Express Application",
+        "details": "model_design_guide:express_application"
+      },
+      {
+        "model_storage_type": "nestjs_application",
+        "title": "NestJS Application",
+        "details": "model_design_guide:nestjs_application"
+      },
+      {
+        "model_storage_type": "nextjs_application",
+        "title": "Next.js Application",
+        "details": "model_design_guide:nextjs_application"
+      },
+      {
+        "model_storage_type": "axum_application",
+        "title": "Axum Application",
+        "details": "model_design_guide:axum_application"
+      },
+      {
+        "model_storage_type": "actix_web_application",
+        "title": "Actix Web Application",
+        "details": "model_design_guide:actix_web_application"
+      },
+      {
+        "model_storage_type": "rocket_application",
+        "title": "Rocket Application",
+        "details": "model_design_guide:rocket_application"
+      },
+      {
+        "model_storage_type": "tonic_application",
+        "title": "Tonic Application",
+        "details": "model_design_guide:tonic_application"
+      },
+      {
+        "model_storage_type": "react_application",
+        "title": "React Application",
+        "details": "model_design_guide:react_application"
+      },
+      {
+        "model_storage_type": "tauri_react_application",
+        "title": "Tauri + React",
+        "details": "model_design_guide:tauri_react_application"
+      },
+      {
+        "model_storage_type": "tauri_react_rust_application",
+        "title": "Tauri + React + Rust",
+        "details": "model_design_guide:tauri_react_rust_application"
+      },
+      {
+        "model_storage_type": "tauri_general_application",
+        "title": "Tauri General",
+        "details": "model_design_guide:tauri_general_application"
+      },
+      {
+        "model_storage_type": "external_system",
+        "title": "External System",
+        "details": "model_design_guide:external_system"
+      }
+    ],
+    "next": "Fetch details through beyond_get_definitions(definition_names=[details]). The selected model acceptable_processors is the creation allowlist.",
+    "transformation_rule": "SQL is BE data-flow notation across all relevant layers, including React UI, Controller, Service and integration; runtime SQL is not required. Read transformation_design_guide. Review relevant processor flows, not only DAO/Repository."
+  }
+}

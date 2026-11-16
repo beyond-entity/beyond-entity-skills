@@ -1,0 +1,24 @@
+{
+  "name": "beyond_get_context",
+  "description": "Get current session context including Platform project, branch, permissions, compact model-only schema information, last_checkout, and relevant_documents when available. Use beyond_get_project_overview or beyond_get_model with detail_level='full' for detailed data. Use beyond_get_document for specific documents and fetch all HUMAN-authored documents if they are not already in memory.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "detail_level": {
+        "type": "string",
+        "enum": [
+          "compact",
+          "name-only",
+          "full"
+        ],
+        "default": "compact",
+        "description": "compact returns model-only schema information with entities/processors/attributes/transformations counts per model; name-only returns logical name, physical name, ID, and counts in hierarchy; full returns the cached full context."
+      }
+    },
+    "required": []
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

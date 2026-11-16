@@ -1,0 +1,138 @@
+{
+  "name": "beyond_update_implementation_status",
+  "description": "Update implementation status for either an entity or a processor. Prefer the entity/processor-specific tools when the object type is already known. Inspect transformation_check and warnings: advanced implementation/UX statuses check the processor for zero transformations; new checkpoints check changed processors in the preceding checkpoint interval. Saves remain allowed; no warnings does not prove complete lineage.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "object_type": {
+        "type": "string",
+        "enum": [
+          "entity",
+          "processor"
+        ],
+        "description": "Type of object to update"
+      },
+      "object_id": {
+        "type": "string",
+        "description": "Entity ID or processor ID to update"
+      },
+      "implementation_status": {
+        "$ref": "#/definitions/implementation_status"
+      },
+      "ux_implementation_status": {
+        "$ref": "#/definitions/implementation_status",
+        "description": "Processor-only UX implementation status"
+      }
+    },
+    "required": [
+      "object_type",
+      "object_id"
+    ],
+    "definitions": {
+      "implementation_status": {
+        "type": "string",
+        "enum": [
+          "NOT_APPLICABLE",
+          "DESIGNING",
+          "DESIGNED",
+          "IMPLEMENTING",
+          "DRAFT_IMPLEMENTED",
+          "TESTING",
+          "IMPLEMENTED",
+          "MODIFICATION_REQUESTED",
+          "MODIFICATION_APPROVED",
+          "MODIFICATION_REJECTED",
+          "MODIFICATION_IMPLEMENTING",
+          "MODIFICATION_TESTING",
+          "USER_DEFINED"
+        ],
+        "description": "Implementation workflow status shared by entities, processors, and processor UX."
+      }
+    }
+  },
+  "outputSchema": {
+    "oneOf": [
+      {
+        "$ref": "#/definitions/update_entity_implementation_status_response"
+      },
+      {
+        "$ref": "#/definitions/update_processor_implementation_status_response"
+      }
+    ],
+    "definitions": {
+      "implementation_status": {
+        "type": "string",
+        "enum": [
+          "NOT_APPLICABLE",
+          "DESIGNING",
+          "DESIGNED",
+          "IMPLEMENTING",
+          "DRAFT_IMPLEMENTED",
+          "TESTING",
+          "IMPLEMENTED",
+          "MODIFICATION_REQUESTED",
+          "MODIFICATION_APPROVED",
+          "MODIFICATION_REJECTED",
+          "MODIFICATION_IMPLEMENTING",
+          "MODIFICATION_TESTING",
+          "USER_DEFINED"
+        ],
+        "description": "Implementation workflow status shared by entities, processors, and processor UX."
+      },
+      "update_entity_implementation_status_response": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "entity_id": {
+                "type": "string"
+              },
+              "implementation_status": {
+                "$ref": "#/definitions/implementation_status"
+              }
+            }
+          }
+        }
+      },
+      "update_processor_implementation_status_response": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "processor_id": {
+                "type": "string"
+              },
+              "implementation_status": {
+                "$ref": "#/definitions/implementation_status"
+              },
+              "ux_implementation_status": {
+                "$ref": "#/definitions/implementation_status"
+              },
+              "transformation_check": {
+                "type": "object",
+                "description": "Non-blocking zero-transformation check. Inspect check_status, scope, missing_processor_count, has_more and coverage_note. UNAVAILABLE is not a clean result."
+              },
+              "warnings": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                },
+                "description": "Advisory warnings with processor/model/layer identities and next steps. Does not prevent saving; absence is not proof of complete lineage."
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "output_schema_declared": true
+}

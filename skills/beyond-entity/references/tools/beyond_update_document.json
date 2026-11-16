@@ -1,0 +1,55 @@
+{
+  "name": "beyond_update_document",
+  "description": "Update a working-stage shared project document in TB_DOCUMENT. ACTOR_TYPE is always AI, and actor_name must identify the LLM model name and version.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "required": [
+      "doc_id",
+      "actor_name"
+    ],
+    "properties": {
+      "doc_id": {
+        "type": "string",
+        "description": "Document ID to update, such as doc_xxx."
+      },
+      "doc_content": {
+        "type": "string",
+        "description": "Replacement full markdown content. Required unless file_name is being updated by itself."
+      },
+      "file_name": {
+        "type": "string",
+        "description": "Optional replacement file name."
+      },
+      "actor_name": {
+        "type": "string",
+        "description": "LLM model name and version, such as GPT-5 Codex 2026-08-12 or the exact MCP client model identifier."
+      },
+      "include_json_content": {
+        "type": "boolean",
+        "default": false,
+        "description": "When false, omit duplicated JSON from text content and rely on structuredContent."
+      }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "type": "string"
+          },
+          "document": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  },
+  "output_schema_declared": true
+}

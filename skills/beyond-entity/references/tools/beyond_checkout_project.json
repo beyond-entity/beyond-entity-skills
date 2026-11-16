@@ -1,0 +1,39 @@
+{
+  "name": "beyond_checkout_project",
+  "description": "Check out a Platform project. MUST be called before any Platform project-specific operations. The response is compact by default, includes model-only schema information, last_checkout, and relevant_documents. Use beyond_list_checkpoints to fetch older checkpoint/checkout messages. Use beyond_get_document to fetch a specific relevant document; fetch all HUMAN-authored documents if they are not already in memory.For project setup with supplied requirements (Excel/docs/chat), do not stop at acknowledgement: check existing BE records, save traceable DRAFT requirements within the requested scope, verify saved IDs, then ask focused gap questions. Reuse prior agreement and answered questions. Reading/summarizing alone does not authorize writes. Without supplied requirements, offer an interview. Applicable intake and next-stage guides are inline. ALWAYS save BE ANALYSIS_CONTENT as Markdown.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "project_id": {
+        "type": "string",
+        "description": "Project identifier to check out (e.g., 'proj_abc123')"
+      },
+      "branch": {
+        "type": "string",
+        "description": "Branch to check out. Defaults to project's default branch."
+      },
+      "force_clone": {
+        "type": "boolean",
+        "description": "Force cloning the project if never checked out before",
+        "default": false
+      },
+      "detail_level": {
+        "type": "string",
+        "enum": [
+          "compact",
+          "name-only",
+          "full"
+        ],
+        "default": "compact",
+        "description": "compact returns project metadata and model-only schema information with entities/processors/attributes/transformations counts per model; name-only returns logical name, physical name, ID, and counts in hierarchy; full returns detailed overview data."
+      }
+    },
+    "required": [
+      "project_id"
+    ]
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

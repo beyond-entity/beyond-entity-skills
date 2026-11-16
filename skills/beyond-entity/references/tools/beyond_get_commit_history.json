@@ -1,0 +1,27 @@
+{
+  "name": "beyond_get_commit_history",
+  "description": "Get commit history for current branch.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "branch": {
+        "type": "string",
+        "description": "Branch name. Defaults to current branch."
+      },
+      "limit": {
+        "type": "integer",
+        "default": 20,
+        "description": "Maximum number of commits to return"
+      },
+      "object_id": {
+        "type": "string",
+        "description": "Filter to commits affecting this specific object (entity_id, model_id, or processor_id)"
+      }
+    },
+    "required": []
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

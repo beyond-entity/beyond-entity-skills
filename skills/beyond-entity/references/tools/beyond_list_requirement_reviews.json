@@ -1,0 +1,44 @@
+{
+  "name": "beyond_list_requirement_reviews",
+  "description": "List paged root posts grouped with bounded descendant replies. For truncated replies, pass thread_review_id and next_offset to page the entire thread. No resolve/status workflow. Responses embed current/next-stage guide text and disclose server-generated values; no separate guide query is required.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "requirement_code": {
+        "type": "string",
+        "minLength": 1
+      },
+      "thread_review_id": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "reply_limit": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 50,
+        "default": 20
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 200,
+        "default": 50
+      },
+      "offset": {
+        "type": "integer",
+        "minimum": 0,
+        "default": 0
+      }
+    },
+    "required": [
+      "requirement_code"
+    ],
+    "additionalProperties": false
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

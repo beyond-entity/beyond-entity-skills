@@ -1,0 +1,26 @@
+{
+  "name": "beyond_prune_code_analysis",
+  "description": "Delete at most 200 old finalized summaries before epoch milliseconds, preserving keep_latest runs and every run referenced by current states. Repeat as needed.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "before": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "keep_latest": {
+        "type": "integer",
+        "minimum": 1,
+        "default": 100
+      }
+    },
+    "required": [
+      "before"
+    ],
+    "additionalProperties": false
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

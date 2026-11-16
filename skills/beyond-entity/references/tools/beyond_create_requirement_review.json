@@ -1,0 +1,47 @@
+{
+  "name": "beyond_create_requirement_review",
+  "description": "Post an AI-authored opinion/question or reply. Author display is server-derived AI (MCP); authenticated CREATED_BY is recorded. Never impersonate a participant. Parent must belong to the same requirement. Default response_detail=compact; use full only when complete saved records are needed. Responses embed current/next-stage guide text and disclose server-generated values; no separate guide query is required.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "requirement_code": {
+        "type": "string",
+        "minLength": 1
+      },
+      "review_content": {
+        "type": "string",
+        "minLength": 1
+      },
+      "parent_review_id": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "req_review_id": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "response_detail": {
+        "type": "string",
+        "enum": [
+          "compact",
+          "full"
+        ],
+        "default": "compact",
+        "description": "Compact returns identities and automatic-value receipts without echoing input bodies. Full returns complete saved records."
+      }
+    },
+    "required": [
+      "requirement_code",
+      "review_content"
+    ],
+    "additionalProperties": false
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

@@ -1,0 +1,134 @@
+{
+  "guide_id": "messaging_design_guide",
+  "guide_revision": "8360c93bfba1e67c",
+  "source_mcp_version": "3.2.51",
+  "content": {
+    "model_storage_type": "Use the current model when its acceptable_entities allows this queue type.",
+    "allowed_model_storage_types": {
+      "rabbitmq": [
+        "jms",
+        "sqs"
+      ],
+      "spring_boot_application": [
+        "jms",
+        "sqs"
+      ],
+      "general_system": [
+        "jms",
+        "sqs"
+      ],
+      "asp_net_application": [
+        "jms",
+        "sqs"
+      ],
+      "django_application": [
+        "jms",
+        "sqs"
+      ],
+      "flask_application": [
+        "jms",
+        "sqs"
+      ],
+      "fastapi_application": [
+        "jms",
+        "sqs"
+      ],
+      "express_application": [
+        "jms",
+        "sqs"
+      ],
+      "nestjs_application": [
+        "jms",
+        "sqs"
+      ],
+      "nextjs_application": [
+        "jms",
+        "sqs"
+      ],
+      "axum_application": [
+        "jms",
+        "sqs"
+      ],
+      "actix_web_application": [
+        "jms",
+        "sqs"
+      ],
+      "rocket_application": [
+        "jms",
+        "sqs"
+      ],
+      "tonic_application": [
+        "jms",
+        "sqs"
+      ],
+      "tauri_general_application": [
+        "jms",
+        "sqs"
+      ]
+    },
+    "entity_storage_types": [
+      "jms",
+      "sqs"
+    ],
+    "other_info_recommendations": {
+      "location": "entity_info.other_info",
+      "policy": "Recommended optional metadata using the UI otherInfoKeys. No runtime enum or broker validation is implied. Omit unknown keys; never copy placeholders, invent provider/queue identities or store credentials. Examples are documentation templates, not observed application usage or executable integration tests. Preserve existing metadata; no automatic key migration.",
+      "jms": {
+        "otherInfoKeys": [
+          "provider",
+          "destinationName",
+          "destinationType",
+          "jndiName",
+          "description"
+        ],
+        "fields": {
+          "provider": "Verified JMS provider/product name from source or configuration.",
+          "destinationName": "Actual destination name resolved from source/configuration; normally matches the physical table_name. A JNDI lookup name is recorded separately.",
+          "destinationType": "Recommended values: queue or topic, only when verified. These are documentation conventions, not a server-enforced enum.",
+          "jndiName": "Verified JNDI lookup name when JNDI is used; otherwise omit.",
+          "description": "Known message purpose and publisher/consumer responsibility; distinguish proposals from observed behavior."
+        },
+        "other_info_example": {
+          "provider": "<verified JMS provider>",
+          "destinationName": "<verified destination name>",
+          "destinationType": "queue",
+          "jndiName": "<verified JNDI name; omit when unused>",
+          "description": "<verified message purpose>"
+        }
+      },
+      "sqs": {
+        "otherInfoKeys": [
+          "queueUrl",
+          "queueArn",
+          "region",
+          "queueType",
+          "description"
+        ],
+        "fields": {
+          "queueUrl": "Verified complete queue URL from configuration or authoritative queue metadata; do not construct a URL from an unverified queue name/account.",
+          "queueArn": "Verified queue ARN; do not invent an AWS account ID or infer an ARN from incomplete configuration.",
+          "region": "Verified queue region; do not substitute the application's default region without evidence.",
+          "queueType": "Recommended values: standard or fifo, only when verified. These are documentation conventions, not a server-enforced enum.",
+          "description": "Known message purpose and publisher/consumer responsibility; distinguish proposals from observed behavior."
+        },
+        "other_info_example": {
+          "queueUrl": "<verified complete queue URL>",
+          "queueArn": "<verified queue ARN>",
+          "region": "<verified AWS region>",
+          "queueType": "standard",
+          "description": "<verified message purpose>"
+        }
+      }
+    },
+    "rules": [
+      "Create jms or sqs message queue entities inside the existing general_system or framework application model when its acceptable_entities permits the selected type. The schema allowlist is authoritative, including Spring Boot, Flask and other supported frameworks. These are entity storage types, not model or processor types; do not create a separate JMS/SQS model or change the parent framework merely to represent a queue.",
+      "Reuse one verified destination entity across publishers and consumers in the current model. Preserve provider/account/region identity when distinguishing destinations with the same name. Keep publisher/listener classes or functions as allowed processors of their actual framework; JmsTemplate/JmsListener/SqsListener are Spring examples, not requirements for Flask or other frameworks. A destination is an entity, not a duplicate processor.",
+      "Use entity_name for the logical destination name and table_name for the actual physical destination. Preserve verified queue URLs/ARNs in other_info; use BE_OBJECT IDs in SQL when physical names contain punctuation or collide.",
+      "Use the UI otherInfoKeys verbatim inside entity_info.other_info: JMS provider/destinationName/destinationType/jndiName/description; SQS queueUrl/queueArn/region/queueType/description. These camelCase keys are recommended descriptive metadata, not broker configuration, required fields or enforced delivery guarantees. Do not generate snake_case alternatives for new entries; existing metadata is preserved without automatic migration.",
+      "Model only verified payload fields using the selected entity data types. Unknown payload is not an invented Object or string field. Never store credentials or connection secrets in metadata.",
+      "Publish lineage uses INSERT INTO BE_OBJECT('queue_entity_id') (field) VALUES (:callerInput), or SELECT a verified processor OUTPUT field. Consume lineage uses SELECT q.field AS existing_target FROM BE_OBJECT('queue_entity_id') q on the consuming processor. Use beyond_add_transformation_by_sql; BE records lineage and does not send or receive messages.",
+      "Read the consumer type use_lookup policy and target an existing appropriate attribute or an explicitly verified handler contract. Do not invent a handler or force all message consumers to use LOOKUP.",
+      "message_publish/message_consume may label other_info.operation, but are not native transformation types. Unknown/dynamic destinations remain unresolved metadata until configuration provides an identity; do not guess a queue or cross-provider connection."
+    ]
+  }
+}

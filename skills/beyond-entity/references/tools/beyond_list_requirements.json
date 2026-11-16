@@ -1,0 +1,50 @@
+{
+  "name": "beyond_list_requirements",
+  "description": "List requirements by plan, Phase, status or exact numeric priority. No separate Phase table. Verified empty results include document-first intake guidance: authorized supplied requirements should be registered as traceable drafts before asking missing questions. Responses embed current/next-stage guide text and disclose server-generated values; no separate guide query is required.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "dev_plan_id": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "dev_phase": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "requirement_status": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "requirement_priority": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 200,
+        "default": 50
+      },
+      "offset": {
+        "type": "integer",
+        "minimum": 0,
+        "default": 0
+      }
+    },
+    "required": [],
+    "additionalProperties": false
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

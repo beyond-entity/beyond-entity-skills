@@ -1,0 +1,112 @@
+{
+  "guide_id": "attribute_security_guide",
+  "guide_revision": "06dfa6c02aef9eb5",
+  "source_mcp_version": "3.2.51",
+  "content": {
+    "scope": "Entity attributes and processor INPUT/OUTPUT/LOOKUP attributes.",
+    "pii_data_type": {
+      "storage_column": "PII_DATA_TYPE",
+      "value_type": "string enum name or null",
+      "allowed_values": [
+        "NA",
+        "NAME",
+        "CONTACT",
+        "ADDRESS",
+        "FINANCIAL",
+        "SENSITIVE_GENERAL",
+        "LOCATION",
+        "ONLINE_ID",
+        "HEALTH",
+        "BIOMETRIC",
+        "EMPLOYMENT",
+        "DATE_OF_BIRTH",
+        "GENERAL_INFO",
+        "PASSPORT_NUMBER",
+        "NATIONAL_ID",
+        "DRIVER_LICENSE",
+        "ALIEN_ID",
+        "UNIQUE_ID_GENERAL"
+      ],
+      "rules": [
+        "Use exact enum names such as DRIVER_LICENSE; do not send level codes such as UD, labels, or lowercase names.",
+        "pii_data_type and pii_level are independent metadata. Setting one does not automatically change the other.",
+        "Omitting a field on modification preserves it; null clears it."
+      ]
+    },
+    "encryption_level": {
+      "storage_column": "ENCRYPTION_LEVEL",
+      "value_type": "integer",
+      "values": [
+        {
+          "value": 0,
+          "name": "NONE",
+          "description": "None",
+          "meaning": "No encryption or masking declared."
+        },
+        {
+          "value": 1,
+          "name": "MASKED",
+          "description": "Masked",
+          "meaning": "Masking classification."
+        },
+        {
+          "value": 2,
+          "name": "ENCRYPTED",
+          "description": "Encrypted",
+          "meaning": "Reversible encryption storage classification."
+        },
+        {
+          "value": 3,
+          "name": "HASHED",
+          "description": "Hashed",
+          "meaning": "One-way hash storage; the original value cannot be restored. Used for input verification, such as passwords."
+        },
+        {
+          "value": 4,
+          "name": "KEYSERVER",
+          "description": "Key Server",
+          "meaning": "Encryption key managed by a key server."
+        }
+      ],
+      "rules": [
+        "Send the integer levelNumber (0, 1, 2, 3, 4), not the enum name or display label.",
+        "New attributes default to 0 when omitted. On modification, omission preserves the value; send 0=NONE to remove encryption/masking classification. Null is not accepted for writes.",
+        "Read responses include encryption_level and encryption_level_desc: None, Masked, Encrypted, Hashed, or Key Server. Undeclared/null has a null description.",
+        "The numbers identify protection methods, not an ordered security strength. Handle each enum value explicitly.",
+        "These fields describe design metadata; storing them does not itself encrypt, hash, or mask runtime data."
+      ]
+    },
+    "tools": {
+      "create": [
+        "beyond_create_entities",
+        "beyond_create_processors",
+        "beyond_create_model_objects"
+      ],
+      "add": [
+        "beyond_add_entity_attributes",
+        "beyond_add_processor_attributes"
+      ],
+      "modify": [
+        "beyond_modify_entity_attribute",
+        "beyond_modify_processor_attribute",
+        "beyond_modify_processor_attributes"
+      ],
+      "read": [
+        "beyond_get_entity",
+        "beyond_get_processor",
+        "beyond_get_model",
+        "beyond_load_schema",
+        "beyond_find_attributes",
+        "beyond_search"
+      ],
+      "read_hint": "Use detail_level=full where supported to retrieve attribute security metadata."
+    },
+    "example": {
+      "attribute_name": "Driver license",
+      "column_name": "driver_license",
+      "data_type": "String",
+      "pii_data_type": "DRIVER_LICENSE",
+      "encryption_level": 4
+    }
+  }
+}

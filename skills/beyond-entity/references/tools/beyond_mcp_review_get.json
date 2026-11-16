@@ -1,0 +1,19 @@
+{
+  "name": "beyond_mcp_review_get",
+  "description": "Get one central MCP Review Board entry with occurrences, replies, resolutions, and audit logs.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "review_id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "review_id"
+    ]
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

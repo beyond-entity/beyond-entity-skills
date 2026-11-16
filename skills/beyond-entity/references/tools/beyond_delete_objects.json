@@ -1,0 +1,37 @@
+{
+  "name": "beyond_delete_objects",
+  "description": "Delete entities or processors and all dependent attributes, constraints, relationships, lineages, transformations, policies and canvas placements. Transformations consuming deleted endpoints are also removed; unrelated entities/processors and historical evidence remain. Deletes all stored stages, matching existing object deletion semantics.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "object_ids": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Entity IDs or Processor IDs to delete"
+      }
+    },
+    "required": [
+      "object_ids"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "cascade_deleted": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  },
+  "output_schema_declared": true
+}

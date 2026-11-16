@@ -1,0 +1,58 @@
+{
+  "name": "beyond_add_checkpoint",
+  "description": "Add an AI job checkpoint to TB_JOB_CHECK_POINT_LOG. ACTOR_TYPE is always stored as AI. actor_name must identify the LLM model name and version. The server automatically snapshots overall implementation and test status by model from working tree rows. Returns data.checkpoint.cp_at. For remote projects, saving a checkpoint also exports and commits the working tree using cp_message as the Git commit message (no push). Local project checkpoints do not run Git. If Git commit fails, the checkpoint remains saved; retry beyond_git_commit rather than adding another checkpoint. This opens the next change window; update the current message before calling this at run end. Inspect transformation_check and warnings: advanced implementation/UX statuses check the processor for zero transformations; new checkpoints check changed processors in the preceding checkpoint interval. Saves remain allowed; no warnings does not prove complete lineage.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "required": [
+      "cp_message",
+      "actor_name"
+    ],
+    "properties": {
+      "cp_message": {
+        "type": "string",
+        "description": "Concise checkpoint message describing current job status, completed work, blockers, and next action if relevant."
+      },
+      "actor_name": {
+        "type": "string",
+        "description": "LLM model name and version, such as GPT-5 Codex 2026-08-12 or the exact MCP client model identifier."
+      },
+      "include_json_content": {
+        "type": "boolean",
+        "default": false,
+        "description": "When false, omit duplicated JSON from text content and rely on structuredContent."
+      }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "type": "string"
+          },
+          "checkpoint": {
+            "type": "object"
+          },
+          "transformation_check": {
+            "type": "object",
+            "description": "Non-blocking zero-transformation check. Inspect check_status, scope, missing_processor_count, has_more and coverage_note. UNAVAILABLE is not a clean result."
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "Advisory warnings with processor/model/layer identities and next steps. Does not prevent saving; absence is not proof of complete lineage."
+          }
+        }
+      }
+    }
+  },
+  "output_schema_declared": true
+}

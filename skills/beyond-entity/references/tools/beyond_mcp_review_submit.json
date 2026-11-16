@@ -1,0 +1,89 @@
+{
+  "name": "beyond_mcp_review_submit",
+  "description": "Submit a tool behavior review, ambiguity report, inefficiency, missing capability, or suggestion to the central MCP Review Board. The server computes the fingerprint and deduplicates repeated reports into occurrences. mcp_version describes the originating/reported runtime; metadata.review_server_mcp_version identifies the central review service separately. metadata.reporter is free-form text, not authenticated model identity; created_by_model may remain unknown when the client does not supply model identity.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "tool_name": {
+        "type": "string",
+        "description": "MCP tool being reviewed."
+      },
+      "category": {
+        "type": "string",
+        "enum": [
+          "bug",
+          "ambiguity",
+          "missing_capability",
+          "inefficiency",
+          "suggestion"
+        ]
+      },
+      "summary": {
+        "type": "string",
+        "description": "Short normalized description of the issue or suggestion."
+      },
+      "observed_behavior": {
+        "type": "string"
+      },
+      "expected_behavior": {
+        "type": "string"
+      },
+      "workaround": {
+        "type": "string"
+      },
+      "error_message": {
+        "type": "string"
+      },
+      "severity": {
+        "type": "string",
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "critical"
+        ],
+        "default": "medium"
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "evidence": {
+        "type": "object",
+        "description": "Structured reproduction or result evidence. Do not include secrets."
+      },
+      "context": {
+        "type": "string",
+        "description": "Concise context that helps reproduce the MCP behavior."
+      },
+      "organization_id": {
+        "type": "string"
+      },
+      "project_id": {
+        "type": "string"
+      },
+      "project_scope": {
+        "type": "string",
+        "enum": [
+          "local",
+          "remote",
+          "none",
+          "unknown"
+        ]
+      },
+      "metadata": {
+        "type": "object"
+      }
+    },
+    "required": [
+      "tool_name",
+      "category",
+      "summary"
+    ]
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

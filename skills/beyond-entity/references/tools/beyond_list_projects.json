@@ -1,0 +1,81 @@
+{
+  "name": "beyond_list_projects",
+  "description": "List all projects accessible to the current user.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "organization_id": {
+        "type": "string",
+        "description": "Filter by organization ID. If omitted, returns projects from all accessible organizations."
+      }
+    },
+    "required": []
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "projects": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/project_summary"
+        }
+      }
+    },
+    "definitions": {
+      "project_summary": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "type": "string"
+          },
+          "project_name": {
+            "type": "string"
+          },
+          "project_description": {
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "string"
+          },
+          "organization_name": {
+            "type": "string"
+          },
+          "user_role": {
+            "type": "string"
+          },
+          "last_accessed_at": {
+            "type": "integer"
+          },
+          "access_all_canvases": {
+            "type": "boolean"
+          },
+          "can_push": {
+            "type": "boolean"
+          },
+          "cloned": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "project_id",
+          "project_name"
+        ],
+        "examples": [
+          {
+            "project_id": "proj_A1b2C3d4E5f6",
+            "project_name": "Order Platform",
+            "project_description": "Customer ordering and fulfillment design",
+            "organization_id": "org_123",
+            "organization_name": "Beyond Entity",
+            "user_role": "admin",
+            "access_all_canvases": true,
+            "can_push": true,
+            "cloned": true
+          }
+        ]
+      }
+    }
+  },
+  "output_schema_declared": true
+}

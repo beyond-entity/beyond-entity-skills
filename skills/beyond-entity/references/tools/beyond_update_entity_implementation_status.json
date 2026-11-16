@@ -1,0 +1,83 @@
+{
+  "name": "beyond_update_entity_implementation_status",
+  "description": "Update implementation status for a data entity.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "entity_id": {
+        "type": "string",
+        "description": "Entity ID to update"
+      },
+      "implementation_status": {
+        "$ref": "#/definitions/implementation_status"
+      }
+    },
+    "required": [
+      "entity_id",
+      "implementation_status"
+    ],
+    "definitions": {
+      "implementation_status": {
+        "type": "string",
+        "enum": [
+          "NOT_APPLICABLE",
+          "DESIGNING",
+          "DESIGNED",
+          "IMPLEMENTING",
+          "DRAFT_IMPLEMENTED",
+          "TESTING",
+          "IMPLEMENTED",
+          "MODIFICATION_REQUESTED",
+          "MODIFICATION_APPROVED",
+          "MODIFICATION_REJECTED",
+          "MODIFICATION_IMPLEMENTING",
+          "MODIFICATION_TESTING",
+          "USER_DEFINED"
+        ],
+        "description": "Implementation workflow status shared by entities, processors, and processor UX."
+      }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          },
+          "implementation_status": {
+            "$ref": "#/definitions/implementation_status"
+          }
+        }
+      }
+    },
+    "definitions": {
+      "implementation_status": {
+        "type": "string",
+        "enum": [
+          "NOT_APPLICABLE",
+          "DESIGNING",
+          "DESIGNED",
+          "IMPLEMENTING",
+          "DRAFT_IMPLEMENTED",
+          "TESTING",
+          "IMPLEMENTED",
+          "MODIFICATION_REQUESTED",
+          "MODIFICATION_APPROVED",
+          "MODIFICATION_REJECTED",
+          "MODIFICATION_IMPLEMENTING",
+          "MODIFICATION_TESTING",
+          "USER_DEFINED"
+        ],
+        "description": "Implementation workflow status shared by entities, processors, and processor UX."
+      }
+    }
+  },
+  "output_schema_declared": true
+}

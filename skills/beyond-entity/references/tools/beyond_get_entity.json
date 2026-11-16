@@ -1,0 +1,997 @@
+{
+  "name": "beyond_get_entity",
+  "description": "Get entity details with attributes, constraints, and lineage. Constraints default to not requested; inspect sections before inferring absence. Optional lineage uses context/focused defaults. Inspect lineage_status; follow its continuation with beyond_get_lineage. logical returns a flat graph. Partial/focused lineage cannot prove absence. context returns direct_detail and remote_summary records with interpretation metadata. Repeated summary IDs across pages are additive fragments, not duplicates; process each page_index once. Explicit physical preserves legacy detail shape.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "entity_id": {
+        "type": "string",
+        "description": "Entity unique identifier"
+      },
+      "include_constraints_and_indexes": {
+        "type": "string",
+        "description": "Level of constraints and indexes to include. This platform regards index as a type of constraint.",
+        "enum": [
+          "all",
+          "indexes_only",
+          "except_foreign_keys",
+          "except_foreign_keys_and_indexes",
+          "none"
+        ],
+        "default": "none"
+      },
+      "data_lineage": {
+        "type": "string",
+        "enum": [
+          "none",
+          "upstream_only",
+          "downstream_only",
+          "both"
+        ],
+        "default": "none"
+      },
+      "lineage_depth": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 25,
+        "default": 3,
+        "description": "Depth is independent of fan-out/edge budget. A depth boundary with remaining links returns complete=false and depth_limit."
+      },
+      "response_format": {
+        "type": "string",
+        "enum": [
+          "auto",
+          "full",
+          "paged"
+        ],
+        "default": "auto",
+        "description": "auto returns inline when small and switches to paged delivery when the response exceeds max_inline_bytes. full disables automatic paging. paged forces paged delivery."
+      },
+      "max_inline_bytes": {
+        "type": "integer",
+        "default": 30000,
+        "description": "Maximum serialized structuredContent size to return inline when response_format is auto."
+      },
+      "page_size_bytes": {
+        "type": "integer",
+        "default": 30000,
+        "description": "Maximum JSON text fragment size per page when paged delivery is used."
+      },
+      "include_json_content": {
+        "type": "boolean",
+        "default": true,
+        "description": "When false, omit duplicated JSON from text content and rely on structuredContent."
+      },
+      "lineage_view": {
+        "type": "string",
+        "enum": [
+          "context",
+          "physical",
+          "logical"
+        ],
+        "default": "context",
+        "description": "context (default): direct physical references in detail, then grouped logical stages. physical: all reference detail. logical: collapsed stage paths. Read response interpretation for why, omitted details, scope, and page-delta merge rules."
+      },
+      "lineage_policy": {
+        "type": "string",
+        "enum": [
+          "focused",
+          "impact"
+        ],
+        "default": "focused",
+        "description": "focused: direct stage includes all supported references, subsequent upstream MAP / downstream QUERY_PARAMETER. impact: all supported attribute paths. SEMANTIC/RELATION excluded in both. focused never supports exhaustive absence claims."
+      },
+      "max_edges": {
+        "type": "integer",
+        "default": 200,
+        "minimum": 1,
+        "maximum": 1000
+      },
+      "max_scanned_edges": {
+        "type": "integer",
+        "default": 1000,
+        "minimum": 1,
+        "maximum": 10000
+      },
+      "max_response_bytes": {
+        "type": "integer",
+        "default": 30000,
+        "minimum": 4096,
+        "maximum": 262144
+      },
+      "attribute_ids": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "maxItems": 64,
+        "description": "Root attribute IDs; narrow wide entities to at most 64 roots."
+      },
+      "canvas_ids": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Optional subset of accessible canvases."
+      }
+    },
+    "required": [
+      "entity_id"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "$ref": "#/definitions/entity_detail_payload"
+      }
+    },
+    "definitions": {
+      "constraint": {
+        "type": "object",
+        "description": "Constraint definition. Used for create/update payloads and for persisted constraint records.",
+        "properties": {
+          "constraint_id": {
+            "type": "string",
+            "description": "Beyond Entity constraint ID"
+          },
+          "entity_id": {
+            "type": "string",
+            "description": "Target entity ID"
+          },
+          "model_id": {
+            "type": "string",
+            "description": "Target model ID"
+          },
+          "constraint_name": {
+            "type": "string"
+          },
+          "index_name": {
+            "type": "string",
+            "description": "Physical index name when applicable"
+          },
+          "constraint_type": {
+            "type": "string",
+            "description": "Constraint type. For pgvector vector similarity indexes, use 'cosine', 'l2', or 'inner_product' instead of generic 'Index'. These map to pgvector cosine, L2, and inner-product operator classes.",
+            "enum": [
+              "PrimaryKey",
+              "Unique",
+              "Check",
+              "Default",
+              "Index",
+              "cosine",
+              "l2",
+              "inner_product"
+            ],
+            "x-vectorConstraintTypes": [
+              {
+                "constraint_type": "cosine",
+                "pgvectorOperatorClass": "vector_cosine_ops",
+                "preferredFor": "cosine similarity / cosine distance"
+              },
+              {
+                "constraint_type": "l2",
+                "pgvectorOperatorClass": "vector_l2_ops",
+                "preferredFor": "Euclidean L2 distance"
+              },
+              {
+                "constraint_type": "inner_product",
+                "pgvectorOperatorClass": "vector_ip_ops",
+                "preferredFor": "negative inner product"
+              }
+            ]
+          },
+          "attribute_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For existing entities"
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Column names involved in the constraint"
+          },
+          "attribute_names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For batch create"
+          },
+          "check_expression": {
+            "type": "string",
+            "description": "For CHECK constraints only. Do not use this for Unique constraints or partial unique indexes."
+          },
+          "constraint_value": {
+            "type": "string",
+            "description": "For Default or Check constraints, the stored value or condition"
+          },
+          "constraint_order": {
+            "type": "integer",
+            "description": "Attribute order within the constraint for persisted records"
+          },
+          "index_type": {
+            "type": "string",
+            "enum": [
+              "BTREE",
+              "HASH",
+              "GIN",
+              "GIST"
+            ],
+            "description": "For generic INDEX constraints. For pgvector vector similarity indexes, prefer constraint_type 'cosine', 'l2', or 'inner_product' instead of encoding the vector index as a generic Index."
+          },
+          "other_info": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Preserved relationship metadata. on_delete/on_update are reference annotations, not supported BE behaviors.",
+            "additionalProperties": true
+          },
+          "relationship_description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Stored relationship description, separate from referential-action metadata."
+          },
+          "metadata_guide": {
+            "type": "string",
+            "description": "Present when on_delete or on_update metadata exists; explains that BE does not support or apply these behavior settings."
+          }
+        },
+        "required": [
+          "constraint_name",
+          "constraint_type"
+        ],
+        "examples": [
+          {
+            "constraint_id": "cst_4FfSu6cF1S",
+            "entity_id": "ent_kMntnK7JSM",
+            "model_id": "mdl_ef32pexmia",
+            "constraint_name": "pk_code_group",
+            "index_name": "PK_code_group",
+            "constraint_type": "PrimaryKey",
+            "attribute_ids": [
+              "attr_c3SpXfySa6"
+            ],
+            "constraint_order": 0
+          },
+          {
+            "constraint_id": "cst_5gJbnF2BK4",
+            "entity_id": "ent_kMntnK7JSM",
+            "model_id": "mdl_ef32pexmia",
+            "constraint_name": "DF_code_group_created_at",
+            "constraint_type": "Default",
+            "attribute_ids": [
+              "attr_ey1Y7Rd8ba"
+            ],
+            "constraint_order": 0
+          },
+          {
+            "constraint_id": "cst_tjxr3CfQTW",
+            "entity_id": "ent_kMntnK7JSM",
+            "model_id": "mdl_ef32pexmia",
+            "constraint_name": "chk_code_group_use_yn",
+            "constraint_type": "Check",
+            "attribute_ids": [
+              "attr_wrh7pEDzPK"
+            ],
+            "constraint_order": 0
+          },
+          {
+            "constraint_id": "cst_vectorCosine01",
+            "entity_id": "ent_pgvectorChunk01",
+            "model_id": "mdl_pgvectorEmbeddings01",
+            "constraint_name": "idx_document_embedding_cosine",
+            "index_name": "idx_document_embedding_cosine",
+            "constraint_type": "cosine",
+            "attribute_ids": [
+              "attr_embeddingVector01"
+            ],
+            "columns": [
+              "embedding"
+            ],
+            "other_info": {
+              "pgvector_operator_class": "vector_cosine_ops"
+            }
+          }
+        ]
+      },
+      "constraint_summary": {
+        "type": "object",
+        "properties": {
+          "constraint_id": {
+            "type": "string"
+          },
+          "constraint_name": {
+            "type": "string"
+          },
+          "constraint_type": {
+            "type": "string"
+          },
+          "attribute_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "other_info": {
+            "type": "object"
+          }
+        }
+      },
+      "entity_attribute": {
+        "type": "object",
+        "description": "Attribute schema for data entities.",
+        "properties": {
+          "attribute_id": {
+            "type": "string",
+            "description": "Beyond Entity attribute ID"
+          },
+          "attribute_name": {
+            "type": "string",
+            "description": "Logical attribute name. Use a human-friendly business/property name in the user's language, not a physical identifier."
+          },
+          "column_name": {
+            "type": "string",
+            "description": "Physical column name"
+          },
+          "is_primary_key": {
+            "type": "boolean",
+            "default": false
+          },
+          "is_not_null": {
+            "type": "boolean",
+            "default": false
+          },
+          "is_auto_increment": {
+            "type": "boolean",
+            "default": false
+          },
+          "domain_id": {
+            "type": "string",
+            "description": "Optional domain ID applied to this attribute"
+          },
+          "data_length": {
+            "type": "integer",
+            "description": "Physical length/size for the data type. For vector-like types this is the embedding dimension; for bit and bit varying this is the bit length."
+          },
+          "decimal_points": {
+            "type": "integer",
+            "description": "Scale / decimal precision for numeric data types. Do not use this for vector, bit, or bit varying."
+          },
+          "data_type": {
+            "type": "string",
+            "description": "Physical data type exposed as data_type"
+          },
+          "nested_data_type": {
+            "type": "string",
+            "description": "Logical nested element type for complex attributes"
+          },
+          "nested_physical_data_type": {
+            "type": "string",
+            "description": "Stored physical data type for nested values"
+          },
+          "default_value": {
+            "type": "string",
+            "description": "Default value expression"
+          },
+          "enum_values": {
+            "type": "string",
+            "description": "Comma-separated allowed values as stored"
+          },
+          "example_values": {
+            "type": "string",
+            "description": "Example values as stored"
+          },
+          "encryption_level": {
+            "type": "integer",
+            "default": 0,
+            "description": "Integer levelNumber: 0=NONE (None), 1=MASKED (Masked), 2=ENCRYPTED (Encrypted), 3=HASHED (Hashed; one-way hash), 4=KEYSERVER (Key Server; encryption key managed by a key server). Writes do not accept null; omission preserves the value on modification.",
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "pii_level": {
+            "type": "integer",
+            "default": 0,
+            "description": "0 = none, 1 = low, 2 = medium, 3 = high"
+          },
+          "sensitivity_level": {
+            "type": "integer",
+            "default": 0,
+            "description": "Custom sensitivity level defined by the organization. 0 = not specified, 1 = public, 2 = internal, 3 = confidential, 4 = restricted"
+          },
+          "confidentiality": {
+            "type": "string",
+            "enum": [
+              "L",
+              "M",
+              "H",
+              "S"
+            ],
+            "description": "TARA confidentiality classification. L = Low, M = Medium, H = High, S = Safety Critical."
+          },
+          "integrity": {
+            "type": "string",
+            "enum": [
+              "L",
+              "M",
+              "H",
+              "S"
+            ],
+            "description": "TARA integrity classification. L = Low, M = Medium, H = High, S = Safety Critical."
+          },
+          "availability": {
+            "type": "string",
+            "enum": [
+              "L",
+              "M",
+              "H",
+              "S"
+            ],
+            "description": "TARA availability classification. L = Low, M = Medium, H = High, S = Safety Critical."
+          },
+          "attribute_description": {
+            "type": "string",
+            "description": "Human-readable attribute description"
+          },
+          "other_info": {
+            "type": "object",
+            "description": "Additional JSON metadata for the attribute"
+          },
+          "data_depth": {
+            "type": "integer",
+            "default": 0,
+            "description": "Nesting depth. 0 for root attributes."
+          },
+          "upper_attribute_id": {
+            "type": "string",
+            "description": "Parent attribute ID for nested structures. Null for root-level attributes."
+          },
+          "display_order": {
+            "type": "integer",
+            "description": "Display order within the entity"
+          },
+          "pii_data_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "NA",
+              "NAME",
+              "CONTACT",
+              "ADDRESS",
+              "FINANCIAL",
+              "SENSITIVE_GENERAL",
+              "LOCATION",
+              "ONLINE_ID",
+              "HEALTH",
+              "BIOMETRIC",
+              "EMPLOYMENT",
+              "DATE_OF_BIRTH",
+              "GENERAL_INFO",
+              "PASSPORT_NUMBER",
+              "NATIONAL_ID",
+              "DRIVER_LICENSE",
+              "ALIEN_ID",
+              "UNIQUE_ID_GENERAL",
+              null
+            ],
+            "description": "PII_DATA_TYPE enum name stored verbatim, e.g. DRIVER_LICENSE. Null clears the classification; this is independent of pii_level."
+          },
+          "encryption_level_desc": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "readOnly": true,
+            "description": "Human-readable encryption_level: None, Masked, Encrypted, Hashed, Key Server; null for an undeclared value."
+          }
+        },
+        "required": [
+          "attribute_name",
+          "column_name",
+          "data_type"
+        ],
+        "examples": [
+          {
+            "attribute_id": "attr_c3SpXfySa6",
+            "attribute_name": "코드그룹ID",
+            "column_name": "code_group_id",
+            "is_primary_key": true,
+            "is_not_null": true,
+            "is_auto_increment": false,
+            "data_length": 20,
+            "data_type": "varchar",
+            "encryption_level": 0,
+            "pii_level": 0,
+            "sensitivity_level": 0,
+            "attribute_description": "코드그룹ID",
+            "other_info": {},
+            "data_depth": 0,
+            "display_order": 0
+          },
+          {
+            "attribute_id": "attr_wrh7pEDzPK",
+            "attribute_name": "사용여부",
+            "column_name": "use_yn",
+            "is_primary_key": false,
+            "is_not_null": true,
+            "is_auto_increment": false,
+            "data_length": 1,
+            "data_type": "char",
+            "default_value": "Y",
+            "enum_values": "Y, N",
+            "encryption_level": 0,
+            "pii_level": 0,
+            "sensitivity_level": 0,
+            "attribute_description": "사용여부",
+            "other_info": {},
+            "data_depth": 0,
+            "display_order": 3
+          }
+        ]
+      },
+      "entity_detail_payload": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          },
+          "entity_info": {
+            "$ref": "#/definitions/entity_runtime_info"
+          },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/entity_attribute"
+            }
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/constraint"
+            }
+          },
+          "auto_created_constraints": {
+            "type": "array",
+            "description": "Constraints automatically created while creating this entity, such as PrimaryKey from is_primary_key or Default from default_value. Do not create these constraints again.",
+            "items": {
+              "$ref": "#/definitions/constraint_summary"
+            }
+          },
+          "auto_created_constraint_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lineage": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              {
+                "type": "object",
+                "description": "Logical lineage graph page with coverage and continuation."
+              }
+            ]
+          },
+          "lineage_status": {
+            "type": "object",
+            "description": "Lineage coverage only (separate from inventory/search pagination). complete means this single response includes the whole selected traversal; traversal_complete means traversal finished across all graph pages. focused is policy-limited. Follow continuation.tool/cursor until exhausted; combine all prior pages. A depth/path/state limit requires a narrower or deeper new query."
+          },
+          "auto_created_attributes": {
+            "type": "array",
+            "description": "Attributes automatically added from storage-type default_fields; also included in attributes. Do not create them again.",
+            "items": {
+              "$ref": "#/definitions/entity_attribute"
+            }
+          },
+          "auto_created_attribute_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "entity_info": {
+        "type": "object",
+        "description": "Entity metadata returned by MCP read tools.",
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "description": "Beyond Entity entity ID"
+          },
+          "model_id": {
+            "type": "string",
+            "description": "Parent model ID"
+          },
+          "entity_name": {
+            "type": "string",
+            "description": "Logical entity name. Use a human-friendly business name in the user's language. Do not default this to a physical identifier."
+          },
+          "table_name": {
+            "type": "string",
+            "description": "Physical table/object name"
+          },
+          "other_info": {
+            "type": "object",
+            "description": "Additional JSON metadata for the entity",
+            "properties": {
+              "endpoints": {
+                "type": [
+                  "array",
+                  "null",
+                  "string"
+                ],
+                "description": "Verified inbound HTTP routes for a Controller class or API Server boundary. One Controller processor can contain multiple path/method/handler combinations. Omit unknown fields; never assume GET or derive routes from class names. On update omission preserves, an array replaces, [] empties, null clears. Do not use for Filter/Interceptor matching or Advice scope. Stored only in other_info.endpoints; the top-level response is a projection, not a separate stored value. API Server represents one Swagger/OpenAPI operation: endpoints is an array with at most one method/path pair. Different methods or paths require separate processors. Spring Controller classes may have multiple endpoints. Endpoint cardinality follows the storage catalog: is_module=true permits multiple endpoints; false, null or omitted permits at most one. Clients cannot override this flag. This applies to all processor types and both endpoints and other_info.endpoints. Check acceptable_processors or processor_storage_types before writing. Legacy JSON strings encoding an array or null are also accepted, decoded and validated; new writes store arrays or null and top-level endpoints read projections use arrays or null. Existing raw other_info may retain legacy strings until updated. New clients must send arrays. Invalid strings are rejected without clearing metadata.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Verified request mapping path; resolve class and handler mappings only from evidence."
+                    },
+                    "method": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Verified HTTP method; omit if unspecified or unknown. Never default to GET."
+                    },
+                    "handler": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Actual source handler method name without class/package prefix; omit if unknown."
+                    },
+                    "endpoint_id": {
+                      "type": "string",
+                      "description": "Server-assigned stable Controller endpoint ID. Preserve on edits to retain the contract association."
+                    },
+                    "input_attribute_id": {
+                      "type": "string",
+                      "description": "Server-managed Controller INPUT Object ID. Preserve on edits; do not invent. Same-handler routes share this ID."
+                    },
+                    "output_attribute_id": {
+                      "type": "string",
+                      "description": "Server-managed Controller OUTPUT Object ID. Preserve on edits; do not invent. Add verified child fields under this Object."
+                    }
+                  },
+                  "anyOf": [
+                    {
+                      "required": [
+                        "path"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "method"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "handler"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "description": {
+            "type": "string",
+            "description": "Entity description"
+          },
+          "entity_storage_type": {
+            "type": "string",
+            "description": "Exposed as entity_storage_type, sourced from ENTITY_TYPE. Use 'pgvector' for dedicated pgvector tables, and use 'postgresql' or 'supabase' when vector or bit columns belong to those runtime models. For vector and bit attributes, data_length represents dimensions or bit length, and decimal_points should not be used. For InfluxDB entities, entity_name should describe the business meaning of the series and table_name should store the physical series signature based on tag-key combinations. Save sample tag/field text in other_info.",
+            "enum": [
+              "mysql",
+              "mariadb",
+              "postgresql",
+              "pgvector",
+              "supabase",
+              "hive",
+              "athena",
+              "inceptor",
+              "redshift",
+              "netezza",
+              "vertica",
+              "snowflake",
+              "databricks",
+              "mongodb",
+              "cassandra",
+              "scylladb",
+              "hbase",
+              "bigtable",
+              "bigquery",
+              "redis",
+              "session_storage",
+              "local_storage",
+              "web_storage",
+              "indexed_db",
+              "cookie",
+              "general_cache",
+              "elasticsearch",
+              "opensearch",
+              "oracle",
+              "sqlserver",
+              "sybase",
+              "db2",
+              "influxdb",
+              "saphana",
+              "sqlite",
+              "hsqldb",
+              "h2",
+              "derby",
+              "sqlite_cache",
+              "csv_file",
+              "weblog_file",
+              "spreadsheet_file",
+              "json_file",
+              "general_file",
+              "dynamodb",
+              "jms",
+              "sqs",
+              "queue_json",
+              "queue_general",
+              "firestore",
+              "ai_model",
+              "ai_file",
+              "google_sheet",
+              "google_document",
+              "google_slide",
+              "google_drive_file",
+              "google_gmail_message"
+            ]
+          },
+          "entity_data_type": {
+            "type": "string",
+            "enum": [
+              "data_entity"
+            ],
+            "description": "Entity category"
+          },
+          "criticality_level": {
+            "type": "integer",
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "default": 1,
+            "description": "TARA criticality level. 1 = Low, 2 = Medium, 3 = High."
+          },
+          "sub_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional free-text refinement of the storage type; alias subType. Examples: controller REST/MVC, service Application/Domain/Facade/AI Service, repository Repository/DAO/Mapper/Memory Repository. See model_selection_guide for the complete recommended Spring subtype catalog; do not create new default types for internal stages."
+          },
+          "layer_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "readOnly": true,
+            "description": "Existing layer assignment. Creation sets NULL; property updates preserve it."
+          },
+          "endpoints": {
+            "type": [
+              "array",
+              "null",
+              "string"
+            ],
+            "description": "Verified inbound HTTP routes for a Controller class or API Server boundary. One Controller processor can contain multiple path/method/handler combinations. Omit unknown fields; never assume GET or derive routes from class names. On update omission preserves, an array replaces, [] empties, null clears. Do not use for Filter/Interceptor matching or Advice scope. Stored only in other_info.endpoints; the top-level response is a projection, not a separate stored value. API Server represents one Swagger/OpenAPI operation: endpoints is an array with at most one method/path pair. Different methods or paths require separate processors. Spring Controller classes may have multiple endpoints. Endpoint cardinality follows the storage catalog: is_module=true permits multiple endpoints; false, null or omitted permits at most one. Clients cannot override this flag. This applies to all processor types and both endpoints and other_info.endpoints. Check acceptable_processors or processor_storage_types before writing. Legacy JSON strings encoding an array or null are also accepted, decoded and validated; new writes store arrays or null and top-level endpoints read projections use arrays or null. Existing raw other_info may retain legacy strings until updated. New clients must send arrays. Invalid strings are rejected without clearing metadata.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Verified request mapping path; resolve class and handler mappings only from evidence."
+                },
+                "method": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Verified HTTP method; omit if unspecified or unknown. Never default to GET."
+                },
+                "handler": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Actual source handler method name without class/package prefix; omit if unknown."
+                },
+                "endpoint_id": {
+                  "type": "string",
+                  "description": "Server-assigned stable Controller endpoint ID. Preserve on edits to retain the contract association."
+                },
+                "input_attribute_id": {
+                  "type": "string",
+                  "description": "Server-managed Controller INPUT Object ID. Preserve on edits; do not invent. Same-handler routes share this ID."
+                },
+                "output_attribute_id": {
+                  "type": "string",
+                  "description": "Server-managed Controller OUTPUT Object ID. Preserve on edits; do not invent. Add verified child fields under this Object."
+                }
+              },
+              "anyOf": [
+                {
+                  "required": [
+                    "path"
+                  ]
+                },
+                {
+                  "required": [
+                    "method"
+                  ]
+                },
+                {
+                  "required": [
+                    "handler"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "entity_id",
+          "model_id",
+          "entity_name",
+          "table_name",
+          "entity_storage_type"
+        ],
+        "examples": [
+          {
+            "entity_id": "ent_kMntnK7JSM",
+            "model_id": "mdl_ef32pexmia",
+            "entity_name": "공통코드그룹",
+            "table_name": "code_group",
+            "other_info": {},
+            "description": "공통코드그룹",
+            "entity_storage_type": "postgresql",
+            "entity_data_type": "data_entity",
+            "criticality_level": 1
+          },
+          {
+            "entity_id": "ent_pgvectorChunk01",
+            "model_id": "mdl_pgvectorEmbeddings01",
+            "entity_name": "Document Chunk Embedding",
+            "table_name": "document_chunk_embedding",
+            "other_info": {
+              "embedding_column": "embedding",
+              "embedding_data_type": "vector",
+              "embedding_dimensions": 1536
+            },
+            "description": "Stores document chunks and embeddings for semantic search.",
+            "entity_storage_type": "pgvector",
+            "entity_data_type": "data_entity",
+            "criticality_level": 1
+          },
+          {
+            "entity_id": "ent_influxCpu01",
+            "model_id": "mdl_influxRuntime01",
+            "entity_name": "서버 CPU 사용률 시계열",
+            "table_name": "host,region,cpu",
+            "other_info": {
+              "tag_sample_text": "tags: host=app-01, region=ap-northeast-2, cpu=cpu0",
+              "field_sample_text": "fields: usage_user=12.5, usage_system=4.2, usage_idle=83.3, collected_at=2026-05-21T10:30:00Z"
+            },
+            "description": "업무상 CPU series 의미",
+            "entity_storage_type": "influxdb",
+            "entity_data_type": "data_entity",
+            "criticality_level": 1
+          },
+          {
+            "entity_id": "ent_YqS511iwK3",
+            "model_id": "mdl_ef32pexmia",
+            "entity_name": "관리자역할",
+            "table_name": "admin_role",
+            "other_info": {},
+            "description": "관리자역할",
+            "entity_storage_type": "postgresql",
+            "entity_data_type": "data_entity",
+            "criticality_level": 1
+          },
+          {
+            "entity_id": "ent_EeCGcExePQ",
+            "model_id": "mdl_ef32pexmia",
+            "entity_name": "고객",
+            "table_name": "customer",
+            "other_info": {},
+            "description": "고객",
+            "entity_storage_type": "postgresql",
+            "entity_data_type": "data_entity",
+            "criticality_level": 1
+          }
+        ]
+      },
+      "entity_runtime_info": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/entity_info"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "model_name": {
+                "type": "string"
+              },
+              "database_name": {
+                "type": "string"
+              },
+              "schema_name": {
+                "type": "string"
+              },
+              "implementation_status": {
+                "$ref": "#/definitions/implementation_status"
+              },
+              "canvas_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "implementation_status": {
+        "type": "string",
+        "enum": [
+          "NOT_APPLICABLE",
+          "DESIGNING",
+          "DESIGNED",
+          "IMPLEMENTING",
+          "DRAFT_IMPLEMENTED",
+          "TESTING",
+          "IMPLEMENTED",
+          "MODIFICATION_REQUESTED",
+          "MODIFICATION_APPROVED",
+          "MODIFICATION_REJECTED",
+          "MODIFICATION_IMPLEMENTING",
+          "MODIFICATION_TESTING",
+          "USER_DEFINED"
+        ],
+        "description": "Implementation workflow status shared by entities, processors, and processor UX."
+      }
+    }
+  },
+  "output_schema_declared": true
+}

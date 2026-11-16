@@ -1,0 +1,75 @@
+{
+  "name": "beyond_update_requirements",
+  "description": "Atomically update existing requirements by requirement_code. Update content/status/DEV_PHASE/priority/interview notes; preserve omitted fields. Reflect only confirmed review conclusions. Default response_detail=compact; use full only when complete saved records are needed. Responses embed current/next-stage guide text and disclose server-generated values; no separate guide query is required.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "requirements": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 200,
+        "items": {
+          "type": "object",
+          "properties": {
+            "requirement_code": {
+              "type": "string",
+              "minLength": 1
+            },
+            "requirement_title": {
+              "type": "string"
+            },
+            "requirement_content": {
+              "type": "string"
+            },
+            "requirement_status": {
+              "type": "string",
+              "description": "Suggested convention when the project/user has none; custom existing values remain valid: {'DRAFT': 'Unconfirmed', 'CONFIRMED': 'Agreed scope', 'ON_HOLD': 'Deferred', 'EXCLUDED': 'Out of scope'}"
+            },
+            "dev_phase": {
+              "type": "string",
+              "description": "Suggested convention when the project/user has none; custom existing values remain valid: {'MVP': 'Initial minimum scope', 'Phase 1': 'First delivery', 'Phase 2': 'Later delivery'}"
+            },
+            "requirement_priority": {
+              "type": "integer",
+              "description": "Suggested convention when the project/user has none; custom existing values remain valid: {'ordering': 'Lower numbers mean higher priority under this suggested convention.', 'examples': {'1': 'High', '5': 'Medium', '10': 'Normal (schema default)'}}"
+            },
+            "interview_lists": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "other_info": {
+              "type": [
+                "object",
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "requirement_code"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "response_detail": {
+        "type": "string",
+        "enum": [
+          "compact",
+          "full"
+        ],
+        "default": "compact",
+        "description": "Compact returns identities and automatic-value receipts without echoing input bodies. Full returns complete saved records."
+      }
+    },
+    "required": [
+      "requirements"
+    ],
+    "additionalProperties": false
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

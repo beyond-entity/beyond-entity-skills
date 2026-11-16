@@ -1,0 +1,77 @@
+{
+  "name": "beyond_update_processor_test_status",
+  "description": "Update module test status and JSON test message for a processor.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "processor_id": {
+        "type": "string",
+        "description": "Processor ID to update"
+      },
+      "test_status": {
+        "$ref": "#/definitions/test_status"
+      },
+      "test_message": {
+        "type": "object",
+        "description": "JSON test result, diagnostics, warnings, or execution metadata."
+      }
+    },
+    "required": [
+      "processor_id"
+    ],
+    "definitions": {
+      "test_status": {
+        "type": "string",
+        "enum": [
+          "NOT_TOUCHED",
+          "SCHEDULED",
+          "TESTING",
+          "TEST_FAILED",
+          "TEST_PASSED_WITH_WARNING",
+          "TEST_PASSED",
+          "USER_DEFINED"
+        ],
+        "description": "Processor module test status."
+      }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "processor_id": {
+            "type": "string"
+          },
+          "test_status": {
+            "$ref": "#/definitions/test_status"
+          },
+          "test_message": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "definitions": {
+      "test_status": {
+        "type": "string",
+        "enum": [
+          "NOT_TOUCHED",
+          "SCHEDULED",
+          "TESTING",
+          "TEST_FAILED",
+          "TEST_PASSED_WITH_WARNING",
+          "TEST_PASSED",
+          "USER_DEFINED"
+        ],
+        "description": "Processor module test status."
+      }
+    }
+  },
+  "output_schema_declared": true
+}

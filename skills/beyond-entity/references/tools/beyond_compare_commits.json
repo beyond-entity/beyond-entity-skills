@@ -1,0 +1,24 @@
+{
+  "name": "beyond_compare_commits",
+  "description": "Compare two commits.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "base_commit": {
+        "type": "string",
+        "description": "Base commit SHA or reference (e.g., 'HEAD~1', 'abc123')"
+      },
+      "compare_commit": {
+        "type": "string",
+        "description": "Commit to compare. Defaults to HEAD if not specified."
+      }
+    },
+    "required": [
+      "base_commit"
+    ]
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

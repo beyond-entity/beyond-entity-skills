@@ -1,0 +1,89 @@
+{
+  "name": "beyond_get_lineage",
+  "description": "Retrieve bounded resumable lineage. entity_id or attribute_ids required initially, cursor for subsequent pages. context/focused defaults; logical collapses only connected processor ports. Collect all pages via next_cursor and inspect complete, exhaustive, policy_limited and stop_reasons before absence claims. Cursor freezes query scope/policy/depth, permits budget changes, expires after 10 minutes, is process-local (same MCP worker required), and is invalidated by project edits or permission loss. Each page contains only its own edges; graph continuation is distinct from JSON transport paging. complete/exhaustive describe this response alone; traversal_complete describes accumulated traversal. The last page alone remains incomplete when prior pages exist. context returns direct_detail and remote_summary records with interpretation metadata. Repeated summary IDs across pages are additive fragments, not duplicates; process each page_index once. Explicit physical preserves legacy detail shape. Coverage contract: traversal_complete and traversal_stop_reasons describe graph coverage within scope. response_complete means all graph pages have been produced; requires_prior_pages means earlier pages must still be combined. next_cursor resumes graph exploration, not just transport. complete/exhaustive are deprecated compatibility fields. Transport fragments use transport_complete and must be assembled separately. Absence claims apply only to modeled accessible references in the declared scope.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "entity_id": {
+        "type": "string"
+      },
+      "attribute_ids": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "maxItems": 64,
+        "description": "Root attribute IDs; narrow wide entities to at most 64 roots."
+      },
+      "canvas_ids": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Optional subset of accessible canvases."
+      },
+      "data_lineage": {
+        "type": "string",
+        "enum": [
+          "both",
+          "upstream_only",
+          "downstream_only"
+        ],
+        "default": "both"
+      },
+      "lineage_depth": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 25,
+        "default": 3,
+        "description": "Depth is independent of fan-out/edge budget. A depth boundary with remaining links returns complete=false and depth_limit."
+      },
+      "lineage_view": {
+        "type": "string",
+        "enum": [
+          "context",
+          "physical",
+          "logical"
+        ],
+        "default": "context",
+        "description": "context (default): direct physical references in detail, then grouped logical stages. physical: all reference detail. logical: collapsed stage paths. Read response interpretation for why, omitted details, scope, and page-delta merge rules."
+      },
+      "lineage_policy": {
+        "type": "string",
+        "enum": [
+          "focused",
+          "impact"
+        ],
+        "default": "focused",
+        "description": "focused: direct stage includes all supported references, subsequent upstream MAP / downstream QUERY_PARAMETER. impact: all supported attribute paths. SEMANTIC/RELATION excluded in both. focused never supports exhaustive absence claims."
+      },
+      "max_edges": {
+        "type": "integer",
+        "default": 200,
+        "minimum": 1,
+        "maximum": 1000
+      },
+      "max_scanned_edges": {
+        "type": "integer",
+        "default": 1000,
+        "minimum": 1,
+        "maximum": 10000
+      },
+      "max_response_bytes": {
+        "type": "integer",
+        "default": 30000,
+        "minimum": 4096,
+        "maximum": 262144
+      },
+      "cursor": {
+        "type": "string",
+        "description": "Opaque continuation token; use with same active project and MCP worker."
+      }
+    }
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

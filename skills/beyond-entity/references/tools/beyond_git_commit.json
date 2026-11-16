@@ -1,0 +1,20 @@
+{
+  "name": "beyond_git_commit",
+  "description": "Commit current workspace changes to the active branch.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "message": {
+        "type": "string",
+        "description": "Commit message"
+      }
+    },
+    "required": [
+      "message"
+    ]
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

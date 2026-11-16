@@ -1,0 +1,30 @@
+{
+  "name": "beyond_switch_branch",
+  "description": "Switch to a different branch. Requires clean workspace.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "branch_name": {
+        "type": "string",
+        "description": "Target branch name"
+      },
+      "commit_first_if_dirty": {
+        "type": "boolean",
+        "description": "Commit first if workspace is dirty",
+        "default": false
+      },
+      "create_if_not_exists": {
+        "type": "boolean",
+        "description": "Create branch if it doesn't exist",
+        "default": false
+      }
+    },
+    "required": [
+      "branch_name"
+    ]
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

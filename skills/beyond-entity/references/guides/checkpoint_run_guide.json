@@ -1,0 +1,41 @@
+{
+  "guide_id": "checkpoint_run_guide",
+  "guide_revision": "74568f468fea1fd1",
+  "source_mcp_version": "3.2.51",
+  "content": {
+    "run_flow": [
+      "Read newest checkpoint cp_at; create one only if absent.",
+      "Write architecture and report; pass this cp_at to security scan checkpoint_id.",
+      "Call beyond_update_checkpoint(cp_at, cp_message) for the run summary, including unchanged or failed runs.",
+      "Call beyond_add_checkpoint to open the next window; response data.checkpoint.cp_at contains its ID."
+    ],
+    "actor_name": "update_checkpoint changes only CP_MESSAGE. Original ACTOR_NAME and ACTOR_TYPE are preserved; actor_name is not an update input.",
+    "node_json": "NODE_JSON stores one node object. For insert/update it is the final newData node; for delete it is the matching oldData node immediately before deletion. Keep old audit fields and DIFF_SOURCE unchanged for delete. NODE_VALUES is removed when opening projects and is not returned by MCP. Determine deletion only from ACTION=delete. No OLD_NODE_VALUES column is added.",
+    "missing_checkpoint": "update_checkpoint returns an error without creating a row.",
+    "node_history_contract": {
+      "action_values": [
+        "insert",
+        "update",
+        "delete"
+      ],
+      "same_checkpoint_composition": {
+        "insert_then_update": "insert",
+        "insert_then_delete": "remove record",
+        "update_then_delete": "delete",
+        "delete_then_reinsert_existing": "update"
+      },
+      "delete_node_json": "JSON serialization of that same one oldData object.",
+      "producer_requirements": "Every update must provide the matching complete oldData and newData row; every delete must provide complete oldData. Classification uses NODE_TYPE/NODE_ID identity, excluding GIT_STAGE as before."
+    },
+    "consumer_rules": "Use node_json for structured inspection when present. NODE_VALUES is no longer stored or returned. Determine insert/update/delete only from action. Delete node_json describes the deleted node immediately before deletion; it is not a live node or the interval starting snapshot. Do not restore a deleted object merely because its payload is nonempty. No OLD_NODE_VALUES is stored.",
+    "delete_example": {
+      "action": "delete",
+      "deleted": true,
+      "node_json": {
+        "PROCESSOR_ID": "deleted-processor-id",
+        "PROCESSOR_NAME": "Removed processor"
+      },
+      "note": "Illustrative fields only: actual node_json preserves the full deleted oldData object, including audit fields and DIFF_SOURCE."
+    }
+  }
+}

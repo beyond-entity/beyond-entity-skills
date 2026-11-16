@@ -1,0 +1,24 @@
+{
+  "name": "beyond_get_changes",
+  "description": "Get uncommitted changes in workspace.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "change_type_filter": {
+        "type": "string",
+        "enum": [
+          "all",
+          "added",
+          "deleted"
+        ],
+        "default": "all",
+        "description": "Filter by change type"
+      }
+    },
+    "required": []
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

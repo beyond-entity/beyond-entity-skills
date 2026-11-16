@@ -1,0 +1,55 @@
+{
+  "name": "beyond_delete_transformations",
+  "description": "Delete transformations from a processor. Transformation item links are deleted. Shared references are preserved; reference/canvas_reference rows are deleted only when no relation uses them, no remaining transformation uses them, and REFERENCE_TYPE is not SEMANTIC.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "transformation_ids": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Transformation IDs to delete"
+      }
+    },
+    "required": [
+      "transformation_ids"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "string"
+          },
+          "transformation_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cascade_deleted": {
+            "type": "object",
+            "properties": {
+              "references": {
+                "type": "integer"
+              },
+              "canvas_references": {
+                "type": "integer"
+              }
+            },
+            "description": "Conditionally deleted orphan non-SEMANTIC reference rows and matching canvas reference rows"
+          }
+        }
+      }
+    }
+  },
+  "output_schema_declared": true
+}

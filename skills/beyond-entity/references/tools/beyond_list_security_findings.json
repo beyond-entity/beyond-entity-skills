@@ -1,0 +1,79 @@
+{
+  "name": "beyond_list_security_findings",
+  "description": "List/read security findings including all target and standard mappings. Follow next_offset until has_more=false. Read beyond_get_usage_guide(workflow=\"security_findings\") or beyond_get_definitions(definition_names=[\"security_findings_guide\"]) first.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "finding_id": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "fingerprint": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "model_id": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "status": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "rule_id": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "severity": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 200,
+        "default": 50
+      },
+      "offset": {
+        "type": "integer",
+        "minimum": 0,
+        "default": 0
+      },
+      "display_key": {
+        "type": "string",
+        "description": "Exact project-local readable key, for example BESEC-00001. Returned findings include the immutable display_key and display_sequence; mutations use finding_id."
+      }
+    },
+    "required": [],
+    "additionalProperties": false
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object"
+      }
+    },
+    "required": [
+      "success",
+      "data"
+    ]
+  },
+  "output_schema_declared": true
+}

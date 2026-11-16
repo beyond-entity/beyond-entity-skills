@@ -1,0 +1,75 @@
+{
+  "guide_id": "query_dependency_guide",
+  "guide_revision": "d52d61d854c48eaa",
+  "source_mcp_version": "3.2.51",
+  "content": {
+    "rules": [
+      "Do not omit a verified call dependency merely because no request attributes are passed. Verify caller, target and code/configuration evidence; class names alone do not establish a call.",
+      "For SQL reads without request parameters, MCP automatically records caller-to-source object-level QUERY_PARAMETER dependencies and retains modeled return-value lineage. Object-level lineage endpoints omit attribute IDs.",
+      "This SQL-read support is not a general execution/call-graph API. For calls with no input or return values (startup, reindex triggers, factories, guards or fallbacks), verify the actual behavior and record caller, target, execution condition and code evidence in documentation or existing other_info when the tool cannot represent it. State the representation limitation, not simply \"no data, no lineage\".",
+      "Record DDL initialization with its target storage, schema/index operation and code evidence; do not disguise DDL as a data query or claim this creates execution lineage.",
+      "Never invent INPUT/OUTPUT fields, return values or SELECT 1 solely to draw a connection. Preserve real data dependencies without dropping parameters.",
+      "In-memory counters may have no storage lineage. Still trace their verified producing/updating processor to response fields where representable; do not invent a backing store.",
+      "Throwable is passed data, not a processor type. Use spring_boot_controller_advice for @ControllerAdvice/@RestControllerAdvice; use module_general with sub_type Exception Handler or Fallback for an independent handler class when no closer allowed type fits. Keep local catch/onErrorResume/@ExceptionHandler logic in its existing owner; do not duplicate the class.",
+      "Model a verified Throwable argument as INPUT Object; record its Java type in the attribute description/other_info. Add only fields actually used and verified, such as message or cause; an opaque Object is sufficient when its structure is unknown. Respect use_lookup=false.",
+      "Trace verified exception arguments and result fields where supported. Type selection does not automatically create throw/catch lineage. Never invent caller OUTPUTs or SELECT 1 to draw a link; document unsupported propagation with caller, target, argument and code evidence."
+    ],
+    "example_notice": "Examples are illustrative, not facts about the current project. Re-read the latest model, attributes and transformations through MCP; replace names/IDs only with verified code-backed objects. Do not create example fields merely to make SQL succeed.",
+    "examples": [
+      {
+        "case": "No request parameters, real return value",
+        "verified_preconditions": [
+          "ReadinessService calls StatusProvider.readStatus() with no arguments.",
+          "StatusProvider has a verified OUTPUT status field. ReadinessService has an existing OUTPUT status field; both are modeled spring_boot_service processors."
+        ],
+        "tool": "beyond_add_transformation_by_sql",
+        "arguments": {
+          "processor_id": "<verified ReadinessService processor ID>",
+          "sql": "SELECT s.OUTPUT.status AS status FROM StatusProvider s"
+        },
+        "expected": [
+          "Object-level QUERY_PARAMETER: ReadinessService -> StatusProvider, without attribute IDs at either endpoint.",
+          "Data mapping: StatusProvider.OUTPUT.status -> ReadinessService.OUTPUT.status."
+        ],
+        "do_not": "Do not create dummy INPUT parameters. If duplicate object names exist, use BE_OBJECT with the verified ID."
+      },
+      {
+        "case": "Pure execution without input or return data",
+        "verified_preconditions": [
+          "StartupListener.onReady() invokes IndexingService.reindex(), returning void and passing no arguments."
+        ],
+        "documentation_example": {
+          "caller": "StartupListener.onReady",
+          "target": "IndexingService.reindex",
+          "condition": "ApplicationReadyEvent",
+          "evidence": "<actual source file and line or symbol>",
+          "representation": "Verified execution dependency; not represented by the current SQL-read dependency mechanism. No data mapping asserted."
+        },
+        "do_not": "Do not submit SELECT 1 FROM IndexingService or invent run/status fields to obtain a line. This documentation object is an example, not an accepted MCP call schema."
+      },
+      {
+        "case": "DDL initialization",
+        "verified_preconditions": [
+          "An initializer executes CREATE INDEX against a confirmed storage table."
+        ],
+        "documentation_example": {
+          "caller": "<verified initializer method>",
+          "target": "<verified storage entity ID and physical table name>",
+          "condition": "<verified initialization event and configuration condition>",
+          "operation": "<actual CREATE INDEX statement>",
+          "evidence": "<actual source file and line or symbol>",
+          "representation": "Schema/index initialization; not a row-value transformation or an automatically created execution reference."
+        },
+        "do_not": "Do not turn CREATE INDEX into SELECT/INSERT or claim a data lineage edge was stored."
+      },
+      {
+        "case": "In-memory progress response",
+        "verified_preconditions": [
+          "IndexingService maintains processedCount in memory and a status handler exposes it."
+        ],
+        "action": "Model and map verified producer/response fields where supported. Record the counter update evidence. There is no backing-store lineage unless code actually persists or reads the counter.",
+        "do_not": "Do not invent a status table. If no callable/readable output is modeled, record the representation limitation instead of fabricating SQL."
+      }
+    ]
+  }
+}

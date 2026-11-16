@@ -1,0 +1,460 @@
+{
+  "name": "beyond_modify_processor",
+  "description": "For api_server use at most one endpoint per processor (one Swagger/OpenAPI operation); Spring Controller classes may have multiple endpoints. Use endpoints or other_info.endpoints. Explicit endpoints takes precedence over nested endpoints and legacy method/path. On update omission preserves, a list replaces, [] empties and null clears routing. Storage is only other_info.endpoints; legacy method/path inputs are converted. Before architecture writes, read the model_storage_design_guide and acceptable_processors returned by model creation/retrieval. Use verified source, configuration, specifications or explicit user requirements; never guess missing classes, routes, framework or subtype. Omit unknown optional values and ask for required information. For spring_boot_controller, a verified handler automatically creates or reuses handler-named INPUT/OUTPUT Object containers. Read the latest processor before editing, send the complete desired endpoints array, and preserve returned endpoint_id/input_attribute_id/output_attribute_id on retained endpoints. New endpoints omit those IDs. Read data.endpoints and data.auto_created_attributes after modification; do not create duplicate containers. Removed endpoints retain attributes and lineage. Query controller_endpoint_contract_guide for the full lifecycle and examples.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "processor_id": {
+        "type": "string",
+        "description": "Processor ID to update"
+      },
+      "updates": {
+        "type": "object",
+        "properties": {
+          "processor_name": {
+            "type": "string",
+            "description": "Logical/business API name for api_server processors. Use the user-facing name, not method/path or code identifiers."
+          },
+          "module_name": {
+            "type": "string",
+            "description": "Physical/code identifier. For every class-backed processor in a Spring Boot Application model, use the simple class name without package (OrderController), including processor_general. Keep verified package_name, qualified_class_name and source_file in other_info for tracing. module_name must be unique within the model physical-name namespace; package metadata does not bypass this. Reuse one class/module across roles rather than creating duplicates. Do not use a route, HTTP verb or method name as the Controller class name. For api_server use the verified single-operation identifier (operationId, controller method or function), never a server/router grouping."
+          },
+          "processor_storage_type": {
+            "type": "string",
+            "description": "Processor storage type"
+          },
+          "description": {
+            "type": "string"
+          },
+          "other_info": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Optional verified source and processor-specific metadata. Controller/API routing is stored in other_info.endpoints; explicit endpoints input takes precedence over nested endpoints and legacy method/path. Filter matchers, Interceptor include/exclude paths and Controller Advice scope are not HTTP endpoints. Omit unknown values.",
+            "properties": {
+              "package_name": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Verified source package, without the class name. Omit if unknown."
+              },
+              "qualified_class_name": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Verified fully qualified class name for source tracing; module_name remains the simple class name."
+              },
+              "source_file": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Verified source file path. Never fabricate a path from a class name."
+              },
+              "matchers": {
+                "type": "array",
+                "description": "Filter applicability conditions, not endpoints. Use only verified matchers.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "pattern": {
+                      "type": "string"
+                    },
+                    "method": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "pattern"
+                  ]
+                }
+              },
+              "include_paths": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Interceptor included path patterns."
+              },
+              "exclude_paths": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Interceptor excluded path patterns."
+              },
+              "order": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "description": "Verified Filter or Interceptor execution order."
+              },
+              "dispatcher_types": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Verified Filter dispatcher types."
+              },
+              "controller_scope": {
+                "type": "object",
+                "description": "Verified Controller Advice applicability, preserving source selector meaning. Omit unknown scope.",
+                "additionalProperties": true
+              },
+              "exception_types": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Verified exception types handled by Controller Advice."
+              },
+              "endpoints": {
+                "type": [
+                  "array",
+                  "null",
+                  "string"
+                ],
+                "description": "Verified inbound HTTP routes for a Controller class or API Server boundary. One Controller processor can contain multiple path/method/handler combinations. Omit unknown fields; never assume GET or derive routes from class names. On update omission preserves, an array replaces, [] empties, null clears. Do not use for Filter/Interceptor matching or Advice scope. Stored only in other_info.endpoints; the top-level response is a projection, not a separate stored value. API Server represents one Swagger/OpenAPI operation: endpoints is an array with at most one method/path pair. Different methods or paths require separate processors. Spring Controller classes may have multiple endpoints. Endpoint cardinality follows the storage catalog: is_module=true permits multiple endpoints; false, null or omitted permits at most one. Clients cannot override this flag. This applies to all processor types and both endpoints and other_info.endpoints. Check acceptable_processors or processor_storage_types before writing. Legacy JSON strings encoding an array or null are also accepted, decoded and validated; new writes store arrays or null and top-level endpoints read projections use arrays or null. Existing raw other_info may retain legacy strings until updated. New clients must send arrays. Invalid strings are rejected without clearing metadata.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Verified request mapping path; resolve class and handler mappings only from evidence."
+                    },
+                    "method": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Verified HTTP method; omit if unspecified or unknown. Never default to GET."
+                    },
+                    "handler": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Actual source handler method name without class/package prefix; omit if unknown."
+                    },
+                    "endpoint_id": {
+                      "type": "string",
+                      "description": "Server-assigned stable Controller endpoint ID. Preserve on edits to retain the contract association."
+                    },
+                    "input_attribute_id": {
+                      "type": "string",
+                      "description": "Server-managed Controller INPUT Object ID. Preserve on edits; do not invent. Same-handler routes share this ID."
+                    },
+                    "output_attribute_id": {
+                      "type": "string",
+                      "description": "Server-managed Controller OUTPUT Object ID. Preserve on edits; do not invent. Add verified child fields under this Object."
+                    }
+                  },
+                  "anyOf": [
+                    {
+                      "required": [
+                        "path"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "method"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "handler"
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "http_method": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Deprecated single-endpoint input. Prefer endpoints. Converted to one endpoint; no duplicate routing keys are stored in other_info. Explicit endpoints takes precedence. Partial legacy updates are rejected when multiple endpoints exist."
+          },
+          "sub_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional free-text refinement of the storage type; alias subType. Examples: controller REST/MVC, service Application/Domain/Facade/AI Service, repository Repository/DAO/Mapper/Memory Repository. See model_selection_guide for the complete recommended Spring subtype catalog; do not create new default types for internal stages."
+          },
+          "uri_path": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Deprecated single-endpoint input. Prefer endpoints. Converted to one endpoint; no duplicate routing keys are stored in other_info. Explicit endpoints takes precedence. Partial legacy updates are rejected when multiple endpoints exist."
+          },
+          "subType": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Alias for sub_type; canonical sub_type takes precedence."
+          },
+          "method": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Deprecated single-endpoint input. Prefer endpoints. Converted to one endpoint; no duplicate routing keys are stored in other_info. Explicit endpoints takes precedence. Partial legacy updates are rejected when multiple endpoints exist."
+          },
+          "path": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Deprecated single-endpoint input. Prefer endpoints. Converted to one endpoint; no duplicate routing keys are stored in other_info. Explicit endpoints takes precedence. Partial legacy updates are rejected when multiple endpoints exist."
+          },
+          "endpoints": {
+            "type": [
+              "array",
+              "null",
+              "string"
+            ],
+            "description": "Verified inbound HTTP routes for a Controller class or API Server boundary. One Controller processor can contain multiple path/method/handler combinations. Omit unknown fields; never assume GET or derive routes from class names. On update omission preserves, an array replaces, [] empties, null clears. Do not use for Filter/Interceptor matching or Advice scope. Stored only in other_info.endpoints; the top-level response is a projection, not a separate stored value. API Server represents one Swagger/OpenAPI operation: endpoints is an array with at most one method/path pair. Different methods or paths require separate processors. Spring Controller classes may have multiple endpoints. Endpoint cardinality follows the storage catalog: is_module=true permits multiple endpoints; false, null or omitted permits at most one. Clients cannot override this flag. This applies to all processor types and both endpoints and other_info.endpoints. Check acceptable_processors or processor_storage_types before writing. Legacy JSON strings encoding an array or null are also accepted, decoded and validated; new writes store arrays or null and top-level endpoints read projections use arrays or null. Existing raw other_info may retain legacy strings until updated. New clients must send arrays. Invalid strings are rejected without clearing metadata.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Verified request mapping path; resolve class and handler mappings only from evidence."
+                },
+                "method": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Verified HTTP method; omit if unspecified or unknown. Never default to GET."
+                },
+                "handler": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Actual source handler method name without class/package prefix; omit if unknown."
+                },
+                "endpoint_id": {
+                  "type": "string",
+                  "description": "Server-assigned stable Controller endpoint ID. Preserve on edits to retain the contract association."
+                },
+                "input_attribute_id": {
+                  "type": "string",
+                  "description": "Server-managed Controller INPUT Object ID. Preserve on edits; do not invent. Same-handler routes share this ID."
+                },
+                "output_attribute_id": {
+                  "type": "string",
+                  "description": "Server-managed Controller OUTPUT Object ID. Preserve on edits; do not invent. Add verified child fields under this Object."
+                }
+              },
+              "anyOf": [
+                {
+                  "required": [
+                    "path"
+                  ]
+                },
+                {
+                  "required": [
+                    "method"
+                  ]
+                },
+                {
+                  "required": [
+                    "handler"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "processor_storage_type": {
+                  "enum": [
+                    "processor_general",
+                    "api_server",
+                    "frontend",
+                    "stream_processing",
+                    "file_processor",
+                    "aggregator",
+                    "ml_pipeline",
+                    "data_sync",
+                    "graphql_server",
+                    "scheduler",
+                    "app_lang_c",
+                    "rabbitmq_exchange",
+                    "kafka_topic",
+                    "webapp_task",
+                    "app_task",
+                    "elt_batch",
+                    "etl_batch",
+                    "google_form",
+                    "google_read_sheet",
+                    "google_write_sheet",
+                    "google_search_drive",
+                    "google_watch_drive_changes",
+                    "google_update_document",
+                    "google_send_gmail",
+                    "external_api"
+                  ]
+                }
+              },
+              "required": [
+                "processor_storage_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "endpoints": {
+                  "maxItems": 1
+                }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "not": {
+                      "required": [
+                        "endpoints"
+                      ]
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "other_info": {
+                        "properties": {
+                          "endpoints": {
+                            "maxItems": 1
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "required": [
+      "processor_id",
+      "updates"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "processor_id": {
+            "type": "string"
+          },
+          "endpoints": {
+            "type": [
+              "array",
+              "null",
+              "string"
+            ],
+            "description": "Verified inbound HTTP routes for a Controller class or API Server boundary. One Controller processor can contain multiple path/method/handler combinations. Omit unknown fields; never assume GET or derive routes from class names. On update omission preserves, an array replaces, [] empties, null clears. Do not use for Filter/Interceptor matching or Advice scope. Stored only in other_info.endpoints; the top-level response is a projection, not a separate stored value. API Server represents one Swagger/OpenAPI operation: endpoints is an array with at most one method/path pair. Different methods or paths require separate processors. Spring Controller classes may have multiple endpoints. Endpoint cardinality follows the storage catalog: is_module=true permits multiple endpoints; false, null or omitted permits at most one. Clients cannot override this flag. This applies to all processor types and both endpoints and other_info.endpoints. Check acceptable_processors or processor_storage_types before writing. Legacy JSON strings encoding an array or null are also accepted, decoded and validated; new writes store arrays or null and top-level endpoints read projections use arrays or null. Existing raw other_info may retain legacy strings until updated. New clients must send arrays. Invalid strings are rejected without clearing metadata.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Verified request mapping path; resolve class and handler mappings only from evidence."
+                },
+                "method": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Verified HTTP method; omit if unspecified or unknown. Never default to GET."
+                },
+                "handler": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Actual source handler method name without class/package prefix; omit if unknown."
+                },
+                "endpoint_id": {
+                  "type": "string",
+                  "description": "Server-assigned stable Controller endpoint ID. Preserve on edits to retain the contract association."
+                },
+                "input_attribute_id": {
+                  "type": "string",
+                  "description": "Server-managed Controller INPUT Object ID. Preserve on edits; do not invent. Same-handler routes share this ID."
+                },
+                "output_attribute_id": {
+                  "type": "string",
+                  "description": "Server-managed Controller OUTPUT Object ID. Preserve on edits; do not invent. Add verified child fields under this Object."
+                }
+              },
+              "anyOf": [
+                {
+                  "required": [
+                    "path"
+                  ]
+                },
+                {
+                  "required": [
+                    "method"
+                  ]
+                },
+                {
+                  "required": [
+                    "handler"
+                  ]
+                }
+              ]
+            }
+          },
+          "auto_created_attributes": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "Server-created Controller INPUT/OUTPUT contract Objects. Do not create duplicates; add only verified child fields."
+          },
+          "auto_created_attribute_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "output_schema_declared": true
+}

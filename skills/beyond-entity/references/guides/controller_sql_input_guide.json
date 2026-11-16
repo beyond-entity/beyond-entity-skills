@@ -1,0 +1,14 @@
+{
+  "guide_id": "controller_sql_input_guide",
+  "guide_revision": "98e6ff36763bb72a",
+  "source_mcp_version": "3.2.51",
+  "content": {
+    "rules": [
+      "Explicit alias.OUTPUT.field and alias.INPUT.field resolve complete paths starting at the IO root; use alias.OUTPUT.parent.field for nested fields. Bare duplicate basenames remain ambiguous.",
+      "Bind caller INPUT by :handler.field or :INPUT.handler.field; bare names must be unique. Invalid paths never fall back. One handler INPUT + storage values/expressions may INSERT without OUTPUT; mixed handlers fail. Verify all example names and IDs through MCP."
+    ],
+    "bind_example": "SELECT s.amount AS \"listMySettlements.amount\" FROM settlement s WHERE s.user_id=:INPUT.listMySettlements.userId",
+    "self_alias_example": "FROM settlement s CROSS JOIN BE_OBJECT('<Controller ID>') c WHERE s.user_id=c.INPUT.listMySettlements.userId",
+    "mixed_insert_example": "INSERT INTO join_snapshot(user_id,amount) SELECT :registerJoinCode.userId,s.amount FROM settlement s WHERE s.user_id=:registerJoinCode.userId"
+  }
+}

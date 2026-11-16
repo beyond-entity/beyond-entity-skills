@@ -1,0 +1,53 @@
+{
+  "name": "beyond_mcp_review_resolve",
+  "description": "Record an MCP maintainer-agent resolution, code change summary, commit, release version, and verification requirement for an MCP Review Board entry. Reopening is done with beyond_mcp_review_reply(reply_type='reopen', message=reason), not resolution_status.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "review_id": {
+        "type": "string"
+      },
+      "resolution_status": {
+        "type": "string",
+        "enum": [
+          "investigating",
+          "fixed",
+          "wont_fix",
+          "duplicate",
+          "needs_verification",
+          "verified"
+        ]
+      },
+      "analysis": {
+        "type": "string"
+      },
+      "change_summary": {
+        "type": "string"
+      },
+      "commit_sha": {
+        "type": "string"
+      },
+      "pull_request_url": {
+        "type": "string"
+      },
+      "released_version": {
+        "type": "string"
+      },
+      "verification_required": {
+        "type": "boolean",
+        "default": true
+      },
+      "metadata": {
+        "type": "object"
+      }
+    },
+    "required": [
+      "review_id",
+      "resolution_status"
+    ]
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

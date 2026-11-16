@@ -1,0 +1,34 @@
+{
+  "guide_id": "external_api_design_guide",
+  "guide_revision": "ed31123e312b76eb",
+  "source_mcp_version": "3.2.51",
+  "content": {
+    "model_storage_type": "external_system",
+    "processor_storage_type": "external_api",
+    "scope": "A verified external service boundary and its HTTP operations; not an internal integration adapter or an executable HTTP client.",
+    "rules": [
+      "Use external_system for a provider/service outside the managed application. Use one external_api processor per verified HTTP operation. general_system also permits external_api. Keep the calling adapter in its original application model.",
+      "external_api is a processor, not an entity or parent model type. ai_model and ai_file remain resource entities, not request/response ports. AI resources can be placed in allowed application models or the external_system that owns them; do not duplicate one resource merely to connect a call.",
+      "Set processor_name to a readable operation name and module_name to a stable verified operation identifier. Put at most one route in endpoints; preserve endpoint_id on edits. HTTP metadata is stored only in other_info.endpoints. Unknown method/path/handler stays omitted; no synthetic handler contracts are created.",
+      "external_api INPUT means data received by the external service (the caller request). OUTPUT means data returned by that service (the caller response). LOOKUP is disabled. Create only verified request and response fields, including explicit Object/Array children when known; never invent payloads or internal provider implementation.",
+      "For request lineage, run beyond_add_transformation_by_sql on the calling processor with INSERT INTO the external_api existing INPUT fields. For response lineage, SELECT external_api.OUTPUT fields into verified caller destinations. Both use the existing processor handoff and cross-model access checks; BE records lineage and never sends an HTTP request.",
+      "For a verified parameterless call, follow query_dependency_guide instead of fabricating a request attribute. Read the latest source/target attributes and transformations before adding or changing lineage.",
+      "For external providers set exposure_level=4 (External) on the model and operation explicitly; classification is not inferred or forced, because partner/private services may differ. Classify actual transmitted and returned fields with pii_level, pii_data_type, sensitivity_level and integer encryption_level where verified. Masked source data does not prove the provider response is masked.",
+      "Store verified non-secret provider, base_url, protocol, operation_id and resource references in other_info. Do not store API keys, bearer tokens, authorization header samples, personal sample data or secrets in URLs. An endpoint describes a contract, not credentials.",
+      "Reusing existing ai_model and ai_file does not require Spring Boot. spring_boot_ai_model_client is the internal Spring component, distinct from the remote resource and external_api operation. Do not convert existing resource attributes into processor ports or rewrite historical IDs/transformations."
+    ],
+    "lineage_examples": {
+      "note": "Illustrative names only. Resolve actual object IDs and fields through MCP. Add only verified contracts before SQL.",
+      "request": "INSERT INTO BE_OBJECT('<external_api processor ID>') (text) SELECT a.OUTPUT.masked_text FROM BE_OBJECT('<caller processor ID>') a",
+      "response": "SELECT e.OUTPUT.result_text AS result_text FROM BE_OBJECT('<external_api processor ID>') e"
+    },
+    "other_info_keys": [
+      "provider",
+      "base_url",
+      "protocol",
+      "operation_id",
+      "resource_ids"
+    ],
+    "compatibility": "Additive catalog change only. Existing objects, IDs, routing and transformations are not migrated. App UI and central server rollout must be verified separately from the local desktop MCP release."
+  }
+}

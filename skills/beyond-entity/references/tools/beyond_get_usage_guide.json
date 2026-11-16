@@ -1,0 +1,35 @@
+{
+  "name": "beyond_get_usage_guide",
+  "description": "Get workflow guide for common tasks. Call this when unsure how to proceed or need step-by-step instructions.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "workflow": {
+        "type": "string",
+        "enum": [
+          "attribute_security",
+          "attribute_security_guide",
+          "code_autocompletion",
+          "code_generation",
+          "database_design",
+          "exploration",
+          "getting_started",
+          "mcp_review_board",
+          "processor_design",
+          "security_findings",
+          "security_findings_guide",
+          "code_analysis",
+          "code_analysis_guide",
+          "checkpoint_run",
+          "checkpoint_run_guide"
+        ],
+        "default": "getting_started",
+        "description": "Workflow name. Security aliases: security_findings/security_findings_guide and attribute_security/attribute_security_guide."
+      }
+    }
+  },
+  "outputSchema": null,
+  "output_schema_declared": false,
+  "output_contract_note": "No outputSchema is declared by the inspected public source definition. Consult live help and actual results; do not infer a missing output contract."
+}

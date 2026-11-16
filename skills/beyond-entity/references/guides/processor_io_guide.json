@@ -1,0 +1,87 @@
+{
+  "guide_id": "processor_io_guide",
+  "guide_revision": "9a27c089a058a2dc",
+  "source_mcp_version": "3.2.51",
+  "content": {
+    "controller_endpoint_contract_guide": {
+      "applies_to": [
+        "asp_net_controller",
+        "asp_net_endpoint_handler",
+        "asp_net_http_handler",
+        "asp_net_page_handler",
+        "asp_net_view_handler",
+        "django_endpoint_handler",
+        "express_controller",
+        "express_endpoint_handler",
+        "fastapi_endpoint_handler",
+        "flask_endpoint_handler",
+        "nestjs_controller",
+        "nextjs_endpoint_handler",
+        "spring_boot_controller"
+      ],
+      "rules": [
+        "Each verified handler gets one INPUT and one OUTPUT OBJECT container using the catalog physical object type. Same-handler routes share a pair; attribute and column names equal the handler.",
+        "Unknown handlers create no containers. These empty IO groupings imply no HTTP body schema; add only verified children. Reads do not backfill contracts.",
+        "Read returned endpoints, auto_created_attributes and IDs. Updates replace the endpoints list: preserve endpoint_id, input_attribute_id and output_attribute_id on retained routes; omit IDs on new routes.",
+        "Preserving endpoint_id preserves contract and child IDs and ID-based lineage during handler/route renames. Raw SQL text is not rewritten. Rename shared-handler routes together; split a route by submitting it without old IDs.",
+        "Reuse one same-handler root OBJECT in the same IO port. Non-object or duplicate roots, foreign IDs and inconsistent shared handlers fail; inspect current attributes before editing.",
+        "Omitted endpoints preserves routing, [] removes routes and null clears routing. Route removal retains contracts, children and lineage for explicit review and cleanup.",
+        "Use existing handler OUTPUT contracts for SQL results. Create verified child fields first and address them by full handler.field path. Never invent top-level results or copy caller arguments into response fields."
+      ],
+      "example": {
+        "note": "Illustrative verified design only. Replace angle-bracket IDs with actual server-returned IDs; never send these placeholders literally.",
+        "create_endpoint": {
+          "method": "GET",
+          "path": "/orders/{id}",
+          "handler": "getOrder"
+        },
+        "returned_endpoint_shape": {
+          "method": "GET",
+          "path": "/orders/{id}",
+          "handler": "getOrder",
+          "endpoint_id": "<returned endpoint_id>",
+          "input_attribute_id": "<returned INPUT Object ID>",
+          "output_attribute_id": "<returned OUTPUT Object ID>"
+        },
+        "add_verified_children": {
+          "tool": "beyond_add_processor_attributes",
+          "arguments": {
+            "processor_id": "<Controller ID>",
+            "input_attributes": [
+              {
+                "attribute_name": "Order ID",
+                "column_name": "id",
+                "data_type": "string",
+                "upper_attribute_id": "<returned INPUT Object ID>"
+              }
+            ],
+            "output_attributes": [
+              {
+                "attribute_name": "Status",
+                "column_name": "status",
+                "data_type": "string",
+                "upper_attribute_id": "<returned OUTPUT Object ID>"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "use_lookup": true,
+    "allowed_io_types": [
+      "INPUT",
+      "LOOKUP",
+      "OUTPUT"
+    ],
+    "automatic_target_io_type": "LOOKUP",
+    "rules": [
+      "use_lookup is a storage-type catalog policy, not an instance override. Missing or null preserves the legacy enabled behavior.",
+      "When use_lookup=false, never create LOOKUP attributes or change an attribute to LOOKUP. SQL-generated targets go directly to OUTPUT; explicit LOOKUP requests fail. Existing LOOKUP data is retained for compatibility and is not silently migrated.",
+      "When use_lookup=true, LOOKUP is allowed, not a requirement to add an extra transformation. Reuse a confirmed existing OUTPUT target for final results.",
+      "For Controller endpoints with a verified handler, the server creates an INPUT Object and an OUTPUT Object named after the handler. Empty contracts represent no known fields; they do not assert an Object-shaped HTTP body.",
+      "Preserve returned endpoint_id, input_attribute_id and output_attribute_id on endpoint edits. Same-handler routes share a contract pair; distinct handlers have separate pairs. Removed routes do not automatically delete their attributes or transformations.",
+      "Do not invent a handler or request/response fields. Legacy endpoints without a handler remain unchanged until a verified handler is supplied. Add confirmed nested fields under the returned contract attribute IDs.",
+      "Read a source child using alias.OUTPUT.handler.field (or alias.INPUT.handler.field for request bindings). Target an existing Controller response field using AS \"handler.field\"; create confirmed nested fields before SQL. Never combine unrelated endpoint contracts into common ports."
+    ]
+  }
+}

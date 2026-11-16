@@ -1,0 +1,73 @@
+{
+  "name": "beyond_get_document",
+  "description": "Read one shared project document by docId/doc_id or fileName/file_name. Use this after project context, checkout, or overview returns relevant_documents.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "docId": {
+        "type": "string",
+        "description": "Document ID, such as doc_xxx."
+      },
+      "fileName": {
+        "type": "string",
+        "description": "Exact document file name, such as AGENTS.md or README.md."
+      },
+      "doc_id": {
+        "type": "string",
+        "description": "Snake-case alias for docId."
+      },
+      "file_name": {
+        "type": "string",
+        "description": "Snake-case alias for fileName."
+      },
+      "include_json_content": {
+        "type": "boolean",
+        "default": false,
+        "description": "When false, omit duplicated JSON from text content and rely on structuredContent."
+      }
+    },
+    "anyOf": [
+      {
+        "required": [
+          "docId"
+        ]
+      },
+      {
+        "required": [
+          "fileName"
+        ]
+      },
+      {
+        "required": [
+          "doc_id"
+        ]
+      },
+      {
+        "required": [
+          "file_name"
+        ]
+      }
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "type": "string"
+          },
+          "document": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  },
+  "output_schema_declared": true
+}

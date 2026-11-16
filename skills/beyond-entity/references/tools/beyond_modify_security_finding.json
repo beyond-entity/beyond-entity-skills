@@ -1,0 +1,301 @@
+{
+  "name": "beyond_modify_security_finding",
+  "description": "Modify a finding, including manual status decisions. targets/standards omitted preserve, [] clear. Reasons required for accepted risk/false positive; authenticated actor/time recorded. Read beyond_get_usage_guide(workflow=\"security_findings\") or beyond_get_definitions(definition_names=[\"security_findings_guide\"]) first.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "finding_id": {
+        "type": "string"
+      },
+      "updates": {
+        "$ref": "#/definitions/security_finding_update"
+      }
+    },
+    "required": [
+      "finding_id",
+      "updates"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+      "security_finding_standard": {
+        "type": "object",
+        "properties": {
+          "standard_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "standard_version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "item_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "is_primary": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "standard_id",
+          "standard_version",
+          "item_id"
+        ],
+        "additionalProperties": false
+      },
+      "security_finding_target": {
+        "type": "object",
+        "properties": {
+          "object_type": {
+            "type": "string",
+            "enum": [
+              "ATTRIBUTE",
+              "ENTITY",
+              "MODEL",
+              "PROCESSOR",
+              "PROJECT",
+              "TRANSFORMATION"
+            ]
+          },
+          "object_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "owner",
+              "source",
+              "via",
+              "sink",
+              null
+            ]
+          },
+          "handler": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "attribute_ids": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "roles": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "owner",
+                "source",
+                "via",
+                "sink"
+              ]
+            },
+            "description": "All roles for this target object. Combined with singular role; duplicates removed."
+          },
+          "handlers": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "All handlers for this target object. Combined with singular handler; independent of roles, not paired by position."
+          }
+        },
+        "required": [
+          "object_type",
+          "object_id"
+        ],
+        "additionalProperties": false
+      },
+      "security_finding_update": {
+        "type": "object",
+        "properties": {
+          "evidence_path": {
+            "type": [
+              "object",
+              "array",
+              "string",
+              "null"
+            ],
+            "description": "JSON source -> via -> sink steps with files/lines; a string must contain valid JSON. Mask secrets."
+          },
+          "branch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "line_start": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "rule_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "confidence": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "flow",
+              "pattern",
+              null
+            ]
+          },
+          "accepted_until": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "source_file": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "detected_by": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "cwe_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACCEPTED_RISK",
+              "FALSE_POSITIVE",
+              "FIXED",
+              "OPEN",
+              "REOPENED"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "last_detected_commit": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "severity": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "high",
+              "medium",
+              "low",
+              null
+            ]
+          },
+          "message": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "code_snippet": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Mask all secret values before submitting (e.g. password = ****)."
+          },
+          "line_end": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "symbol": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "model_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/security_finding_target"
+            },
+            "description": "On modify, omitted preserves, [] clears, an array replaces all targets."
+          },
+          "standards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/security_finding_standard"
+            },
+            "description": "Finding-time standard version snapshots. Omitted preserves on modify; [] clears."
+          }
+        },
+        "minProperties": 1,
+        "additionalProperties": false
+      }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object"
+      }
+    },
+    "required": [
+      "success",
+      "data"
+    ]
+  },
+  "output_schema_declared": true
+}

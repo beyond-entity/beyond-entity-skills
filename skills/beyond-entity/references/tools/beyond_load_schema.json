@@ -1,0 +1,3931 @@
+{
+  "name": "beyond_load_schema",
+  "description": "Load all entity and processor schemas for the current Platform project. Use once at session start and again before coding from confirmed design so the AI can cache the current schema for auto-completion and code generation. Keep this schema, including each processor's transformations, in the AI's temporary or working context while coding. Returns schema without lineage details; each returned processor also includes its transformations. Compact mode still includes stable ids such as entity_id, processor_id, and attribute_id in their natural enclosing objects.",
+  "source_mcp_version": "3.2.51",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "include_entities": {
+        "type": "boolean",
+        "default": true
+      },
+      "include_processors": {
+        "type": "boolean",
+        "default": true
+      },
+      "include_relationships": {
+        "type": "boolean",
+        "default": false,
+        "description": "Include FK relationships for JOIN suggestions"
+      },
+      "names_and_data_types_only": {
+        "type": "boolean",
+        "default": true,
+        "description": "When true, return a compact schema for entity and processor attributes including attribute_id plus core fields such as names and data types, while parent entity_id or processor_id remains on the enclosing object."
+      },
+      "canvas_ids": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Limit to specific canvases. Empty = all accessible"
+      },
+      "response_format": {
+        "type": "string",
+        "enum": [
+          "auto",
+          "full",
+          "paged"
+        ],
+        "default": "auto",
+        "description": "auto returns inline when small and switches to paged delivery when the response exceeds max_inline_bytes. full disables automatic paging. paged forces paged delivery."
+      },
+      "max_inline_bytes": {
+        "type": "integer",
+        "default": 30000,
+        "description": "Maximum serialized structuredContent size to return inline when response_format is auto."
+      },
+      "page_size_bytes": {
+        "type": "integer",
+        "default": 30000,
+        "description": "Maximum JSON text fragment size per page when paged delivery is used."
+      },
+      "include_json_content": {
+        "type": "boolean",
+        "default": false,
+        "description": "When false, omit duplicated JSON from text content and rely on structuredContent."
+      }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "$ref": "#/definitions/project_summary"
+          },
+          "canvas_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "models": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "model_id": {
+                  "type": "string"
+                },
+                "model_info": {
+                  "$ref": "#/definitions/model_runtime_info"
+                }
+              }
+            }
+          },
+          "entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/entity_detail_payload"
+            }
+          },
+          "processors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/processor_detail_payload"
+            }
+          },
+          "relationships": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/relationship"
+            }
+          }
+        }
+      }
+    },
+    "definitions": {
+      "aggregation_item": {
+        "type": "object",
+        "description": "Aggregate function (COUNT, SUM, AVG, etc.)",
+        "properties": {
+          "function": {
+            "type": "string",
+            "enum": [
+              "COUNT",
+              "SUM",
+              "AVG",
+              "MIN",
+              "MAX",
+              "ARRAY_AGG",
+              "STRING_AGG"
+            ]
+          },
+          "distinct": {
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "default": 0
+          },
+          "source_attributes": {
+            "type": "array",
+            "description": "Empty for COUNT(*)",
+            "items": {
+              "$ref": "#/definitions/source_attribute"
+            }
+          },
+          "target_attribute": {
+            "$ref": "#/definitions/target_attribute"
+          },
+          "raw_expression": {
+            "type": "string",
+            "description": "The aggregated expression (e.g., '*', 'o.amount')"
+          },
+          "filter_expression": {
+            "type": "string",
+            "description": "FILTER (WHERE ...) clause"
+          }
+        },
+        "required": [
+          "function",
+          "target_attribute"
+        ],
+        "examples": [
+          {
+            "_description": "COUNT(*)",
+            "function": "COUNT",
+            "distinct": 0,
+            "source_attributes": [],
+            "target_attribute": {
+              "target_column_name": "order_count",
+              "target_attribute_id": "attr_out_count",
+              "target_entity_id": "proc_001"
+            },
+            "raw_expression": "*"
+          },
+          {
+            "_description": "SUM with FILTER",
+            "function": "SUM",
+            "distinct": 0,
+            "source_attributes": [
+              {
+                "source_alias": "o",
+                "source_column_name": "amount",
+                "source_attribute_id": "attr_amount",
+                "source_entity_id": "ent_orders"
+              }
+            ],
+            "target_attribute": {
+              "target_column_name": "total_active",
+              "target_attribute_id": "attr_out_total",
+              "target_entity_id": "proc_001"
+            },
+            "raw_expression": "o.amount",
+            "filter_expression": "WHERE o.status != 'CANCELLED'"
+          }
+        ]
+      },
+      "assignment_item": {
+        "type": "object",
+        "description": "Value assignment for INSERT/UPDATE. Creates WRITE lineage.",
+        "properties": {
+          "target_attribute": {
+            "$ref": "#/definitions/target_attribute"
+          },
+          "source_attributes": {
+            "type": "array",
+            "description": "If value comes from another attribute",
+            "items": {
+              "$ref": "#/definitions/source_attribute"
+            }
+          },
+          "value_info": {
+            "$ref": "#/definitions/value_info",
+            "description": "If value is literal/expression/parameter"
+          },
+          "raw_expression": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_attribute",
+          "raw_expression"
+        ],
+        "examples": [
+          {
+            "_description": "From source attribute (creates WRITE lineage)",
+            "target_attribute": {
+              "target_column_name": "coupon_id",
+              "target_attribute_id": "attr_ci_coupon_id",
+              "target_entity_id": "ent_coupon_issue"
+            },
+            "source_attributes": [
+              {
+                "source_alias": "proc",
+                "source_column_name": "coupon_id",
+                "source_attribute_id": "attr_input_coupon_id",
+                "source_entity_id": "proc_001"
+              }
+            ],
+            "raw_expression": "coupon_id = :coupon_id"
+          },
+          {
+            "_description": "Literal value",
+            "target_attribute": {
+              "target_column_name": "status",
+              "target_attribute_id": "attr_ci_status",
+              "target_entity_id": "ent_coupon_issue"
+            },
+            "value_info": {
+              "value_type": "LITERAL",
+              "value_expression": "'ISSUED'"
+            },
+            "raw_expression": "status = 'ISSUED'"
+          },
+          {
+            "_description": "Expression (self-reference)",
+            "target_attribute": {
+              "target_column_name": "issued_qty",
+              "target_attribute_id": "attr_issued_qty",
+              "target_entity_id": "ent_coupon"
+            },
+            "value_info": {
+              "value_type": "EXPRESSION",
+              "value_expression": "issued_qty + :count"
+            },
+            "raw_expression": "issued_qty = issued_qty + :issuedCount"
+          }
+        ]
+      },
+      "constraint": {
+        "type": "object",
+        "description": "Constraint definition. Used for create/update payloads and for persisted constraint records.",
+        "properties": {
+          "constraint_id": {
+            "type": "string",
+            "description": "Beyond Entity constraint ID"
+          },
+          "entity_id": {
+            "type": "string",
+            "description": "Target entity ID"
+          },
+          "model_id": {
+            "type": "string",
+            "description": "Target model ID"
+          },
+          "constraint_name": {
+            "type": "string"
+          },
+          "index_name": {
+            "type": "string",
+            "description": "Physical index name when applicable"
+          },
+          "constraint_type": {
+            "type": "string",
+            "description": "Constraint type. For pgvector vector similarity indexes, use 'cosine', 'l2', or 'inner_product' instead of generic 'Index'. These map to pgvector cosine, L2, and inner-product operator classes.",
+            "enum": [
+              "PrimaryKey",
+              "Unique",
+              "Check",
+              "Default",
+              "Index",
+              "cosine",
+              "l2",
+              "inner_product"
+            ],
+            "x-vectorConstraintTypes": [
+              {
+                "constraint_type": "cosine",
+                "pgvectorOperatorClass": "vector_cosine_ops",
+                "preferredFor": "cosine similarity / cosine distance"
+              },
+              {
+                "constraint_type": "l2",
+                "pgvectorOperatorClass": "vector_l2_ops",
+                "preferredFor": "Euclidean L2 distance"
+              },
+              {
+                "constraint_type": "inner_product",
+                "pgvectorOperatorClass": "vector_ip_ops",
+                "preferredFor": "negative inner product"
+              }
+            ]
+          },
+          "attribute_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For existing entities"
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Column names involved in the constraint"
+          },
+          "attribute_names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For batch create"
+          },
+          "check_expression": {
+            "type": "string",
+            "description": "For CHECK constraints only. Do not use this for Unique constraints or partial unique indexes."
+          },
+          "constraint_value": {
+            "type": "string",
+            "description": "For Default or Check constraints, the stored value or condition"
+          },
+          "constraint_order": {
+            "type": "integer",
+            "description": "Attribute order within the constraint for persisted records"
+          },
+          "index_type": {
+            "type": "string",
+            "enum": [
+              "BTREE",
+              "HASH",
+              "GIN",
+              "GIST"
+            ],
+            "description": "For generic INDEX constraints. For pgvector vector similarity indexes, prefer constraint_type 'cosine', 'l2', or 'inner_product' instead of encoding the vector index as a generic Index."
+          },
+          "other_info": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Preserved relationship metadata. on_delete/on_update are reference annotations, not supported BE behaviors.",
+            "additionalProperties": true
+          },
+          "relationship_description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Stored relationship description, separate from referential-action metadata."
+          },
+          "metadata_guide": {
+            "type": "string",
+            "description": "Present when on_delete or on_update metadata exists; explains that BE does not support or apply these behavior settings."
+          }
+        },
+        "required": [
+          "constraint_name",
+          "constraint_type"
+        ],
+        "examples": [
+          {
+            "constraint_id": "cst_4FfSu6cF1S",
+            "entity_id": "ent_kMntnK7JSM",
+            "model_id": "mdl_ef32pexmia",
+            "constraint_name": "pk_code_group",
+            "index_name": "PK_code_group",
+            "constraint_type": "PrimaryKey",
+            "attribute_ids": [
+              "attr_c3SpXfySa6"
+            ],
+            "constraint_order": 0
+          },
+          {
+            "constraint_id": "cst_5gJbnF2BK4",
+            "entity_id": "ent_kMntnK7JSM",
+            "model_id": "mdl_ef32pexmia",
+            "constraint_name": "DF_code_group_created_at",
+            "constraint_type": "Default",
+            "attribute_ids": [
+              "attr_ey1Y7Rd8ba"
+            ],
+            "constraint_order": 0
+          },
+          {
+            "constraint_id": "cst_tjxr3CfQTW",
+            "entity_id": "ent_kMntnK7JSM",
+            "model_id": "mdl_ef32pexmia",
+            "constraint_name": "chk_code_group_use_yn",
+            "constraint_type": "Check",
+            "attribute_ids": [
+              "attr_wrh7pEDzPK"
+            ],
+            "constraint_order": 0
+          },
+          {
+            "constraint_id": "cst_vectorCosine01",
+            "entity_id": "ent_pgvectorChunk01",
+            "model_id": "mdl_pgvectorEmbeddings01",
+            "constraint_name": "idx_document_embedding_cosine",
+            "index_name": "idx_document_embedding_cosine",
+            "constraint_type": "cosine",
+            "attribute_ids": [
+              "attr_embeddingVector01"
+            ],
+            "columns": [
+              "embedding"
+            ],
+            "other_info": {
+              "pgvector_operator_class": "vector_cosine_ops"
+            }
+          }
+        ]
+      },
+      "constraint_summary": {
+        "type": "object",
+        "properties": {
+          "constraint_id": {
+            "type": "string"
+          },
+          "constraint_name": {
+            "type": "string"
+          },
+          "constraint_type": {
+            "type": "string"
+          },
+          "attribute_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "other_info": {
+            "type": "object"
+          }
+        }
+      },
+      "entity_attribute": {
+        "type": "object",
+        "description": "Attribute schema for data entities.",
+        "properties": {
+          "attribute_id": {
+            "type": "string",
+            "description": "Beyond Entity attribute ID"
+          },
+          "attribute_name": {
+            "type": "string",
+            "description": "Logical attribute name. Use a human-friendly business/property name in the user's language, not a physical identifier."
+          },
+          "column_name": {
+            "type": "string",
+            "description": "Physical column name"
+          },
+          "is_primary_key": {
+            "type": "boolean",
+            "default": false
+          },
+          "is_not_null": {
+            "type": "boolean",
+            "default": false
+          },
+          "is_auto_increment": {
+            "type": "boolean",
+            "default": false
+          },
+          "domain_id": {
+            "type": "string",
+            "description": "Optional domain ID applied to this attribute"
+          },
+          "data_length": {
+            "type": "integer",
+            "description": "Physical length/size for the data type. For vector-like types this is the embedding dimension; for bit and bit varying this is the bit length."
+          },
+          "decimal_points": {
+            "type": "integer",
+            "description": "Scale / decimal precision for numeric data types. Do not use this for vector, bit, or bit varying."
+          },
+          "data_type": {
+            "type": "string",
+            "description": "Physical data type exposed as data_type"
+          },
+          "nested_data_type": {
+            "type": "string",
+            "description": "Logical nested element type for complex attributes"
+          },
+          "nested_physical_data_type": {
+            "type": "string",
+            "description": "Stored physical data type for nested values"
+          },
+          "default_value": {
+            "type": "string",
+            "description": "Default value expression"
+          },
+          "enum_values": {
+            "type": "string",
+            "description": "Comma-separated allowed values as stored"
+          },
+          "example_values": {
+            "type": "string",
+            "description": "Example values as stored"
+          },
+          "encryption_level": {
+            "type": "integer",
+            "default": 0,
+            "description": "Integer levelNumber: 0=NONE (None), 1=MASKED (Masked), 2=ENCRYPTED (Encrypted), 3=HASHED (Hashed; one-way hash), 4=KEYSERVER (Key Server; encryption key managed by a key server). Writes do not accept null; omission preserves the value on modification.",
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "pii_level": {
+            "type": "integer",
+            "default": 0,
+            "description": "0 = none, 1 = low, 2 = medium, 3 = high"
+          },
+          "sensitivity_level": {
+            "type": "integer",
+            "default": 0,
+            "description": "Custom sensitivity level defined by the organization. 0 = not specified, 1 = public, 2 = internal, 3 = confidential, 4 = restricted"
+          },
+          "confidentiality": {
+            "type": "string",
+            "enum": [
+              "L",
+              "M",
+              "H",
+              "S"
+            ],
+            "description": "TARA confidentiality classification. L = Low, M = Medium, H = High, S = Safety Critical."
+          },
+          "integrity": {
+            "type": "string",
+            "enum": [
+              "L",
+              "M",
+              "H",
+              "S"
+            ],
+            "description": "TARA integrity classification. L = Low, M = Medium, H = High, S = Safety Critical."
+          },
+          "availability": {
+            "type": "string",
+            "enum": [
+              "L",
+              "M",
+              "H",
+              "S"
+            ],
+            "description": "TARA availability classification. L = Low, M = Medium, H = High, S = Safety Critical."
+          },
+          "attribute_description": {
+            "type": "string",
+            "description": "Human-readable attribute description"
+          },
+          "other_info": {
+            "type": "object",
+            "description": "Additional JSON metadata for the attribute"
+          },
+          "data_depth": {
+            "type": "integer",
+            "default": 0,
+            "description": "Nesting depth. 0 for root attributes."
+          },
+          "upper_attribute_id": {
+            "type": "string",
+            "description": "Parent attribute ID for nested structures. Null for root-level attributes."
+          },
+          "display_order": {
+            "type": "integer",
+            "description": "Display order within the entity"
+          },
+          "pii_data_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "NA",
+              "NAME",
+              "CONTACT",
+              "ADDRESS",
+              "FINANCIAL",
+              "SENSITIVE_GENERAL",
+              "LOCATION",
+              "ONLINE_ID",
+              "HEALTH",
+              "BIOMETRIC",
+              "EMPLOYMENT",
+              "DATE_OF_BIRTH",
+              "GENERAL_INFO",
+              "PASSPORT_NUMBER",
+              "NATIONAL_ID",
+              "DRIVER_LICENSE",
+              "ALIEN_ID",
+              "UNIQUE_ID_GENERAL",
+              null
+            ],
+            "description": "PII_DATA_TYPE enum name stored verbatim, e.g. DRIVER_LICENSE. Null clears the classification; this is independent of pii_level."
+          },
+          "encryption_level_desc": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "readOnly": true,
+            "description": "Human-readable encryption_level: None, Masked, Encrypted, Hashed, Key Server; null for an undeclared value."
+          }
+        },
+        "required": [
+          "attribute_name",
+          "column_name",
+          "data_type"
+        ],
+        "examples": [
+          {
+            "attribute_id": "attr_c3SpXfySa6",
+            "attribute_name": "코드그룹ID",
+            "column_name": "code_group_id",
+            "is_primary_key": true,
+            "is_not_null": true,
+            "is_auto_increment": false,
+            "data_length": 20,
+            "data_type": "varchar",
+            "encryption_level": 0,
+            "pii_level": 0,
+            "sensitivity_level": 0,
+            "attribute_description": "코드그룹ID",
+            "other_info": {},
+            "data_depth": 0,
+            "display_order": 0
+          },
+          {
+            "attribute_id": "attr_wrh7pEDzPK",
+            "attribute_name": "사용여부",
+            "column_name": "use_yn",
+            "is_primary_key": false,
+            "is_not_null": true,
+            "is_auto_increment": false,
+            "data_length": 1,
+            "data_type": "char",
+            "default_value": "Y",
+            "enum_values": "Y, N",
+            "encryption_level": 0,
+            "pii_level": 0,
+            "sensitivity_level": 0,
+            "attribute_description": "사용여부",
+            "other_info": {},
+            "data_depth": 0,
+            "display_order": 3
+          }
+        ]
+      },
+      "entity_detail_payload": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          },
+          "entity_info": {
+            "$ref": "#/definitions/entity_runtime_info"
+          },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/entity_attribute"
+            }
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/constraint"
+            }
+          },
+          "auto_created_constraints": {
+            "type": "array",
+            "description": "Constraints automatically created while creating this entity, such as PrimaryKey from is_primary_key or Default from default_value. Do not create these constraints again.",
+            "items": {
+              "$ref": "#/definitions/constraint_summary"
+            }
+          },
+          "auto_created_constraint_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lineage": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              {
+                "type": "object",
+                "description": "Logical lineage graph page with coverage and continuation."
+              }
+            ]
+          },
+          "lineage_status": {
+            "type": "object",
+            "description": "Lineage coverage only (separate from inventory/search pagination). complete means this single response includes the whole selected traversal; traversal_complete means traversal finished across all graph pages. focused is policy-limited. Follow continuation.tool/cursor until exhausted; combine all prior pages. A depth/path/state limit requires a narrower or deeper new query."
+          },
+          "auto_created_attributes": {
+            "type": "array",
+            "description": "Attributes automatically added from storage-type default_fields; also included in attributes. Do not create them again.",
+            "items": {
+              "$ref": "#/definitions/entity_attribute"
+            }
+          },
+          "auto_created_attribute_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "entity_info": {
+        "type": "object",
+        "description": "Entity metadata returned by MCP read tools.",
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "description": "Beyond Entity entity ID"
+          },
+          "model_id": {
+            "type": "string",
+            "description": "Parent model ID"
+          },
+          "entity_name": {
+            "type": "string",
+            "description": "Logical entity name. Use a human-friendly business name in the user's language. Do not default this to a physical identifier."
+          },
+          "table_name": {
+            "type": "string",
+            "description": "Physical table/object name"
+          },
+          "other_info": {
+            "type": "object",
+            "description": "Additional JSON metadata for the entity",
+            "properties": {
+              "endpoints": {
+                "type": [
+                  "array",
+                  "null",
+                  "string"
+                ],
+                "description": "Verified inbound HTTP routes for a Controller class or API Server boundary. One Controller processor can contain multiple path/method/handler combinations. Omit unknown fields; never assume GET or derive routes from class names. On update omission preserves, an array replaces, [] empties, null clears. Do not use for Filter/Interceptor matching or Advice scope. Stored only in other_info.endpoints; the top-level response is a projection, not a separate stored value. API Server represents one Swagger/OpenAPI operation: endpoints is an array with at most one method/path pair. Different methods or paths require separate processors. Spring Controller classes may have multiple endpoints. Endpoint cardinality follows the storage catalog: is_module=true permits multiple endpoints; false, null or omitted permits at most one. Clients cannot override this flag. This applies to all processor types and both endpoints and other_info.endpoints. Check acceptable_processors or processor_storage_types before writing. Legacy JSON strings encoding an array or null are also accepted, decoded and validated; new writes store arrays or null and top-level endpoints read projections use arrays or null. Existing raw other_info may retain legacy strings until updated. New clients must send arrays. Invalid strings are rejected without clearing metadata.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Verified request mapping path; resolve class and handler mappings only from evidence."
+                    },
+                    "method": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Verified HTTP method; omit if unspecified or unknown. Never default to GET."
+                    },
+                    "handler": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Actual source handler method name without class/package prefix; omit if unknown."
+                    },
+                    "endpoint_id": {
+                      "type": "string",
+                      "description": "Server-assigned stable Controller endpoint ID. Preserve on edits to retain the contract association."
+                    },
+                    "input_attribute_id": {
+                      "type": "string",
+                      "description": "Server-managed Controller INPUT Object ID. Preserve on edits; do not invent. Same-handler routes share this ID."
+                    },
+                    "output_attribute_id": {
+                      "type": "string",
+                      "description": "Server-managed Controller OUTPUT Object ID. Preserve on edits; do not invent. Add verified child fields under this Object."
+                    }
+                  },
+                  "anyOf": [
+                    {
+                      "required": [
+                        "path"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "method"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "handler"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "description": {
+            "type": "string",
+            "description": "Entity description"
+          },
+          "entity_storage_type": {
+            "type": "string",
+            "description": "Exposed as entity_storage_type, sourced from ENTITY_TYPE. Use 'pgvector' for dedicated pgvector tables, and use 'postgresql' or 'supabase' when vector or bit columns belong to those runtime models. For vector and bit attributes, data_length represents dimensions or bit length, and decimal_points should not be used. For InfluxDB entities, entity_name should describe the business meaning of the series and table_name should store the physical series signature based on tag-key combinations. Save sample tag/field text in other_info.",
+            "enum": [
+              "mysql",
+              "mariadb",
+              "postgresql",
+              "pgvector",
+              "supabase",
+              "hive",
+              "athena",
+              "inceptor",
+              "redshift",
+              "netezza",
+              "vertica",
+              "snowflake",
+              "databricks",
+              "mongodb",
+              "cassandra",
+              "scylladb",
+              "hbase",
+              "bigtable",
+              "bigquery",
+              "redis",
+              "session_storage",
+              "local_storage",
+              "web_storage",
+              "indexed_db",
+              "cookie",
+              "general_cache",
+              "elasticsearch",
+              "opensearch",
+              "oracle",
+              "sqlserver",
+              "sybase",
+              "db2",
+              "influxdb",
+              "saphana",
+              "sqlite",
+              "hsqldb",
+              "h2",
+              "derby",
+              "sqlite_cache",
+              "csv_file",
+              "weblog_file",
+              "spreadsheet_file",
+              "json_file",
+              "general_file",
+              "dynamodb",
+              "jms",
+              "sqs",
+              "queue_json",
+              "queue_general",
+              "firestore",
+              "ai_model",
+              "ai_file",
+              "google_sheet",
+              "google_document",
+              "google_slide",
+              "google_drive_file",
+              "google_gmail_message"
+            ]
+          },
+          "entity_data_type": {
+            "type": "string",
+            "enum": [
+              "data_entity"
+            ],
+            "description": "Entity category"
+          },
+          "criticality_level": {
+            "type": "integer",
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "default": 1,
+            "description": "TARA criticality level. 1 = Low, 2 = Medium, 3 = High."
+          },
+          "sub_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional free-text refinement of the storage type; alias subType. Examples: controller REST/MVC, service Application/Domain/Facade/AI Service, repository Repository/DAO/Mapper/Memory Repository. See model_selection_guide for the complete recommended Spring subtype catalog; do not create new default types for internal stages."
+          },
+          "layer_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "readOnly": true,
+            "description": "Existing layer assignment. Creation sets NULL; property updates preserve it."
+          },
+          "endpoints": {
+            "type": [
+              "array",
+              "null",
+              "string"
+            ],
+            "description": "Verified inbound HTTP routes for a Controller class or API Server boundary. One Controller processor can contain multiple path/method/handler combinations. Omit unknown fields; never assume GET or derive routes from class names. On update omission preserves, an array replaces, [] empties, null clears. Do not use for Filter/Interceptor matching or Advice scope. Stored only in other_info.endpoints; the top-level response is a projection, not a separate stored value. API Server represents one Swagger/OpenAPI operation: endpoints is an array with at most one method/path pair. Different methods or paths require separate processors. Spring Controller classes may have multiple endpoints. Endpoint cardinality follows the storage catalog: is_module=true permits multiple endpoints; false, null or omitted permits at most one. Clients cannot override this flag. This applies to all processor types and both endpoints and other_info.endpoints. Check acceptable_processors or processor_storage_types before writing. Legacy JSON strings encoding an array or null are also accepted, decoded and validated; new writes store arrays or null and top-level endpoints read projections use arrays or null. Existing raw other_info may retain legacy strings until updated. New clients must send arrays. Invalid strings are rejected without clearing metadata.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Verified request mapping path; resolve class and handler mappings only from evidence."
+                },
+                "method": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Verified HTTP method; omit if unspecified or unknown. Never default to GET."
+                },
+                "handler": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Actual source handler method name without class/package prefix; omit if unknown."
+                },
+                "endpoint_id": {
+                  "type": "string",
+                  "description": "Server-assigned stable Controller endpoint ID. Preserve on edits to retain the contract association."
+                },
+                "input_attribute_id": {
+                  "type": "string",
+                  "description": "Server-managed Controller INPUT Object ID. Preserve on edits; do not invent. Same-handler routes share this ID."
+                },
+                "output_attribute_id": {
+                  "type": "string",
+                  "description": "Server-managed Controller OUTPUT Object ID. Preserve on edits; do not invent. Add verified child fields under this Object."
+                }
+              },
+              "anyOf": [
+                {
+                  "required": [
+                    "path"
+                  ]
+                },
+                {
+                  "required": [
+                    "method"
+                  ]
+                },
+                {
+                  "required": [
+                    "handler"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "entity_id",
+          "model_id",
+          "entity_name",
+          "table_name",
+          "entity_storage_type"
+        ],
+        "examples": [
+          {
+            "entity_id": "ent_kMntnK7JSM",
+            "model_id": "mdl_ef32pexmia",
+            "entity_name": "공통코드그룹",
+            "table_name": "code_group",
+            "other_info": {},
+            "description": "공통코드그룹",
+            "entity_storage_type": "postgresql",
+            "entity_data_type": "data_entity",
+            "criticality_level": 1
+          },
+          {
+            "entity_id": "ent_pgvectorChunk01",
+            "model_id": "mdl_pgvectorEmbeddings01",
+            "entity_name": "Document Chunk Embedding",
+            "table_name": "document_chunk_embedding",
+            "other_info": {
+              "embedding_column": "embedding",
+              "embedding_data_type": "vector",
+              "embedding_dimensions": 1536
+            },
+            "description": "Stores document chunks and embeddings for semantic search.",
+            "entity_storage_type": "pgvector",
+            "entity_data_type": "data_entity",
+            "criticality_level": 1
+          },
+          {
+            "entity_id": "ent_influxCpu01",
+            "model_id": "mdl_influxRuntime01",
+            "entity_name": "서버 CPU 사용률 시계열",
+            "table_name": "host,region,cpu",
+            "other_info": {
+              "tag_sample_text": "tags: host=app-01, region=ap-northeast-2, cpu=cpu0",
+              "field_sample_text": "fields: usage_user=12.5, usage_system=4.2, usage_idle=83.3, collected_at=2026-05-21T10:30:00Z"
+            },
+            "description": "업무상 CPU series 의미",
+            "entity_storage_type": "influxdb",
+            "entity_data_type": "data_entity",
+            "criticality_level": 1
+          },
+          {
+            "entity_id": "ent_YqS511iwK3",
+            "model_id": "mdl_ef32pexmia",
+            "entity_name": "관리자역할",
+            "table_name": "admin_role",
+            "other_info": {},
+            "description": "관리자역할",
+            "entity_storage_type": "postgresql",
+            "entity_data_type": "data_entity",
+            "criticality_level": 1
+          },
+          {
+            "entity_id": "ent_EeCGcExePQ",
+            "model_id": "mdl_ef32pexmia",
+            "entity_name": "고객",
+            "table_name": "customer",
+            "other_info": {},
+            "description": "고객",
+            "entity_storage_type": "postgresql",
+            "entity_data_type": "data_entity",
+            "criticality_level": 1
+          }
+        ]
+      },
+      "entity_runtime_info": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/entity_info"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "model_name": {
+                "type": "string"
+              },
+              "database_name": {
+                "type": "string"
+              },
+              "schema_name": {
+                "type": "string"
+              },
+              "implementation_status": {
+                "$ref": "#/definitions/implementation_status"
+              },
+              "canvas_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "filter_item": {
+        "type": "object",
+        "description": "WHERE condition",
+        "properties": {
+          "operator": {
+            "type": "string",
+            "description": "Filter operator. Vector operators: L2_DISTANCE uses <->, COSINE_DISTANCE uses <=>, NEGATIVE_INNER_PRODUCT uses <#>. These vector operators are also valid for join-like comparisons.",
+            "enum": [
+              "eq",
+              "ne",
+              "gt",
+              "ge",
+              "lt",
+              "le",
+              "LIKE",
+              "ILIKE",
+              "NOT_LIKE",
+              "IN",
+              "NOT_IN",
+              "IS_NULL",
+              "IS_NOT_NULL",
+              "BETWEEN",
+              "EXISTS",
+              "NOT_EXISTS",
+              "L2_DISTANCE",
+              "COSINE_DISTANCE",
+              "NEGATIVE_INNER_PRODUCT",
+              "OR",
+              "AND"
+            ],
+            "x-vectorOperators": [
+              {
+                "title": "L2_DISTANCE",
+                "operationSymbol": "<->",
+                "usedForJoins": true,
+                "isVectorOperation": true
+              },
+              {
+                "title": "COSINE_DISTANCE",
+                "operationSymbol": "<=>",
+                "usedForJoins": true,
+                "isVectorOperation": true
+              },
+              {
+                "title": "NEGATIVE_INNER_PRODUCT",
+                "operationSymbol": "<#>",
+                "usedForJoins": true,
+                "isVectorOperation": true
+              }
+            ]
+          },
+          "value_info": {
+            "$ref": "#/definitions/value_info"
+          },
+          "source_attribute": {
+            "$ref": "#/definitions/source_attribute"
+          },
+          "raw_expression": {
+            "type": "string",
+            "description": "Original SQL for reference"
+          },
+          "sub_filters": {
+            "type": "array",
+            "description": "Nested filters for OR groups or EXISTS subqueries",
+            "items": {
+              "$ref": "#/definitions/filter_item"
+            }
+          }
+        },
+        "required": [
+          "operator"
+        ],
+        "examples": [
+          {
+            "_description": "Simple equality with literal",
+            "operator": "eq",
+            "value_info": {
+              "value_type": "LITERAL",
+              "value": "'ACTIVE'"
+            },
+            "source_attribute": {
+              "source_alias": "c",
+              "source_column_name": "status",
+              "source_attribute_id": "attr_status",
+              "source_entity_id": "ent_customer"
+            },
+            "raw_expression": "c.status = 'ACTIVE'"
+          },
+          {
+            "_description": "Parameter comparison (creates QUERY_PARAMETER lineage)",
+            "operator": "eq",
+            "value_info": {
+              "value_type": "PARAMETER",
+              "value": ":customerId",
+              "value_attribute_id": "attr_input_cust_id",
+              "value_entity_id": "proc_001"
+            },
+            "source_attribute": {
+              "source_alias": "o",
+              "source_column_name": "customer_id",
+              "source_attribute_id": "attr_cust_id",
+              "source_entity_id": "ent_orders"
+            },
+            "raw_expression": "o.customer_id = :customerId"
+          },
+          {
+            "_description": "Vector L2 distance threshold from pgvector SQL",
+            "operator": "L2_DISTANCE",
+            "value_info": {
+              "value_type": "PARAMETER",
+              "value": ":query_embedding",
+              "comparison_operator": "lt",
+              "comparison_right_operand": "0.8"
+            },
+            "source_attribute": {
+              "source_alias": "d",
+              "source_column_name": "embedding",
+              "source_attribute_id": "attr_embedding",
+              "source_entity_id": "ent_documents"
+            },
+            "raw_expression": "d.embedding <-> :query_embedding < 0.8"
+          },
+          {
+            "_description": "OR group with sub_filters",
+            "operator": "OR",
+            "value_info": {
+              "value_type": "EXPRESSION"
+            },
+            "raw_expression": "(:keyword IS NULL OR c.name ILIKE '%' || :keyword || '%' OR c.email ILIKE '%' || :keyword || '%')",
+            "sub_filters": [
+              {
+                "operator": "ILIKE",
+                "value_info": {
+                  "value_type": "PARAMETER",
+                  "value": ":keyword"
+                },
+                "source_attribute": {
+                  "source_alias": "c",
+                  "source_column_name": "name",
+                  "source_attribute_id": "attr_name",
+                  "source_entity_id": "ent_customer"
+                },
+                "raw_expression": "c.name ILIKE '%' || :keyword || '%'"
+              },
+              {
+                "operator": "ILIKE",
+                "value_info": {
+                  "value_type": "PARAMETER",
+                  "value": ":keyword"
+                },
+                "source_attribute": {
+                  "source_alias": "c",
+                  "source_column_name": "email",
+                  "source_attribute_id": "attr_email",
+                  "source_entity_id": "ent_customer"
+                },
+                "raw_expression": "c.email ILIKE '%' || :keyword || '%'"
+              }
+            ]
+          },
+          {
+            "_description": "NOT EXISTS subquery",
+            "operator": "NOT_EXISTS",
+            "value_info": {
+              "value_type": "EXPRESSION"
+            },
+            "raw_expression": "NOT EXISTS (SELECT 1 FROM coupon_issue ci WHERE ci.coupon_id = :coupon_id AND ci.customer_id = c.customer_id)",
+            "sub_filters": [
+              {
+                "operator": "eq",
+                "value_info": {
+                  "value_type": "PARAMETER",
+                  "value": ":coupon_id",
+                  "value_attribute_id": "attr_input_coupon_id",
+                  "value_entity_id": "proc_001"
+                },
+                "source_attribute": {
+                  "source_alias": "ci",
+                  "source_column_name": "coupon_id",
+                  "source_attribute_id": "attr_ci_coupon_id",
+                  "source_entity_id": "ent_coupon_issue"
+                },
+                "raw_expression": "ci.coupon_id = :coupon_id"
+              },
+              {
+                "operator": "eq",
+                "value_info": {
+                  "value_type": "ATTRIBUTE",
+                  "value": "c.customer_id"
+                },
+                "source_attribute": {
+                  "source_alias": "ci",
+                  "source_column_name": "customer_id",
+                  "source_attribute_id": "attr_ci_cust_id",
+                  "source_entity_id": "ent_coupon_issue"
+                },
+                "raw_expression": "ci.customer_id = c.customer_id"
+              }
+            ]
+          }
+        ]
+      },
+      "grouping_item": {
+        "type": "object",
+        "description": "GROUP BY clause",
+        "properties": {
+          "source_attributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/source_attribute"
+            }
+          },
+          "raw_expression": {
+            "type": "string",
+            "description": "For complex expressions like DATE_TRUNC"
+          }
+        },
+        "required": [
+          "source_attributes"
+        ]
+      },
+      "implementation_status": {
+        "type": "string",
+        "enum": [
+          "NOT_APPLICABLE",
+          "DESIGNING",
+          "DESIGNED",
+          "IMPLEMENTING",
+          "DRAFT_IMPLEMENTED",
+          "TESTING",
+          "IMPLEMENTED",
+          "MODIFICATION_REQUESTED",
+          "MODIFICATION_APPROVED",
+          "MODIFICATION_REJECTED",
+          "MODIFICATION_IMPLEMENTING",
+          "MODIFICATION_TESTING",
+          "USER_DEFINED"
+        ],
+        "description": "Implementation workflow status shared by entities, processors, and processor UX."
+      },
+      "join_item": {
+        "type": "object",
+        "description": "JOIN condition",
+        "properties": {
+          "join_type": {
+            "type": "string",
+            "enum": [
+              "INNER",
+              "LEFT",
+              "RIGHT",
+              "FULL",
+              "CROSS"
+            ],
+            "default": "INNER"
+          },
+          "left_alias": {
+            "type": "string"
+          },
+          "left_column_name": {
+            "type": "string"
+          },
+          "left_attribute_id": {
+            "type": "string"
+          },
+          "left_entity_id": {
+            "type": "string"
+          },
+          "right_alias": {
+            "type": "string"
+          },
+          "right_column_name": {
+            "type": "string"
+          },
+          "right_attribute_id": {
+            "type": "string"
+          },
+          "right_entity_id": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string",
+            "description": "Join comparison operator. Vector joins use L2_DISTANCE (<->), COSINE_DISTANCE (<=>), or NEGATIVE_INNER_PRODUCT (<#>). Relational joins usually use eq."
+          },
+          "raw_expression": {
+            "type": "string",
+            "description": "Original JOIN ON predicate expression."
+          }
+        },
+        "required": [
+          "join_type",
+          "left_attribute_id",
+          "left_entity_id",
+          "right_attribute_id",
+          "right_entity_id"
+        ],
+        "examples": [
+          {
+            "_description": "INNER JOIN on role_id",
+            "join_type": "INNER",
+            "left_alias": "a",
+            "left_column_name": "role_id",
+            "left_attribute_id": "attr_admin_role_id",
+            "left_entity_id": "ent_admin",
+            "right_alias": "r",
+            "right_column_name": "role_id",
+            "right_attribute_id": "attr_role_id",
+            "right_entity_id": "ent_role",
+            "operator": "eq",
+            "raw_expression": "a.role_id = r.role_id"
+          },
+          {
+            "_description": "INNER JOIN by pgvector negative inner product",
+            "join_type": "INNER",
+            "left_alias": "d",
+            "left_column_name": "embedding",
+            "left_attribute_id": "attr_document_embedding",
+            "left_entity_id": "ent_documents",
+            "right_alias": "c",
+            "right_column_name": "embedding",
+            "right_attribute_id": "attr_centroid_embedding",
+            "right_entity_id": "ent_centroids",
+            "operator": "NEGATIVE_INNER_PRODUCT",
+            "raw_expression": "d.embedding <#> c.embedding"
+          }
+        ]
+      },
+      "model": {
+        "type": "object",
+        "description": "Top-level design container for a system boundary in Beyond Entity. A model can represent a database/warehouse schema, a browser or app UI/task design surface, or a general system boundary for APIs, processor groups, files, caches, applications, or mixed components.",
+        "properties": {
+          "model_id": {
+            "type": "string",
+            "description": "Beyond Entity model ID"
+          },
+          "model_name": {
+            "type": "string",
+            "description": "Logical name for the model"
+          },
+          "model_storage_type": {
+            "type": "string",
+            "description": "Storage/system type for the model. Use database values such as 'postgresql', 'pgvector', or 'bigquery' only for real persisted data platforms. Use 'pgvector' for dedicated PostgreSQL pgvector vector databases and embedding stores; PostgreSQL and Supabase models can also contain vector or bit columns when those data types are present in the entity schema. Use 'webapp' for browser-based user workflows and screens such as signup, login, search forms, and modal/page interactions. Use 'app' for application UI workflows and screens such as product lists, detail pages, dashboards, and mobile app navigation. Use 'rabbitmq' or 'kafka' for messaging-system boundaries. Use 'influxdb' for InfluxDB time-series models, where database_name represents Bucket and schema_name represents Measurement. Use 'general_system' for backend, API, file, cache, integration, or processor-centric system groupings; use entity_storage_type='general_file' inside general_system for unstructured or mixed file resources. Store exchange/topic/binding/partitioning or other platform-specific settings in other_info when needed. Use model_storage_type='spring_boot_application' for legacy Spring Boot, Spring AI, and Spring MVC (including non-Boot MVC). When extracting architecture from code, use the actual class name as processor physical name/module_name; exclude its package and record verified package_name, qualified_class_name and source_file in other_info for class tracing. Choose the closest matching allowed spring_boot_* processor type, such as spring_boot_controller or spring_boot_service; use module_general for an unmatched class/module or processor_general for an individual operation. Use model_storage_type='google_workspace' for Google Workspace resources and automation. Query beyond_get_definitions(definition_names=[\"model_selection_guide\"]) for the full rules and examples.",
+            "enum": [
+              "mysql",
+              "mariadb",
+              "pgvector",
+              "postgresql",
+              "supabase",
+              "hive",
+              "athena",
+              "inceptor",
+              "redshift",
+              "netezza",
+              "vertica",
+              "snowflake",
+              "databricks",
+              "mongodb",
+              "cassandra",
+              "scylladb",
+              "hbase",
+              "bigtable",
+              "bigquery",
+              "elasticsearch",
+              "opensearch",
+              "oracle",
+              "sqlserver",
+              "sybase",
+              "db2",
+              "influxdb",
+              "saphana",
+              "sqlite",
+              "hsqldb",
+              "h2",
+              "derby",
+              "webapp",
+              "app",
+              "rabbitmq",
+              "kafka",
+              "spring_boot_application",
+              "google_workspace",
+              "general_system",
+              "asp_net_application",
+              "django_application",
+              "flask_application",
+              "fastapi_application",
+              "express_application",
+              "nestjs_application",
+              "nextjs_application",
+              "axum_application",
+              "actix_web_application",
+              "rocket_application",
+              "tonic_application",
+              "react_application",
+              "tauri_react_application",
+              "tauri_react_rust_application",
+              "tauri_general_application",
+              "external_system"
+            ]
+          },
+          "database_name": {
+            "type": "string",
+            "description": "Physical database/schema/container name when the model represents a database-like platform. Optional. If omitted, defaults to model_name."
+          },
+          "system_name": {
+            "type": "string",
+            "description": "Logical system name exposed for non-database models such as 'general_system', 'webapp', 'app', 'rabbitmq', and 'kafka'. This must be a readable business-facing name such as 'Virtual Office API' or 'Virtual Office App', not a physical identifier like 'virtual_office_api'. In persistence this is backed by database_name; there is no separate system_name field in storage. Use the user's language for logical names: Korean for Korean users, Japanese for Japanese users, otherwise English."
+          },
+          "schema_name": {
+            "type": "string",
+            "description": "Optional schema name when applicable."
+          },
+          "namespace_name": {
+            "type": "string",
+            "description": "Optional namespace name used by modify/get flows."
+          },
+          "storage_name": {
+            "type": "string",
+            "description": "Optional storage container/group name used by modify/get flows."
+          },
+          "partition_name": {
+            "type": "string",
+            "description": "Optional partition name used by modify/get flows."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the model's purpose"
+          },
+          "model_description": {
+            "type": "string",
+            "description": "Alias of description used by some modify/get flows."
+          },
+          "criticality_level": {
+            "type": "integer",
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "default": 1,
+            "description": "TARA criticality level. 1 = Low, 2 = Medium, 3 = High."
+          },
+          "exposure_level": {
+            "type": "integer",
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "default": 0,
+            "description": "TARA exposure level. 0 = Not defined, 1 = Isolated, 2 = Internal, 3 = Partner, 4 = External, 5 = Public."
+          },
+          "other_info": {
+            "type": "object",
+            "description": "Additional JSON metadata for the model"
+          },
+          "framework": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional application framework. Examples: Spring Boot, Spring MVC, Spring Boot + Spring AI. Omit or use null if unknown. Does not change model_storage_type or allowed processor types."
+          }
+        },
+        "required": [
+          "model_name",
+          "model_storage_type"
+        ],
+        "examples": [
+          {
+            "model_id": "mdl_ef32pexmia",
+            "model_name": "배달DB",
+            "model_storage_type": "postgresql",
+            "database_name": "database",
+            "schema_name": "database"
+          },
+          {
+            "model_id": "mdl_pgvectorEmbeddings01",
+            "model_name": "Document Embedding Store",
+            "model_storage_type": "pgvector",
+            "database_name": "knowledge_base",
+            "schema_name": "public"
+          },
+          {
+            "model_id": "mdl_influxRuntime01",
+            "model_name": "설비 모니터링",
+            "model_storage_type": "influxdb",
+            "database_name": "factory_metrics",
+            "schema_name": "equipment_status"
+          },
+          {
+            "model_id": "mdl_E9BzHuTfsD",
+            "model_name": "Virtual Office API",
+            "model_storage_type": "general_system",
+            "system_name": "Virtual Office API",
+            "schema_name": "database"
+          },
+          {
+            "model_id": "mdl_browserSignup01",
+            "model_name": "Virtual Office Browser",
+            "model_storage_type": "webapp",
+            "system_name": "Virtual Office Browser",
+            "description": "Browser signup UI with form validation, consent, and completion flow."
+          },
+          {
+            "model_id": "mdl_appProducts01",
+            "model_name": "Virtual Office App",
+            "model_storage_type": "app",
+            "system_name": "Virtual Office App",
+            "description": "Application product listing UI with filters, sorting, and product detail navigation."
+          },
+          {
+            "model_id": "mdl_kafkaOrders01",
+            "model_name": "Order Event Bus",
+            "model_storage_type": "kafka",
+            "system_name": "Order Event Bus",
+            "other_info": {
+              "topic": "orders.events",
+              "key_strategy": "order_id",
+              "value_format": "json"
+            }
+          },
+          {
+            "model_id": "mdl_dVgesasWF5",
+            "model_name": "Log Processing",
+            "model_storage_type": "general_system",
+            "system_name": "Log Collector"
+          }
+        ]
+      },
+      "model_runtime_info": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/model"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "canvas_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "permission": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "processor_attribute": {
+        "type": "object",
+        "description": "Attribute schema for processor ports.",
+        "properties": {
+          "attribute_id": {
+            "type": "string",
+            "description": "Beyond Entity attribute ID"
+          },
+          "attribute_name": {
+            "type": "string",
+            "description": "Logical attribute name"
+          },
+          "column_name": {
+            "type": "string",
+            "description": "Physical or logical port field name"
+          },
+          "is_not_null": {
+            "type": "boolean",
+            "default": false
+          },
+          "data_type": {
+            "type": "string",
+            "description": "Physical data type exposed as data_type"
+          },
+          "nested_physical_data_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Compatibility alias for nested_data_type; same physical element type and null-clearing semantics."
+          },
+          "encryption_level": {
+            "type": "integer",
+            "default": 0,
+            "description": "Integer levelNumber: 0=NONE (None), 1=MASKED (Masked), 2=ENCRYPTED (Encrypted), 3=HASHED (Hashed; one-way hash), 4=KEYSERVER (Key Server; encryption key managed by a key server). Writes do not accept null; omission preserves the value on modification.",
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "pii_level": {
+            "type": "integer",
+            "default": 0,
+            "description": "0 = none, 1 = low, 2 = medium, 3 = high"
+          },
+          "sensitivity_level": {
+            "type": "integer",
+            "default": 0,
+            "description": "Custom sensitivity level defined by the organization. 0 = not specified, 1 = public, 2 = internal, 3 = confidential, 4 = restricted"
+          },
+          "io_type": {
+            "type": "string",
+            "enum": [
+              "INPUT",
+              "LOOKUP",
+              "OUTPUT"
+            ],
+            "description": "Processor port or internal attribute role. LOOKUP is for internal variables or intermediate fetched data inside the processor/module. Use LOOKUP when a transformation needs a temporary or internal value that is not directly exposed as final OUTPUT."
+          },
+          "attribute_description": {
+            "type": "string",
+            "description": "Human-readable attribute description"
+          },
+          "other_info": {
+            "type": "object",
+            "description": "Additional JSON metadata for the attribute"
+          },
+          "data_depth": {
+            "type": "integer",
+            "default": 0,
+            "description": "Nesting depth. 0 for root attributes."
+          },
+          "upper_attribute_id": {
+            "type": "string",
+            "description": "Parent attribute ID for nested structures. Null for root-level attributes."
+          },
+          "display_order": {
+            "type": "integer",
+            "description": "Display order within the processor"
+          },
+          "nested_data_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Processor list/array element physical type from this storage type catalog, e.g. Object or String. Accepted on create/add/modify and returned on reads. nested_physical_data_type is an equivalent compatibility alias; if both are supplied they must agree. Null clears the element type."
+          },
+          "pii_data_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "NA",
+              "NAME",
+              "CONTACT",
+              "ADDRESS",
+              "FINANCIAL",
+              "SENSITIVE_GENERAL",
+              "LOCATION",
+              "ONLINE_ID",
+              "HEALTH",
+              "BIOMETRIC",
+              "EMPLOYMENT",
+              "DATE_OF_BIRTH",
+              "GENERAL_INFO",
+              "PASSPORT_NUMBER",
+              "NATIONAL_ID",
+              "DRIVER_LICENSE",
+              "ALIEN_ID",
+              "UNIQUE_ID_GENERAL",
+              null
+            ],
+            "description": "PII_DATA_TYPE enum name stored verbatim, e.g. DRIVER_LICENSE. Null clears the classification; this is independent of pii_level."
+          },
+          "encryption_level_desc": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "readOnly": true,
+            "description": "Human-readable encryption_level: None, Masked, Encrypted, Hashed, Key Server; null for an undeclared value."
+          }
+        },
+        "required": [
+          "attribute_name",
+          "column_name",
+          "data_type",
+          "io_type"
+        ],
+        "examples": [
+          {
+            "attribute_id": "fWwNvSs4k1",
+            "attribute_name": "body",
+            "column_name": "body",
+            "is_not_null": false,
+            "data_type": "Object",
+            "encryption_level": 0,
+            "pii_level": 0,
+            "sensitivity_level": 0,
+            "io_type": "INPUT",
+            "other_info": {},
+            "data_depth": 0,
+            "display_order": 0
+          },
+          {
+            "attribute_id": "gWqqATUo7b",
+            "attribute_name": "loginId",
+            "column_name": "loginId",
+            "is_not_null": false,
+            "data_type": "string",
+            "encryption_level": 0,
+            "pii_level": 0,
+            "sensitivity_level": 0,
+            "io_type": "INPUT",
+            "other_info": {},
+            "data_depth": 1,
+            "upper_attribute_id": "fWwNvSs4k1",
+            "display_order": 1
+          },
+          {
+            "attribute_id": "attr_88YQtVuqWE",
+            "attribute_name": "login_id",
+            "column_name": "login_id",
+            "is_not_null": false,
+            "data_type": "string",
+            "encryption_level": 0,
+            "pii_level": 0,
+            "sensitivity_level": 0,
+            "io_type": "LOOKUP",
+            "data_depth": 0,
+            "display_order": 100
+          }
+        ]
+      },
+      "processor_attribute_runtime": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/processor_attribute"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source_attributes": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "lookup_source_attributes": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "transform_source_attributes": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "targets": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "upstream": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "downstream": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "processor_detail_payload": {
+        "type": "object",
+        "properties": {
+          "processor_id": {
+            "type": "string"
+          },
+          "processor_info": {
+            "$ref": "#/definitions/processor_runtime_info"
+          },
+          "transformation_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "transformations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/transformation"
+            }
+          },
+          "input": {
+            "$ref": "#/definitions/processor_input_port_payload"
+          },
+          "lookup": {
+            "$ref": "#/definitions/processor_lookup_port_payload"
+          },
+          "output": {
+            "$ref": "#/definitions/processor_output_port_payload"
+          },
+          "lineage": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              {
+                "type": "object",
+                "description": "Logical lineage graph page with coverage and continuation."
+              }
+            ]
+          },
+          "lineage_status": {
+            "type": "object",
+            "description": "Lineage coverage only (separate from inventory/search pagination). complete means this single response includes the whole selected traversal; traversal_complete means traversal finished across all graph pages. focused is policy-limited. Follow continuation.tool/cursor until exhausted; combine all prior pages. A depth/path/state limit requires a narrower or deeper new query."
+          }
+        }
+      },
+      "processor_info": {
+        "type": "object",
+        "description": "Processor metadata returned by MCP read tools.",
+        "properties": {
+          "processor_id": {
+            "type": "string",
+            "description": "Beyond Entity processor ID"
+          },
+          "model_id": {
+            "type": "string",
+            "description": "Parent model ID"
+          },
+          "processor_name": {
+            "type": "string",
+            "description": "Logical/business processor name. For api_server processors, use the user-facing API name; do not use HTTP method/path or code identifiers."
+          },
+          "module_name": {
+            "type": "string",
+            "description": "Physical/code identifier. For every class-backed processor in a Spring Boot Application model, use the simple class name without package (OrderController), including processor_general. Keep verified package_name, qualified_class_name and source_file in other_info for tracing. module_name must be unique within the model physical-name namespace; package metadata does not bypass this. Reuse one class/module across roles rather than creating duplicates. Do not use a route, HTTP verb or method name as the Controller class name. For api_server use the verified single-operation identifier (operationId, controller method or function), never a server/router grouping."
+          },
+          "other_info": {
+            "type": "object",
+            "description": "Optional verified source and processor-specific metadata. Controller/API routing is stored in other_info.endpoints; explicit endpoints input takes precedence over nested endpoints and legacy method/path. Filter matchers, Interceptor include/exclude paths and Controller Advice scope are not HTTP endpoints. Omit unknown values.",
+            "properties": {
+              "package_name": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Verified source package, without the class name. Omit if unknown."
+              },
+              "qualified_class_name": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Verified fully qualified class name for source tracing; module_name remains the simple class name."
+              },
+              "source_file": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Verified source file path. Never fabricate a path from a class name."
+              },
+              "matchers": {
+                "type": "array",
+                "description": "Filter applicability conditions, not endpoints. Use only verified matchers.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "pattern": {
+                      "type": "string"
+                    },
+                    "method": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "pattern"
+                  ]
+                }
+              },
+              "include_paths": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Interceptor included path patterns."
+              },
+              "exclude_paths": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Interceptor excluded path patterns."
+              },
+              "order": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "description": "Verified Filter or Interceptor execution order."
+              },
+              "dispatcher_types": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Verified Filter dispatcher types."
+              },
+              "controller_scope": {
+                "type": "object",
+                "description": "Verified Controller Advice applicability, preserving source selector meaning. Omit unknown scope.",
+                "additionalProperties": true
+              },
+              "exception_types": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Verified exception types handled by Controller Advice."
+              },
+              "endpoints": {
+                "type": [
+                  "array",
+                  "null",
+                  "string"
+                ],
+                "description": "Verified inbound HTTP routes for a Controller class or API Server boundary. One Controller processor can contain multiple path/method/handler combinations. Omit unknown fields; never assume GET or derive routes from class names. On update omission preserves, an array replaces, [] empties, null clears. Do not use for Filter/Interceptor matching or Advice scope. Stored only in other_info.endpoints; the top-level response is a projection, not a separate stored value. API Server represents one Swagger/OpenAPI operation: endpoints is an array with at most one method/path pair. Different methods or paths require separate processors. Spring Controller classes may have multiple endpoints. Endpoint cardinality follows the storage catalog: is_module=true permits multiple endpoints; false, null or omitted permits at most one. Clients cannot override this flag. This applies to all processor types and both endpoints and other_info.endpoints. Check acceptable_processors or processor_storage_types before writing. Legacy JSON strings encoding an array or null are also accepted, decoded and validated; new writes store arrays or null and top-level endpoints read projections use arrays or null. Existing raw other_info may retain legacy strings until updated. New clients must send arrays. Invalid strings are rejected without clearing metadata.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Verified request mapping path; resolve class and handler mappings only from evidence."
+                    },
+                    "method": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Verified HTTP method; omit if unspecified or unknown. Never default to GET."
+                    },
+                    "handler": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Actual source handler method name without class/package prefix; omit if unknown."
+                    },
+                    "endpoint_id": {
+                      "type": "string",
+                      "description": "Server-assigned stable Controller endpoint ID. Preserve on edits to retain the contract association."
+                    },
+                    "input_attribute_id": {
+                      "type": "string",
+                      "description": "Server-managed Controller INPUT Object ID. Preserve on edits; do not invent. Same-handler routes share this ID."
+                    },
+                    "output_attribute_id": {
+                      "type": "string",
+                      "description": "Server-managed Controller OUTPUT Object ID. Preserve on edits; do not invent. Add verified child fields under this Object."
+                    }
+                  },
+                  "anyOf": [
+                    {
+                      "required": [
+                        "path"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "method"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "handler"
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "description": {
+            "type": "string",
+            "description": "Processor description"
+          },
+          "processor_storage_type": {
+            "type": "string",
+            "description": "Exposed as processor_storage_type, sourced from ENTITY_TYPE",
+            "enum": [
+              "processor_general",
+              "module_general",
+              "api_server",
+              "frontend",
+              "stream_processing",
+              "file_processor",
+              "aggregator",
+              "ml_pipeline",
+              "data_sync",
+              "graphql_server",
+              "scheduler",
+              "app_lang_c",
+              "rabbitmq_exchange",
+              "kafka_topic",
+              "webapp_task",
+              "app_task",
+              "elt_batch",
+              "etl_batch",
+              "spring_boot_filter",
+              "spring_boot_handler_interceptor",
+              "spring_boot_controller",
+              "spring_boot_controller_advice",
+              "spring_boot_view_renderer",
+              "spring_boot_service",
+              "spring_boot_repository",
+              "spring_boot_integration_client",
+              "spring_boot_chat_client",
+              "spring_boot_adviser",
+              "spring_boot_tool",
+              "spring_boot_chat_memory",
+              "spring_boot_ai_model_client",
+              "spring_boot_data_processor",
+              "spring_boot_job",
+              "google_form",
+              "google_read_sheet",
+              "google_write_sheet",
+              "google_search_drive",
+              "google_watch_drive_changes",
+              "google_update_document",
+              "google_send_gmail",
+              "asp_net_controller",
+              "asp_net_endpoint_handler",
+              "asp_net_page_handler",
+              "asp_net_view_handler",
+              "asp_net_middleware",
+              "asp_net_request_filter",
+              "asp_net_exception_handler",
+              "asp_net_http_handler",
+              "asp_net_http_module",
+              "asp_net_message_handler",
+              "asp_net_service",
+              "asp_net_repository",
+              "asp_net_data_context",
+              "asp_net_integration_adapter",
+              "asp_net_rpc_service",
+              "asp_net_realtime_handler",
+              "asp_net_job_event_handler",
+              "asp_net_general_module",
+              "python_view_handler",
+              "python_middleware",
+              "python_service",
+              "python_repository",
+              "python_integration_adapter",
+              "python_general_module",
+              "django_endpoint_handler",
+              "django_request_policy",
+              "django_repository",
+              "django_realtime_handler",
+              "django_job_event_handler",
+              "flask_endpoint_handler",
+              "flask_request_hook",
+              "flask_middleware",
+              "flask_exception_handler",
+              "flask_realtime_handler",
+              "flask_job_event_handler",
+              "fastapi_endpoint_handler",
+              "fastapi_dependency_handler",
+              "fastapi_exception_handler",
+              "fastapi_realtime_handler",
+              "fastapi_job_event_handler",
+              "javascript_view_handler",
+              "javascript_service",
+              "javascript_repository",
+              "javascript_integration_adapter",
+              "javascript_job_event_handler",
+              "javascript_general_module",
+              "express_endpoint_handler",
+              "express_controller",
+              "express_middleware",
+              "express_exception_handler",
+              "express_realtime_handler",
+              "nestjs_controller",
+              "nestjs_graphql_resolver",
+              "nestjs_middleware",
+              "nestjs_guard",
+              "nestjs_pipe",
+              "nestjs_interceptor",
+              "nestjs_exception_handler",
+              "nestjs_integration_adapter",
+              "nestjs_rpc_service",
+              "nestjs_realtime_handler",
+              "nextjs_page",
+              "nextjs_layout",
+              "nextjs_ui_component",
+              "nextjs_request_interceptor",
+              "nextjs_server_action",
+              "nextjs_endpoint_handler",
+              "nextjs_job_event_handler",
+              "axum_endpoint_handler",
+              "axum_middleware",
+              "axum_extractor",
+              "axum_exception_handler",
+              "rust_service",
+              "rust_repository",
+              "rust_integration_adapter",
+              "rust_job_event_handler",
+              "rust_general_module",
+              "actix_web_endpoint_handler",
+              "actix_web_middleware",
+              "actix_web_extractor",
+              "actix_web_exception_handler",
+              "rocket_endpoint_handler",
+              "rocket_fairing",
+              "rocket_request_guard",
+              "rocket_exception_handler",
+              "tonic_rpc_handler",
+              "tonic_interceptor",
+              "app_lang_rust",
+              "react_page",
+              "react_ui_component",
+              "react_event_handler",
+              "react_form_handler",
+              "react_use_case",
+              "react_state_handler",
+              "react_integration_adapter",
+              "react_data_access",
+              "react_general_module",
+              "tauri_command_handler",
+              "clap_command_handler",
+              "clap_argument_validator",
+              "ratatui_view",
+              "ratatui_update_handler",
+              "external_api"
+            ]
+          },
+          "entity_data_type": {
+            "type": "string",
+            "enum": [
+              "processor"
+            ],
+            "description": "Entity category"
+          },
+          "exposure_level": {
+            "type": "integer",
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "default": 0,
+            "description": "TARA exposure level. 0 = Not defined/follow model exposure level, 1 = Isolated, 2 = Internal, 3 = Partner, 4 = External, 5 = Public. Omit this or set 0 when the processor should follow the model exposure level; set it only when the processor exposure differs from the model."
+          },
+          "sub_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional free-text refinement of the storage type; alias subType. Examples: controller REST/MVC, service Application/Domain/Facade/AI Service, repository Repository/DAO/Mapper/Memory Repository. See model_selection_guide for the complete recommended Spring subtype catalog; do not create new default types for internal stages."
+          },
+          "layer_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "readOnly": true,
+            "description": "Existing layer assignment. Creation sets NULL; property updates preserve it."
+          },
+          "endpoints": {
+            "type": [
+              "array",
+              "null",
+              "string"
+            ],
+            "description": "Verified inbound HTTP routes for a Controller class or API Server boundary. One Controller processor can contain multiple path/method/handler combinations. Omit unknown fields; never assume GET or derive routes from class names. On update omission preserves, an array replaces, [] empties, null clears. Do not use for Filter/Interceptor matching or Advice scope. Stored only in other_info.endpoints; the top-level response is a projection, not a separate stored value. API Server represents one Swagger/OpenAPI operation: endpoints is an array with at most one method/path pair. Different methods or paths require separate processors. Spring Controller classes may have multiple endpoints. Endpoint cardinality follows the storage catalog: is_module=true permits multiple endpoints; false, null or omitted permits at most one. Clients cannot override this flag. This applies to all processor types and both endpoints and other_info.endpoints. Check acceptable_processors or processor_storage_types before writing. Legacy JSON strings encoding an array or null are also accepted, decoded and validated; new writes store arrays or null and top-level endpoints read projections use arrays or null. Existing raw other_info may retain legacy strings until updated. New clients must send arrays. Invalid strings are rejected without clearing metadata.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Verified request mapping path; resolve class and handler mappings only from evidence."
+                },
+                "method": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Verified HTTP method; omit if unspecified or unknown. Never default to GET."
+                },
+                "handler": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Actual source handler method name without class/package prefix; omit if unknown."
+                },
+                "endpoint_id": {
+                  "type": "string",
+                  "description": "Server-assigned stable Controller endpoint ID. Preserve on edits to retain the contract association."
+                },
+                "input_attribute_id": {
+                  "type": "string",
+                  "description": "Server-managed Controller INPUT Object ID. Preserve on edits; do not invent. Same-handler routes share this ID."
+                },
+                "output_attribute_id": {
+                  "type": "string",
+                  "description": "Server-managed Controller OUTPUT Object ID. Preserve on edits; do not invent. Add verified child fields under this Object."
+                }
+              },
+              "anyOf": [
+                {
+                  "required": [
+                    "path"
+                  ]
+                },
+                {
+                  "required": [
+                    "method"
+                  ]
+                },
+                {
+                  "required": [
+                    "handler"
+                  ]
+                }
+              ]
+            }
+          },
+          "use_lookup": {
+            "type": "boolean",
+            "description": "Catalog policy; false permits INPUT and OUTPUT only. Existing LOOKUP data remains readable."
+          },
+          "io_policy": {
+            "type": "object",
+            "description": "Storage-type IO rules and Controller endpoint contract reminders."
+          }
+        },
+        "required": [
+          "processor_id",
+          "model_id",
+          "processor_name",
+          "module_name",
+          "processor_storage_type"
+        ],
+        "examples": [
+          {
+            "processor_name": "관리자 로그인",
+            "module_name": "AuthController.login",
+            "processor_storage_type": "api_server",
+            "other_info": {
+              "method": "POST",
+              "path": "/auth/login",
+              "operation_id": "loginAdmin",
+              "summary": "관리자 로그인",
+              "tags": [
+                "Auth"
+              ]
+            },
+            "description": "관리자 로그인 API endpoint",
+            "processor_id": "proc_example",
+            "model_id": "mdl_example",
+            "entity_data_type": "processor"
+          }
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "processor_storage_type": {
+                  "enum": [
+                    "processor_general",
+                    "api_server",
+                    "frontend",
+                    "stream_processing",
+                    "file_processor",
+                    "aggregator",
+                    "ml_pipeline",
+                    "data_sync",
+                    "graphql_server",
+                    "scheduler",
+                    "app_lang_c",
+                    "rabbitmq_exchange",
+                    "kafka_topic",
+                    "webapp_task",
+                    "app_task",
+                    "elt_batch",
+                    "etl_batch",
+                    "google_form",
+                    "google_read_sheet",
+                    "google_write_sheet",
+                    "google_search_drive",
+                    "google_watch_drive_changes",
+                    "google_update_document",
+                    "google_send_gmail",
+                    "external_api"
+                  ]
+                }
+              },
+              "required": [
+                "processor_storage_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "endpoints": {
+                  "maxItems": 1
+                }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "not": {
+                      "required": [
+                        "endpoints"
+                      ]
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "other_info": {
+                        "properties": {
+                          "endpoints": {
+                            "maxItems": 1
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "processor_input_port_payload": {
+        "type": "object",
+        "properties": {
+          "source_entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/reference_entity"
+            }
+          },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/processor_attribute_runtime"
+            }
+          }
+        }
+      },
+      "processor_lookup_port_payload": {
+        "type": "object",
+        "properties": {
+          "lookup_entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/reference_entity"
+            }
+          },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/processor_attribute_runtime"
+            }
+          }
+        }
+      },
+      "processor_output_port_payload": {
+        "type": "object",
+        "properties": {
+          "target_entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/reference_entity"
+            }
+          },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/processor_attribute_runtime"
+            }
+          }
+        }
+      },
+      "processor_runtime_info": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/processor_info"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "model_name": {
+                "type": "string"
+              },
+              "system_name": {
+                "type": "string"
+              },
+              "implementation_status": {
+                "$ref": "#/definitions/implementation_status"
+              },
+              "ux_implementation_status": {
+                "$ref": "#/definitions/implementation_status"
+              },
+              "canvas_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "used_in_canvas_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "project_summary": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "type": "string"
+          },
+          "project_name": {
+            "type": "string"
+          },
+          "project_description": {
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "string"
+          },
+          "organization_name": {
+            "type": "string"
+          },
+          "user_role": {
+            "type": "string"
+          },
+          "last_accessed_at": {
+            "type": "integer"
+          },
+          "access_all_canvases": {
+            "type": "boolean"
+          },
+          "can_push": {
+            "type": "boolean"
+          },
+          "cloned": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "project_id",
+          "project_name"
+        ],
+        "examples": [
+          {
+            "project_id": "proj_A1b2C3d4E5f6",
+            "project_name": "Order Platform",
+            "project_description": "Customer ordering and fulfillment design",
+            "organization_id": "org_123",
+            "organization_name": "Beyond Entity",
+            "user_role": "admin",
+            "access_all_canvases": true,
+            "can_push": true,
+            "cloned": true
+          }
+        ]
+      },
+      "projection_item": {
+        "type": "object",
+        "description": "SELECT column mapping. Defines how a source attribute becomes a target attribute. This is the primary source of READ and TRANSFORM lineages. Wildcards such as '*' or 'alias.*' are authoring shorthand only and must not be sent as a single projection item. Use explicit SQL select items with beyond_add_transformation_by_sql so lineage can be created per column. Within one SELECT transformation, each projected source column must map to its own distinct target attribute unless you are using explicitly modeled nested child attributes.",
+        "properties": {
+          "projection_type": {
+            "type": "string",
+            "enum": [
+              "DIRECT",
+              "FUNCTION",
+              "VECTOR_DISTANCE",
+              "VECTOR_COMPARISON",
+              "AGGREGATE",
+              "COALESCE",
+              "CASE",
+              "custom"
+            ],
+            "description": "DIRECT=simple copy, FUNCTION=date/string func, VECTOR_DISTANCE=vector similarity/distance expression such as embedding <-> :query_embedding or COSINE_DISTANCE(embedding, :query_embedding), VECTOR_COMPARISON=boolean vector threshold expression such as embedding <-> :query_embedding < 0.8, AGGREGATE=SUM/COUNT in SELECT, COALESCE=null handling"
+          },
+          "source_attributes": {
+            "type": "array",
+            "description": "Source attributes. Empty for COUNT(*) or literals. Do not use a single representative source attribute for '*' or 'alias.*'; wildcard projections must be expanded into the full relevant attribute list.",
+            "items": {
+              "$ref": "#/definitions/source_attribute"
+            }
+          },
+          "target_attribute": {
+            "$ref": "#/definitions/target_attribute"
+          },
+          "raw_expression": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "projection_type",
+          "target_attribute"
+        ],
+        "examples": [
+          {
+            "_description": "Direct mapping (creates READ lineage)",
+            "projection_type": "DIRECT",
+            "source_attributes": [
+              {
+                "source_alias": "c",
+                "source_column_name": "customer_id",
+                "source_attribute_id": "attr_cust_id",
+                "source_entity_id": "ent_customer"
+              }
+            ],
+            "target_attribute": {
+              "target_column_name": "customer_id",
+              "target_attribute_id": "attr_out_cust_id",
+              "target_entity_id": "proc_001"
+            },
+            "raw_expression": "c.customer_id"
+          },
+          {
+            "_description": "Function (creates TRANSFORM lineage)",
+            "projection_type": "FUNCTION",
+            "source_attributes": [
+              {
+                "source_alias": "o",
+                "source_column_name": "created_at",
+                "source_attribute_id": "attr_created",
+                "source_entity_id": "ent_orders"
+              }
+            ],
+            "target_attribute": {
+              "target_column_name": "period",
+              "target_attribute_id": "attr_out_period",
+              "target_entity_id": "proc_001"
+            },
+            "raw_expression": "DATE_TRUNC(:groupBy, o.created_at)"
+          },
+          {
+            "_description": "Vector distance projection from pgvector/PostgreSQL/Supabase SQL",
+            "projection_type": "VECTOR_DISTANCE",
+            "source_attributes": [
+              {
+                "source_alias": "d",
+                "source_column_name": "embedding",
+                "source_attribute_id": "attr_embedding",
+                "source_entity_id": "ent_documents"
+              }
+            ],
+            "target_attribute": {
+              "target_column_name": "distance",
+              "target_attribute_id": "attr_out_distance",
+              "target_entity_id": "proc_vector_search"
+            },
+            "raw_expression": "d.embedding <-> :query_embedding"
+          },
+          {
+            "_description": "Boolean vector threshold projection from pgvector SQL",
+            "projection_type": "VECTOR_COMPARISON",
+            "source_attributes": [
+              {
+                "source_alias": "d",
+                "source_column_name": "embedding",
+                "source_attribute_id": "attr_embedding",
+                "source_entity_id": "ent_documents"
+              }
+            ],
+            "target_attribute": {
+              "target_column_name": "within_l2_threshold",
+              "target_attribute_id": "attr_out_within_l2",
+              "target_entity_id": "proc_vector_search"
+            },
+            "raw_expression": "d.embedding <-> :query_embedding < 0.8"
+          },
+          {
+            "_description": "Wildcard caution: expand 'p.*' into one projection per relevant column before sending. If the result is an internal rowset on the current processor, prefer LOOKUP targets over collapsing all columns into one OUTPUT attribute.",
+            "projection_type": "DIRECT",
+            "source_attributes": [
+              {
+                "source_alias": "p",
+                "source_column_name": "plan_id",
+                "source_attribute_id": "attr_plan_id",
+                "source_entity_id": "ent_plans"
+              }
+            ],
+            "target_attribute": {
+              "target_column_name": "plan_id",
+              "target_entity_id": "proc_get_plans"
+            },
+            "raw_expression": "p.plan_id"
+          },
+          {
+            "_description": "Invalid pattern: do not collapse different source columns into one row/object container attribute such as admin_user.",
+            "projection_type": "DIRECT",
+            "source_attributes": [
+              {
+                "source_alias": "au",
+                "source_column_name": "id",
+                "source_attribute_id": "attr_admin_id",
+                "source_entity_id": "ent_admin_users"
+              }
+            ],
+            "target_attribute": {
+              "target_column_name": "admin_user",
+              "target_attribute_id": "attr_lookup_admin_user",
+              "target_entity_id": "proc_auth_login"
+            },
+            "raw_expression": "au.id"
+          }
+        ]
+      },
+      "reference_entity": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          },
+          "entity_name": {
+            "type": "string"
+          },
+          "table_name": {
+            "type": "string"
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "entity_storage_type": {
+            "type": "string"
+          },
+          "processor_id": {
+            "type": "string"
+          },
+          "processor_name": {
+            "type": "string"
+          },
+          "module_name": {
+            "type": "string",
+            "description": "Physical/code identifier. For every class-backed processor in a Spring Boot Application model, use the simple class name without package (OrderController), including processor_general. Keep verified package_name, qualified_class_name and source_file in other_info for tracing. module_name must be unique within the model physical-name namespace; package metadata does not bypass this. Reuse one class/module across roles rather than creating duplicates. Do not use a route, HTTP verb or method name as the Controller class name. For api_server use the verified single-operation identifier (operationId, controller method or function), never a server/router grouping."
+          },
+          "processor_storage_type": {
+            "type": "string"
+          },
+          "model_id": {
+            "type": "string"
+          },
+          "model_name": {
+            "type": "string"
+          },
+          "database_name": {
+            "type": "string"
+          },
+          "schema_name": {
+            "type": "string"
+          },
+          "model_storage_type": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "other_info": {
+            "type": "object",
+            "properties": {
+              "endpoints": {
+                "type": [
+                  "array",
+                  "null",
+                  "string"
+                ],
+                "description": "Verified inbound HTTP routes for a Controller class or API Server boundary. One Controller processor can contain multiple path/method/handler combinations. Omit unknown fields; never assume GET or derive routes from class names. On update omission preserves, an array replaces, [] empties, null clears. Do not use for Filter/Interceptor matching or Advice scope. Stored only in other_info.endpoints; the top-level response is a projection, not a separate stored value. API Server represents one Swagger/OpenAPI operation: endpoints is an array with at most one method/path pair. Different methods or paths require separate processors. Spring Controller classes may have multiple endpoints. Endpoint cardinality follows the storage catalog: is_module=true permits multiple endpoints; false, null or omitted permits at most one. Clients cannot override this flag. This applies to all processor types and both endpoints and other_info.endpoints. Check acceptable_processors or processor_storage_types before writing. Legacy JSON strings encoding an array or null are also accepted, decoded and validated; new writes store arrays or null and top-level endpoints read projections use arrays or null. Existing raw other_info may retain legacy strings until updated. New clients must send arrays. Invalid strings are rejected without clearing metadata.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Verified request mapping path; resolve class and handler mappings only from evidence."
+                    },
+                    "method": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Verified HTTP method; omit if unspecified or unknown. Never default to GET."
+                    },
+                    "handler": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Actual source handler method name without class/package prefix; omit if unknown."
+                    },
+                    "endpoint_id": {
+                      "type": "string",
+                      "description": "Server-assigned stable Controller endpoint ID. Preserve on edits to retain the contract association."
+                    },
+                    "input_attribute_id": {
+                      "type": "string",
+                      "description": "Server-managed Controller INPUT Object ID. Preserve on edits; do not invent. Same-handler routes share this ID."
+                    },
+                    "output_attribute_id": {
+                      "type": "string",
+                      "description": "Server-managed Controller OUTPUT Object ID. Preserve on edits; do not invent. Add verified child fields under this Object."
+                    }
+                  },
+                  "anyOf": [
+                    {
+                      "required": [
+                        "path"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "method"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "handler"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "lookup_parameters": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "sub_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional free-text refinement of the storage type; alias subType. Examples: controller REST/MVC, service Application/Domain/Facade/AI Service, repository Repository/DAO/Mapper/Memory Repository. See model_selection_guide for the complete recommended Spring subtype catalog; do not create new default types for internal stages."
+          },
+          "layer_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "readOnly": true,
+            "description": "Existing layer assignment. Creation sets NULL; property updates preserve it."
+          },
+          "endpoints": {
+            "type": [
+              "array",
+              "null",
+              "string"
+            ],
+            "description": "Verified inbound HTTP routes for a Controller class or API Server boundary. One Controller processor can contain multiple path/method/handler combinations. Omit unknown fields; never assume GET or derive routes from class names. On update omission preserves, an array replaces, [] empties, null clears. Do not use for Filter/Interceptor matching or Advice scope. Stored only in other_info.endpoints; the top-level response is a projection, not a separate stored value. API Server represents one Swagger/OpenAPI operation: endpoints is an array with at most one method/path pair. Different methods or paths require separate processors. Spring Controller classes may have multiple endpoints. Endpoint cardinality follows the storage catalog: is_module=true permits multiple endpoints; false, null or omitted permits at most one. Clients cannot override this flag. This applies to all processor types and both endpoints and other_info.endpoints. Check acceptable_processors or processor_storage_types before writing. Legacy JSON strings encoding an array or null are also accepted, decoded and validated; new writes store arrays or null and top-level endpoints read projections use arrays or null. Existing raw other_info may retain legacy strings until updated. New clients must send arrays. Invalid strings are rejected without clearing metadata.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Verified request mapping path; resolve class and handler mappings only from evidence."
+                },
+                "method": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Verified HTTP method; omit if unspecified or unknown. Never default to GET."
+                },
+                "handler": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Actual source handler method name without class/package prefix; omit if unknown."
+                },
+                "endpoint_id": {
+                  "type": "string",
+                  "description": "Server-assigned stable Controller endpoint ID. Preserve on edits to retain the contract association."
+                },
+                "input_attribute_id": {
+                  "type": "string",
+                  "description": "Server-managed Controller INPUT Object ID. Preserve on edits; do not invent. Same-handler routes share this ID."
+                },
+                "output_attribute_id": {
+                  "type": "string",
+                  "description": "Server-managed Controller OUTPUT Object ID. Preserve on edits; do not invent. Add verified child fields under this Object."
+                }
+              },
+              "anyOf": [
+                {
+                  "required": [
+                    "path"
+                  ]
+                },
+                {
+                  "required": [
+                    "method"
+                  ]
+                },
+                {
+                  "required": [
+                    "handler"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "processor_storage_type": {
+                  "enum": [
+                    "processor_general",
+                    "api_server",
+                    "frontend",
+                    "stream_processing",
+                    "file_processor",
+                    "aggregator",
+                    "ml_pipeline",
+                    "data_sync",
+                    "graphql_server",
+                    "scheduler",
+                    "app_lang_c",
+                    "rabbitmq_exchange",
+                    "kafka_topic",
+                    "webapp_task",
+                    "app_task",
+                    "elt_batch",
+                    "etl_batch",
+                    "google_form",
+                    "google_read_sheet",
+                    "google_write_sheet",
+                    "google_search_drive",
+                    "google_watch_drive_changes",
+                    "google_update_document",
+                    "google_send_gmail",
+                    "external_api"
+                  ]
+                }
+              },
+              "required": [
+                "processor_storage_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "endpoints": {
+                  "maxItems": 1
+                }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "not": {
+                      "required": [
+                        "endpoints"
+                      ]
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "other_info": {
+                        "properties": {
+                          "endpoints": {
+                            "maxItems": 1
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "relationship": {
+        "type": "object",
+        "properties": {
+          "relationship_name": {
+            "type": "string",
+            "description": "Logical relationship name"
+          },
+          "constraint_name": {
+            "type": "string",
+            "description": "Physical FK constraint name"
+          },
+          "relationship_type": {
+            "type": "string",
+            "enum": [
+              "one_to_many_optional",
+              "one_to_many_mandatory",
+              "one_to_many_identifying",
+              "one_to_one_mandatory",
+              "one_to_one_identifying",
+              "1_TO_M_OPT",
+              "1_TO_M_MAN",
+              "1_TO_M_IDE",
+              "1_TO_1_MAN",
+              "1_TO_1_IDE"
+            ],
+            "description": "Required. Cardinality alone cannot determine optionality or identifying semantics. Choose one of the listed values explicitly."
+          },
+          "from_table_name": {
+            "type": "string",
+            "description": "Child/referencing table name"
+          },
+          "from_entity_id": {
+            "type": "string",
+            "description": "Child/referencing entity ID. Use this instead of from_table_name when you already have the entity ID."
+          },
+          "to_table_name": {
+            "type": "string",
+            "description": "Parent/referenced table name"
+          },
+          "to_entity_id": {
+            "type": "string",
+            "description": "Parent/referenced entity ID. Use this instead of to_table_name when you already have the entity ID."
+          },
+          "to_column_name": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "description": "(Optional) Existing child table column name(s) to reuse for FK mapping. If omitted, new child FK columns are created based on the parent PK."
+          },
+          "to_attribute_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Legacy form (no from_attribute_ids): CHILD FK IDs, despite the to_ prefix. Paired form with from_attribute_ids: PARENT PK IDs. Prefer explicit parent_attribute_ids/child_attribute_ids."
+          },
+          "relationship_description": {
+            "type": "string",
+            "description": "Description of the relationship"
+          },
+          "other_info": {
+            "type": "object"
+          },
+          "parent_entity_id": {
+            "type": "string",
+            "description": "Explicit parent entity ID. Parent owns the PK; child owns the FK."
+          },
+          "parent_attribute_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "uniqueItems": true,
+            "description": "Existing parent attribute IDs, in matching pair order. Parent must supply the complete PK."
+          },
+          "parent_attribute_id": {
+            "type": "string",
+            "description": "Singular alias for parent_attribute_ids."
+          },
+          "child_entity_id": {
+            "type": "string",
+            "description": "Explicit child entity ID. Parent owns the PK; child owns the FK."
+          },
+          "child_attribute_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "uniqueItems": true,
+            "description": "Existing child attribute IDs, in matching pair order. Parent must supply the complete PK."
+          },
+          "child_attribute_id": {
+            "type": "string",
+            "description": "Singular alias for child_attribute_ids."
+          },
+          "from_attribute_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "uniqueItems": true,
+            "description": "Paired from/to form: CHILD FK IDs; to_attribute_ids then denotes PARENT PK IDs. Without this field, legacy to_attribute_ids denotes CHILD FK IDs."
+          },
+          "on_delete": {
+            "type": "string",
+            "enum": [
+              "CASCADE",
+              "SET_NULL",
+              "SET_DEFAULT",
+              "RESTRICT",
+              "NO_ACTION"
+            ],
+            "description": "on_delete/on_update are NOT supported BE relationship behavior settings. Inputs are preserved only as reference metadata in relationship other_info. Creation and FK/relationship reads return other_info and metadata_guide when these keys are present. They may inform source SQL analysis or code/DDL authoring; BE does not apply or guarantee these rules. relationship_description remains the separate supported relationship description."
+          },
+          "on_update": {
+            "type": "string",
+            "enum": [
+              "CASCADE",
+              "SET_NULL",
+              "SET_DEFAULT",
+              "RESTRICT",
+              "NO_ACTION"
+            ],
+            "description": "on_delete/on_update are NOT supported BE relationship behavior settings. Inputs are preserved only as reference metadata in relationship other_info. Creation and FK/relationship reads return other_info and metadata_guide when these keys are present. They may inform source SQL analysis or code/DDL authoring; BE does not apply or guarantee these rules. relationship_description remains the separate supported relationship description."
+          }
+        },
+        "required": [
+          "relationship_type"
+        ],
+        "allOf": [
+          {
+            "anyOf": [
+              {
+                "required": [
+                  "child_entity_id"
+                ]
+              },
+              {
+                "required": [
+                  "from_entity_id"
+                ]
+              },
+              {
+                "required": [
+                  "from_table_name"
+                ]
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "required": [
+                  "parent_entity_id"
+                ]
+              },
+              {
+                "required": [
+                  "to_entity_id"
+                ]
+              },
+              {
+                "required": [
+                  "to_table_name"
+                ]
+              }
+            ]
+          }
+        ],
+        "examples": [
+          {
+            "relationship_name": "chat_memory_session_id_fkey",
+            "relationship_type": "one_to_many_mandatory",
+            "child_entity_id": "ent_chat_memory",
+            "child_attribute_ids": [
+              "attr_memory_session_id"
+            ],
+            "parent_entity_id": "ent_chat_sessions",
+            "parent_attribute_ids": [
+              "attr_session_pk"
+            ],
+            "on_delete": "CASCADE"
+          },
+          {
+            "relationship_name": "fk_child_parent",
+            "relationship_type": "1_TO_M_MAN",
+            "from_entity_id": "ent_child",
+            "to_entity_id": "ent_parent",
+            "to_attribute_ids": [
+              "attr_child_fk"
+            ]
+          }
+        ],
+        "description": "Create FK relationships. Prefer explicit child_entity_id/child_attribute_ids and parent_entity_id/parent_attribute_ids, plus required relationship_type. Parent IDs must cover the complete PK; child IDs are reused, not duplicated. Legacy from_entity_id=child, to_entity_id=parent; legacy to_attribute_ids (without from_attribute_ids) unusually denotes CHILD FK IDs. Paired from_attribute_ids/to_attribute_ids instead belongs to each matching entity. cardinality alone is insufficient; choose optional/mandatory/identifying explicitly. The tool creates the FK constraint and RELATION references; do not duplicate them with beyond_add_constraints. Each relationship is atomic; inspect created_relationships and failed, retry only failed items."
+      },
+      "sorting_item": {
+        "type": "object",
+        "description": "ORDER BY clause",
+        "properties": {
+          "source_attributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/source_attribute"
+            }
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "ASC",
+              "DESC"
+            ],
+            "default": "ASC"
+          },
+          "nulls": {
+            "type": "string",
+            "enum": [
+              "FIRST",
+              "LAST"
+            ]
+          },
+          "raw_expression": {
+            "type": "string",
+            "description": "Original ORDER BY expression, including vector distance expressions such as d.embedding <-> :query_embedding."
+          }
+        },
+        "required": [
+          "source_attributes",
+          "direction"
+        ]
+      },
+      "source_attribute": {
+        "type": "object",
+        "description": "A universal attribute reference. source_entity_id can point to a Table, File, Redis Key, Processor, or any other entity.",
+        "properties": {
+          "source_alias": {
+            "type": "string",
+            "description": "Optional alias used in SQL (e.g., 'o', 'c', 'p'). If omitted, the server fills it from the source entity table/module name when possible."
+          },
+          "source_column_name": {
+            "type": "string",
+            "description": "Column name for SQL generation"
+          },
+          "source_attribute_id": {
+            "type": "string",
+            "description": "Beyond Entity attribute ID"
+          },
+          "source_entity_id": {
+            "type": "string",
+            "description": "Beyond Entity entity/processor ID"
+          },
+          "source_model_id": {
+            "type": "string",
+            "description": "Beyond Entity model ID. Optional if source_attribute_id or source_entity_id is provided; the server will resolve it when possible."
+          }
+        },
+        "required": [
+          "source_attribute_id",
+          "source_entity_id"
+        ]
+      },
+      "target_attribute": {
+        "type": "object",
+        "description": "Reference to a target entity/processor attribute. target_alias and target_model_id may be omitted; the server will resolve them from the target entity/attribute when possible. For transformation projections or aggregations targeting the current processor, if target_attribute_id is omitted but target_entity_id and target_column_name are provided, the server may reuse an existing LOOKUP/OUTPUT attribute by column name or create a new LOOKUP attribute and populate target_attribute_id.",
+        "properties": {
+          "target_alias": {
+            "type": "string",
+            "description": "Optional alias for the target entity or processor scope. If omitted, the server fills it from the target entity table/module name when possible."
+          },
+          "target_column_name": {
+            "type": "string",
+            "description": "Target column or attribute name. Required when target_attribute_id is omitted. For projections/aggregations into the current processor, this name is also used to resolve or auto-create a LOOKUP attribute."
+          },
+          "target_attribute_id": {
+            "type": "string",
+            "description": "Target attribute ID. Optional when target_entity_id and target_column_name are provided and the server can resolve or auto-create the target attribute."
+          },
+          "target_entity_id": {
+            "type": "string",
+            "description": "Target entity or processor ID."
+          },
+          "target_model_id": {
+            "type": "string",
+            "description": "Beyond Entity model ID. Optional if target_attribute_id or target_entity_id is provided; the server will resolve it when possible."
+          }
+        },
+        "required": [
+          "target_entity_id"
+        ],
+        "anyOf": [
+          {
+            "required": [
+              "target_entity_id",
+              "target_attribute_id"
+            ]
+          },
+          {
+            "required": [
+              "target_entity_id",
+              "target_column_name"
+            ]
+          }
+        ]
+      },
+      "transformation": {
+        "type": "object",
+        "description": "The logic engine of Beyond Entity. Maps data flow between Entities (Tables, Files, Caches) and Processors. Every transformation item automatically generates a Lineage record.",
+        "properties": {
+          "transformation_name": {
+            "type": "string",
+            "description": "Human-readable name, e.g., '[T1] Fetch active orders'"
+          },
+          "operation_type": {
+            "type": "string",
+            "enum": [
+              "SELECT",
+              "INSERT",
+              "UPDATE",
+              "DELETE",
+              "MERGE",
+              "USER_DEFINED"
+            ],
+            "default": "SELECT",
+            "description": "(Optional) Type of data operation. "
+          },
+          "processing_order": {
+            "type": "integer",
+            "description": "Execution order (0, 1, 2...)"
+          },
+          "implementation_type": {
+            "type": "string",
+            "enum": [
+              "SQL",
+              "SPARK",
+              "NO_SQL",
+              "GRAPH_DB",
+              "FILE_SYSTEM",
+              "API",
+              "STREAMING",
+              "IN_MEMORY",
+              "CUSTOM_CODE",
+              "USER_DEFINED"
+            ],
+            "default": "SQL",
+            "description": "(Optional) How this transformation is implemented"
+          },
+          "implementation_status": {
+            "$ref": "#/definitions/implementation_status"
+          },
+          "semantic_level": {
+            "type": "string",
+            "enum": [
+              "RELATIONAL",
+              "DOCUMENT",
+              "KEY_VALUE",
+              "GRAPH",
+              "VECTOR"
+            ],
+            "default": "RELATIONAL",
+            "description": "(Optional) Semantic level of the transformation, which can guide how lineages are generated and visualized. RELATIONAL is traditional table-based operations. DOCUMENT is for document stores like MongoDB. KEY_VALUE is for key-value stores like Redis. GRAPH is for graph databases like Neo4j. VECTOR is for vector search or vector-distance operations such as pgvector similarity queries."
+          },
+          "referring_raw_code": {
+            "type": "string",
+            "description": "(Optional) Original SQL or code. Kept for reference and debugging."
+          },
+          "is_generated_by_raw_code": {
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "default": 1
+          },
+          "description": {
+            "type": "string",
+            "description": "(Optional) Human-readable description of the transformation"
+          },
+          "other_info": {
+            "type": "object",
+            "description": "(Optional) Additional information related to the transformation. json object where you can put any properties relevant to this transformation, such as database connection info, API endpoint info, code generation hints, etc."
+          },
+          "sources": {
+            "type": "array",
+            "description": "Source entities used in this transformation (FROM clause)",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entity_id": {
+                  "type": "string"
+                },
+                "entity_name": {
+                  "type": "string"
+                },
+                "alias": {
+                  "type": "string"
+                },
+                "model_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "entity_id",
+                "alias"
+              ]
+            }
+          },
+          "filters": {
+            "type": "array",
+            "description": "WHERE conditions",
+            "items": {
+              "$ref": "#/definitions/filter_item"
+            }
+          },
+          "joins": {
+            "type": "array",
+            "description": "JOIN conditions",
+            "items": {
+              "$ref": "#/definitions/join_item"
+            }
+          },
+          "projections": {
+            "type": "array",
+            "description": "SELECT mappings (for SELECT) or value expressions (for INSERT SELECT)",
+            "items": {
+              "$ref": "#/definitions/projection_item"
+            }
+          },
+          "groupings": {
+            "type": "array",
+            "description": "GROUP BY clauses",
+            "items": {
+              "$ref": "#/definitions/grouping_item"
+            }
+          },
+          "aggregations": {
+            "type": "array",
+            "description": "Aggregate functions (COUNT, SUM, etc.)",
+            "items": {
+              "$ref": "#/definitions/aggregation_item"
+            }
+          },
+          "sortings": {
+            "type": "array",
+            "description": "ORDER BY clauses",
+            "items": {
+              "$ref": "#/definitions/sorting_item"
+            }
+          },
+          "assignments": {
+            "type": "array",
+            "description": "Value assignments for INSERT/UPDATE",
+            "items": {
+              "$ref": "#/definitions/assignment_item"
+            }
+          }
+        },
+        "required": [
+          "transformation_name",
+          "operation_type"
+        ],
+        "examples": [
+          {
+            "_description": "SELECT with filter and projection",
+            "transformation_name": "[T1] Fetch active orders",
+            "operation_type": "SELECT",
+            "processing_order": 0,
+            "referring_raw_code": "SELECT o.order_id, o.total FROM orders o WHERE o.status = 'ACTIVE' AND o.created_at >= :startDate",
+            "sources": [
+              {
+                "entity_id": "ent_orders",
+                "alias": "o",
+                "model_id": "mdl_main"
+              }
+            ],
+            "filters": [
+              {
+                "operator": "eq",
+                "value_info": {
+                  "value_type": "LITERAL",
+                  "value": "'ACTIVE'"
+                },
+                "source_attribute": {
+                  "source_alias": "o",
+                  "source_column_name": "status",
+                  "source_attribute_id": "attr_status",
+                  "source_entity_id": "ent_orders"
+                },
+                "raw_expression": "o.status = 'ACTIVE'"
+              },
+              {
+                "operator": "ge",
+                "value_info": {
+                  "value_type": "PARAMETER",
+                  "value": ":startDate",
+                  "value_attribute_id": "attr_input_start",
+                  "value_entity_id": "proc_001"
+                },
+                "source_attribute": {
+                  "source_alias": "o",
+                  "source_column_name": "created_at",
+                  "source_attribute_id": "attr_created_at",
+                  "source_entity_id": "ent_orders"
+                },
+                "raw_expression": "o.created_at >= :startDate"
+              }
+            ],
+            "projections": [
+              {
+                "projection_type": "DIRECT",
+                "source_attributes": [
+                  {
+                    "source_alias": "o",
+                    "source_column_name": "order_id",
+                    "source_attribute_id": "attr_order_id",
+                    "source_entity_id": "ent_orders"
+                  }
+                ],
+                "target_attribute": {
+                  "target_column_name": "order_id",
+                  "target_attribute_id": "attr_out_order_id",
+                  "target_entity_id": "proc_001"
+                },
+                "raw_expression": "o.order_id"
+              },
+              {
+                "projection_type": "DIRECT",
+                "source_attributes": [
+                  {
+                    "source_alias": "o",
+                    "source_column_name": "total",
+                    "source_attribute_id": "attr_total",
+                    "source_entity_id": "ent_orders"
+                  }
+                ],
+                "target_attribute": {
+                  "target_column_name": "total",
+                  "target_attribute_id": "attr_out_total",
+                  "target_entity_id": "proc_001"
+                },
+                "raw_expression": "o.total"
+              }
+            ]
+          },
+          {
+            "_description": "INSERT with assignments",
+            "transformation_name": "[T3] Insert coupon issue",
+            "operation_type": "INSERT",
+            "processing_order": 2,
+            "referring_raw_code": "INSERT INTO coupon_issue (coupon_id, customer_id, status, issued_at) VALUES (:coupon_id, :customer_id, 'ISSUED', CURRENT_TIMESTAMP)",
+            "assignments": [
+              {
+                "target_attribute": {
+                  "target_column_name": "coupon_id",
+                  "target_attribute_id": "attr_ci_coupon_id",
+                  "target_entity_id": "ent_coupon_issue"
+                },
+                "source_attributes": [
+                  {
+                    "source_alias": "proc",
+                    "source_column_name": "coupon_id",
+                    "source_attribute_id": "attr_input_coupon_id",
+                    "source_entity_id": "proc_001"
+                  }
+                ],
+                "raw_expression": "coupon_id = :coupon_id"
+              },
+              {
+                "target_attribute": {
+                  "target_column_name": "status",
+                  "target_attribute_id": "attr_ci_status",
+                  "target_entity_id": "ent_coupon_issue"
+                },
+                "value_info": {
+                  "value_type": "LITERAL",
+                  "value_expression": "'ISSUED'"
+                },
+                "raw_expression": "status = 'ISSUED'"
+              },
+              {
+                "target_attribute": {
+                  "target_column_name": "issued_at",
+                  "target_attribute_id": "attr_ci_issued_at",
+                  "target_entity_id": "ent_coupon_issue"
+                },
+                "value_info": {
+                  "value_type": "EXPRESSION",
+                  "value_expression": "CURRENT_TIMESTAMP"
+                },
+                "raw_expression": "issued_at = CURRENT_TIMESTAMP"
+              }
+            ]
+          },
+          {
+            "_description": "SELECT login candidate with one projection target per selected column",
+            "transformation_name": "[T1] Find admin user by email",
+            "operation_type": "SELECT",
+            "processing_order": 0,
+            "referring_raw_code": "SELECT id, username, password_hash, role FROM admin_users au WHERE au.email = :email AND au.is_active = TRUE",
+            "sources": [
+              {
+                "entity_id": "ent_admin_users",
+                "alias": "au",
+                "model_id": "mdl_auth"
+              }
+            ],
+            "filters": [
+              {
+                "operator": "eq",
+                "value_info": {
+                  "value_type": "PARAMETER",
+                  "value": ":email",
+                  "value_attribute_id": "attr_input_email",
+                  "value_entity_id": "proc_auth_login"
+                },
+                "source_attribute": {
+                  "source_alias": "au",
+                  "source_column_name": "email",
+                  "source_attribute_id": "attr_admin_email",
+                  "source_entity_id": "ent_admin_users",
+                  "source_model_id": "mdl_auth"
+                },
+                "raw_expression": "au.email = :email"
+              },
+              {
+                "operator": "eq",
+                "value_info": {
+                  "value_type": "LITERAL",
+                  "value": "TRUE"
+                },
+                "source_attribute": {
+                  "source_alias": "au",
+                  "source_column_name": "is_active",
+                  "source_attribute_id": "attr_admin_is_active",
+                  "source_entity_id": "ent_admin_users",
+                  "source_model_id": "mdl_auth"
+                },
+                "raw_expression": "au.is_active = TRUE"
+              }
+            ],
+            "projections": [
+              {
+                "projection_type": "DIRECT",
+                "source_attributes": [
+                  {
+                    "source_alias": "au",
+                    "source_column_name": "id",
+                    "source_attribute_id": "attr_admin_id",
+                    "source_entity_id": "ent_admin_users",
+                    "source_model_id": "mdl_auth"
+                  }
+                ],
+                "target_attribute": {
+                  "target_column_name": "id",
+                  "target_attribute_id": "attr_lookup_admin_id",
+                  "target_entity_id": "proc_auth_login",
+                  "target_model_id": "mdl_api",
+                  "target_alias": "auth_login"
+                },
+                "raw_expression": "id"
+              },
+              {
+                "projection_type": "DIRECT",
+                "source_attributes": [
+                  {
+                    "source_alias": "au",
+                    "source_column_name": "username",
+                    "source_attribute_id": "attr_admin_username",
+                    "source_entity_id": "ent_admin_users",
+                    "source_model_id": "mdl_auth"
+                  }
+                ],
+                "target_attribute": {
+                  "target_column_name": "username",
+                  "target_attribute_id": "attr_output_username",
+                  "target_entity_id": "proc_auth_login",
+                  "target_model_id": "mdl_api",
+                  "target_alias": "auth_login"
+                },
+                "raw_expression": "username"
+              },
+              {
+                "projection_type": "DIRECT",
+                "source_attributes": [
+                  {
+                    "source_alias": "au",
+                    "source_column_name": "password_hash",
+                    "source_attribute_id": "attr_admin_password_hash",
+                    "source_entity_id": "ent_admin_users",
+                    "source_model_id": "mdl_auth"
+                  }
+                ],
+                "target_attribute": {
+                  "target_column_name": "password_hash",
+                  "target_attribute_id": "attr_lookup_password_hash",
+                  "target_entity_id": "proc_auth_login",
+                  "target_model_id": "mdl_api",
+                  "target_alias": "auth_login"
+                },
+                "raw_expression": "password_hash"
+              },
+              {
+                "projection_type": "DIRECT",
+                "source_attributes": [
+                  {
+                    "source_alias": "au",
+                    "source_column_name": "role",
+                    "source_attribute_id": "attr_admin_role",
+                    "source_entity_id": "ent_admin_users",
+                    "source_model_id": "mdl_auth"
+                  }
+                ],
+                "target_attribute": {
+                  "target_column_name": "role",
+                  "target_attribute_id": "attr_output_role",
+                  "target_entity_id": "proc_auth_login",
+                  "target_model_id": "mdl_api",
+                  "target_alias": "auth_login"
+                },
+                "raw_expression": "role"
+              }
+            ]
+          },
+          {
+            "_description": "SELECT with JOIN, aggregation, and grouping",
+            "transformation_name": "[T1] Dashboard stats",
+            "operation_type": "SELECT",
+            "processing_order": 0,
+            "referring_raw_code": "SELECT DATE_TRUNC(:groupBy, o.created_at) AS period, COUNT(*) AS order_count, SUM(o.amount) AS total_amount FROM orders o WHERE o.created_at >= :startDate GROUP BY DATE_TRUNC(:groupBy, o.created_at)",
+            "sources": [
+              {
+                "entity_id": "ent_orders",
+                "alias": "o"
+              }
+            ],
+            "filters": [
+              {
+                "operator": "ge",
+                "value_info": {
+                  "value_type": "EXPRESSION",
+                  "value": ":startDate"
+                },
+                "source_attribute": {
+                  "source_alias": "o",
+                  "source_column_name": "created_at",
+                  "source_attribute_id": "attr_created_at",
+                  "source_entity_id": "ent_orders"
+                },
+                "raw_expression": "o.created_at >= :startDate::DATE"
+              }
+            ],
+            "groupings": [
+              {
+                "source_attributes": [
+                  {
+                    "source_alias": "o",
+                    "source_column_name": "created_at",
+                    "source_attribute_id": "attr_created_at",
+                    "source_entity_id": "ent_orders"
+                  }
+                ],
+                "raw_expression": "DATE_TRUNC(:groupBy, o.created_at)"
+              }
+            ],
+            "projections": [
+              {
+                "projection_type": "FUNCTION",
+                "source_attributes": [
+                  {
+                    "source_alias": "o",
+                    "source_column_name": "created_at",
+                    "source_attribute_id": "attr_created_at",
+                    "source_entity_id": "ent_orders"
+                  }
+                ],
+                "target_attribute": {
+                  "target_column_name": "period",
+                  "target_attribute_id": "attr_out_period",
+                  "target_entity_id": "proc_dashboard"
+                },
+                "raw_expression": "DATE_TRUNC(:groupBy, o.created_at)"
+              }
+            ],
+            "aggregations": [
+              {
+                "function": "COUNT",
+                "distinct": 0,
+                "source_attributes": [],
+                "target_attribute": {
+                  "target_column_name": "order_count",
+                  "target_attribute_id": "attr_out_count",
+                  "target_entity_id": "proc_dashboard"
+                },
+                "raw_expression": "*"
+              },
+              {
+                "function": "SUM",
+                "distinct": 0,
+                "source_attributes": [
+                  {
+                    "source_alias": "o",
+                    "source_column_name": "amount",
+                    "source_attribute_id": "attr_amount",
+                    "source_entity_id": "ent_orders"
+                  }
+                ],
+                "target_attribute": {
+                  "target_column_name": "total_amount",
+                  "target_attribute_id": "attr_out_total",
+                  "target_entity_id": "proc_dashboard"
+                },
+                "raw_expression": "o.amount"
+              }
+            ]
+          }
+        ]
+      },
+      "value_info": {
+        "type": "object",
+        "description": "Value specification for filters and assignments",
+        "properties": {
+          "value_type": {
+            "type": "string",
+            "enum": [
+              "LITERAL",
+              "PARAMETER",
+              "ATTRIBUTE",
+              "EXPRESSION"
+            ],
+            "description": "LITERAL=fixed value, PARAMETER=processor INPUT/LOOKUP, ATTRIBUTE=another entity column, EXPRESSION=complex SQL"
+          },
+          "value": {
+            "description": "For LITERAL: the value. For PARAMETER: :param_name format"
+          },
+          "value_expression": {
+            "type": "string",
+            "description": "For EXPRESSION: full expression (e.g., 'CURRENT_TIMESTAMP', 'issued_qty + :count')"
+          },
+          "value_attribute_id": {
+            "type": "string",
+            "description": "For PARAMETER/ATTRIBUTE: the attribute_id"
+          },
+          "value_entity_id": {
+            "type": "string",
+            "description": "For PARAMETER: processor_id. For ATTRIBUTE: entity_id"
+          },
+          "comparison_operator": {
+            "type": "string",
+            "description": "Optional comparison operator for compound expressions such as vector distance threshold filters. Example: lt for '<'."
+          },
+          "comparison_right_operand": {
+            "type": "string",
+            "description": "Optional right operand for compound expressions such as vector distance threshold filters. Example: 0.8 in 'embedding <-> :query_embedding < 0.8'."
+          }
+        },
+        "required": [
+          "value_type"
+        ],
+        "examples": [
+          {
+            "_description": "Literal string",
+            "value_type": "LITERAL",
+            "value": "'ACTIVE'"
+          },
+          {
+            "_description": "Literal number",
+            "value_type": "LITERAL",
+            "value": "100"
+          },
+          {
+            "_description": "Parameter from INPUT",
+            "value_type": "PARAMETER",
+            "value": ":customerId",
+            "value_attribute_id": "attr_input_customer_id",
+            "value_entity_id": "proc_001"
+          },
+          {
+            "_description": "Another entity attribute",
+            "value_type": "ATTRIBUTE",
+            "value": "c.customer_id"
+          },
+          {
+            "_description": "SQL expression",
+            "value_type": "EXPRESSION",
+            "value_expression": "CURRENT_TIMESTAMP"
+          },
+          {
+            "_description": "Expression with casting",
+            "value_type": "EXPRESSION",
+            "value": ":startDate",
+            "value_expression": ":startDate::DATE"
+          }
+        ]
+      }
+    }
+  },
+  "output_schema_declared": true
+}
