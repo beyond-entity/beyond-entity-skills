@@ -1,7 +1,7 @@
 {
   "name": "beyond_mcp_review_submit",
   "description": "Submit a tool behavior review, ambiguity report, inefficiency, missing capability, or suggestion to the central MCP Review Board. The server computes the fingerprint and deduplicates repeated reports into occurrences. mcp_version describes the originating/reported runtime; metadata.review_server_mcp_version identifies the central review service separately. metadata.reporter is free-form text, not authenticated model identity; created_by_model may remain unknown when the client does not supply model identity.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

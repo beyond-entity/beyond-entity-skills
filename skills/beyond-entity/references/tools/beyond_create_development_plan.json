@@ -1,7 +1,7 @@
 {
   "name": "beyond_create_development_plan",
   "description": "Create an initial-build or change plan. Optional dev_plan_id is generated if omitted; existing identity is rejected. DEV_BUDGET/DEV_DURATION_DAYS are customer goals/upper limits, not forecast results. Default response_detail=compact; use full only when complete saved records are needed. Responses embed current/next-stage guide text and disclose server-generated values; no separate guide query is required.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

@@ -1,7 +1,7 @@
 {
   "guide_id": "security_findings_guide",
   "guide_revision": "7c4843e2b6447638",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "content": {
     "tools": [
       "beyond_add_security_findings",

@@ -1,7 +1,7 @@
 {
   "name": "beyond_get_project_overview",
   "description": "Get high-level Platform project overview. Compact mode is the default and includes only model information in schema-related data, plus last_checkout and relevant_documents summaries. Use beyond_list_checkpoints to fetch older checkpoint/checkout messages. Use beyond_get_document to fetch a specific relevant document; fetch all HUMAN-authored documents if they are not already in memory.For project setup with supplied requirements (Excel/docs/chat), do not stop at acknowledgement: check existing BE records, save traceable DRAFT requirements within the requested scope, verify saved IDs, then ask focused gap questions. Reuse prior agreement and answered questions. Reading/summarizing alone does not authorize writes. Without supplied requirements, offer an interview. Applicable intake and next-stage guides are inline. ALWAYS save BE ANALYSIS_CONTENT as Markdown.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

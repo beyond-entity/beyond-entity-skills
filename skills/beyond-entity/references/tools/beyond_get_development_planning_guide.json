@@ -1,7 +1,7 @@
 {
   "name": "beyond_get_development_planning_guide",
   "description": "Optional extra detail by guide section. Applicable current/next guide text is already embedded in planning responses; a guide query is not a prerequisite. Sections: start/interview/requirements/reviews/items/estimation/confidence/report. Chat deliverables may be HTML/PDF/PPT; BE ANALYSIS_CONTENT MUST always be Markdown.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

@@ -1,7 +1,7 @@
 {
   "name": "beyond_create_requirements",
   "description": "For authorized project setup with supplied requirements, save traceable DRAFT records, verify saved IDs, then ask focused gap questions; do not stop after reading. Deduplicate against existing records first. Atomically create requirements. Optional project-unique requirement_code is generated if omitted. Missing required fields fail the entire batch. Default response_detail=compact; use full only when complete saved records are needed. Responses embed current/next-stage guide text and disclose server-generated values; no separate guide query is required.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

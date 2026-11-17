@@ -1,7 +1,7 @@
 {
   "name": "beyond_delete_models",
   "description": "Delete models and their entities/processors, attributes, layers and canvas placements. Cascades to connected relationships, lineages, dependent transformations and policies (including child policies). Shared canvases and unrelated entities/processors remain. Deletes all stored stages; historical evidence is retained.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

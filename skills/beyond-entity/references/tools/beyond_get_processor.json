@@ -1,7 +1,7 @@
 {
   "name": "beyond_get_processor",
   "description": "Get processor details with ports, attributes, optional transformations, and lineage. Optional lineage uses context/focused defaults. Inspect lineage_status; follow its continuation with beyond_get_lineage. logical returns a flat graph. Partial/focused lineage cannot prove absence. context returns direct_detail and remote_summary records with interpretation metadata. Repeated summary IDs across pages are additive fragments, not duplicates; process each page_index once. Explicit physical preserves legacy detail shape. For Controller edits, use the current processor_info.endpoints and preserve returned endpoint/contract IDs. Retrieval does not auto-create missing contracts; verified handlers are synchronized on creation/modification.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {
@@ -2032,7 +2032,7 @@
         "properties": {
           "transformation_name": {
             "type": "string",
-            "description": "Human-readable name, e.g., '[T1] Fetch active orders'"
+            "description": "Use a short human-readable action and purpose, e.g. \"Fetch active orders\" or \"주문별 결제 합계 계산\". Do not paste SQL into the name; original SQL is retained separately."
           },
           "operation_type": {
             "type": "string",

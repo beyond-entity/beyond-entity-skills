@@ -1,7 +1,7 @@
 {
   "name": "beyond_update_implementation_status",
   "description": "Update implementation status for either an entity or a processor. Prefer the entity/processor-specific tools when the object type is already known. Inspect transformation_check and warnings: advanced implementation/UX statuses check the processor for zero transformations; new checkpoints check changed processors in the preceding checkpoint interval. Saves remain allowed; no warnings does not prove complete lineage.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

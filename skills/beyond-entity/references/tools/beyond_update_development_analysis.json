@@ -1,7 +1,7 @@
 {
   "name": "beyond_update_development_analysis",
   "description": "Modify an existing report only on explicit user request; otherwise create a new code. Store Markdown regardless of chat delivery format. Preserve omitted values; null clears optional values. Update body, representative forecasts and matching OTHER_INFO together. Default response_detail=compact; use full only when complete saved records are needed. Responses embed current/next-stage guide text and disclose server-generated values; no separate guide query is required.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

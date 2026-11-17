@@ -1,7 +1,7 @@
 {
   "name": "beyond_add_document",
   "description": "Add a shared markdown-style project document to TB_DOCUMENT. DOC_ID is generated as doc_{random}. ACTOR_TYPE is always AI, and actor_name must identify the LLM model name and version.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "required": [

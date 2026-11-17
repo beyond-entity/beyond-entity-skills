@@ -1,7 +1,7 @@
 {
   "guide_id": "query_dependency_guide",
   "guide_revision": "d52d61d854c48eaa",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "content": {
     "rules": [
       "Do not omit a verified call dependency merely because no request attributes are passed. Verify caller, target and code/configuration evidence; class names alone do not establish a call.",

@@ -1,7 +1,7 @@
 {
   "name": "beyond_get_usage_guide",
-  "description": "Get workflow guide for common tasks. Call this when unsure how to proceed or need step-by-step instructions.",
-  "source_mcp_version": "3.2.51",
+  "description": "Get workflow guide for common tasks. Call this when unsure how to proceed or need step-by-step instructions. Official Skill: https://github.com/beyond-entity/beyond-entity-skills. Use workflow=skill_installation for complete ZIP download, verification and client installation guidance.",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {
@@ -22,7 +22,8 @@
           "code_analysis",
           "code_analysis_guide",
           "checkpoint_run",
-          "checkpoint_run_guide"
+          "checkpoint_run_guide",
+          "skill_installation"
         ],
         "default": "getting_started",
         "description": "Workflow name. Security aliases: security_findings/security_findings_guide and attribute_security/attribute_security_guide."

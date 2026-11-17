@@ -1,7 +1,7 @@
 {
   "name": "beyond_delete_attributes",
   "description": "Delete attributes. Cascades to constraints and lineages involving these attributes.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

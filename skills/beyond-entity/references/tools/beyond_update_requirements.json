@@ -1,7 +1,7 @@
 {
   "name": "beyond_update_requirements",
   "description": "Atomically update existing requirements by requirement_code. Update content/status/DEV_PHASE/priority/interview notes; preserve omitted fields. Reflect only confirmed review conclusions. Default response_detail=compact; use full only when complete saved records are needed. Responses embed current/next-stage guide text and disclose server-generated values; no separate guide query is required.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

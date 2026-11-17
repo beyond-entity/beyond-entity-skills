@@ -1,7 +1,7 @@
 {
   "guide_id": "model_selection_guide",
   "guide_revision": "74622f62b151544f",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "content": {
     "spring_boot_application": {
       "model_storage_type": "spring_boot_application",

@@ -1,7 +1,7 @@
 {
   "name": "beyond_create_project",
   "description": "Create a new Platform project in an organization, clone its repository into the user's workspace, and set it as the active checked-out Platform project. If organization_id is omitted, the server falls back to the user's default organization (user_id_org when available, otherwise the first linked organization).For project setup with supplied requirements (Excel/docs/chat), do not stop at acknowledgement: check existing BE records, save traceable DRAFT requirements within the requested scope, verify saved IDs, then ask focused gap questions. Reuse prior agreement and answered questions. Reading/summarizing alone does not authorize writes. Without supplied requirements, offer an interview. Applicable intake and next-stage guides are inline. ALWAYS save BE ANALYSIS_CONTENT as Markdown.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

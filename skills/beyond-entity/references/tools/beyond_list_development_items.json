@@ -1,7 +1,7 @@
 {
   "name": "beyond_list_development_items",
   "description": "List items by plan, linked requirement or status. Each DEV_ITEM_ID is returned once; shared work must not be double-counted. Responses embed current/next-stage guide text and disclose server-generated values; no separate guide query is required.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

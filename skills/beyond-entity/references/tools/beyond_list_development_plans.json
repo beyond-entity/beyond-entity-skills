@@ -1,7 +1,7 @@
 {
   "name": "beyond_list_development_plans",
   "description": "List development plans and their status/constraints, with pagination. Responses embed current/next-stage guide text and disclose server-generated values; no separate guide query is required.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

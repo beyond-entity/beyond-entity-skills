@@ -1,7 +1,7 @@
 {
   "name": "beyond_delete_relationships",
   "description": "Delete relationships. Cascades to RELATION references/canvas rows, FK constraints created for the relationship, and child FK attributes only when they were auto-created by relationship creation and are not referenced elsewhere.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

@@ -1,7 +1,7 @@
 {
   "guide_id": "controller_endpoint_contract_guide",
   "guide_revision": "84c5a3b53112716e",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "content": {
     "applies_to": [
       "actix_web_endpoint_handler",

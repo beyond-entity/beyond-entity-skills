@@ -1,7 +1,7 @@
 {
   "guide_id": "http_metadata_guide",
   "guide_revision": "b25d38a333b113a3",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "content": {
     "processor_types": [
       "actix_web_endpoint_handler",

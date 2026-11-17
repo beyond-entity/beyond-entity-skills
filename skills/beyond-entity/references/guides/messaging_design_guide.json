@@ -1,7 +1,7 @@
 {
   "guide_id": "messaging_design_guide",
   "guide_revision": "8360c93bfba1e67c",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "content": {
     "model_storage_type": "Use the current model when its acceptable_entities allows this queue type.",
     "allowed_model_storage_types": {

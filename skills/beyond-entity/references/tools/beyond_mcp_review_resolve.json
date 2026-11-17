@@ -1,7 +1,7 @@
 {
   "name": "beyond_mcp_review_resolve",
   "description": "Record an MCP maintainer-agent resolution, code change summary, commit, release version, and verification requirement for an MCP Review Board entry. Reopening is done with beyond_mcp_review_reply(reply_type='reopen', message=reason), not resolution_status.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

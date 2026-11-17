@@ -1,7 +1,7 @@
 {
   "name": "beyond_modify_security_finding",
   "description": "Modify a finding, including manual status decisions. targets/standards omitted preserve, [] clear. Reasons required for accepted risk/false positive; authenticated actor/time recorded. Read beyond_get_usage_guide(workflow=\"security_findings\") or beyond_get_definitions(definition_names=[\"security_findings_guide\"]) first.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

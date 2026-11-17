@@ -1,6 +1,6 @@
 # Tool input/output and Help index
 
-Source baseline: MCP 3.2.51; 100 tools. Read only the relevant tool JSON.
+Source baseline: MCP 3.2.53; 101 tools. Read only the relevant tool JSON.
 
 Each file contains the tool description/help, self-contained inputSchema and declared outputSchema. Required columns below show top-level fields only; nested and conditional requirements remain in the schema. A missing declared output is explicit, not an empty response. Prefer live definitions for the connected runtime.
 
@@ -113,6 +113,7 @@ Each file contains the tool description/help, self-contained inputSchema and dec
 | [beyond_add_transformation_by_sql](tools/beyond_add_transformation_by_sql.json) | `processor_id`, `sql` | declared |
 | [beyond_get_transformations](tools/beyond_get_transformations.json) | `processor_id` | declared |
 | [beyond_delete_transformations](tools/beyond_delete_transformations.json) | `transformation_ids` | declared |
+| [beyond_rename_transformation](tools/beyond_rename_transformation.json) | `transformation_id`, `transformation_name` | declared |
 | [beyond_reorder_transformations](tools/beyond_reorder_transformations.json) | `processor_id`, `transformation_order` | declared |
 | [beyond_get_lineage](tools/beyond_get_lineage.json) | — | not declared |
 

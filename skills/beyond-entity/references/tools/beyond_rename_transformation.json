@@ -1,0 +1,67 @@
+{
+  "name": "beyond_rename_transformation",
+  "description": "Rename an existing transformation by ID while preserving its ID, raw SQL, processing order, items and lineage. Read current transformations first. Use a short human-readable action and purpose, e.g. \"Fetch active orders\" or \"주문별 결제 합계 계산\". Do not paste SQL into the name; original SQL is retained separately.",
+  "source_mcp_version": "3.2.53",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "transformation_id": {
+        "type": "string",
+        "minLength": 1
+      },
+      "transformation_name": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Use a short human-readable action and purpose, e.g. \"Fetch active orders\" or \"주문별 결제 합계 계산\". Do not paste SQL into the name; original SQL is retained separately."
+      }
+    },
+    "required": [
+      "transformation_id",
+      "transformation_name"
+    ],
+    "additionalProperties": false
+  },
+  "outputSchema": {
+    "type": "object",
+    "required": [
+      "success",
+      "data"
+    ],
+    "properties": {
+      "success": {
+        "type": "boolean"
+      },
+      "data": {
+        "type": "object",
+        "required": [
+          "transformation_id",
+          "processor_id",
+          "transformation_name",
+          "previous_name",
+          "changed"
+        ],
+        "properties": {
+          "transformation_id": {
+            "type": "string"
+          },
+          "processor_id": {
+            "type": "string"
+          },
+          "transformation_name": {
+            "type": "string"
+          },
+          "previous_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "changed": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  },
+  "output_schema_declared": true
+}

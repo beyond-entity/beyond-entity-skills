@@ -1,7 +1,7 @@
 {
   "name": "beyond_delete_security_findings",
   "description": "Atomically delete findings and all associated target/standard mappings in the active project. Read beyond_get_usage_guide(workflow=\"security_findings\") or beyond_get_definitions(definition_names=[\"security_findings_guide\"]) first.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

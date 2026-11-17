@@ -1,7 +1,7 @@
 {
   "name": "beyond_list_requirement_reviews",
   "description": "List paged root posts grouped with bounded descendant replies. For truncated replies, pass thread_review_id and next_offset to page the entire thread. No resolve/status workflow. Responses embed current/next-stage guide text and disclose server-generated values; no separate guide query is required.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

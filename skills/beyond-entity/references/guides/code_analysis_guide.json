@@ -1,7 +1,7 @@
 {
   "guide_id": "code_analysis_guide",
   "guide_revision": "a1ea96aee698a47d",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "content": {
     "workflow": "start_code_analysis -> analyze -> finish_code_analysis -> get_code_analysis",
     "identity": "RUN_ID is independent; CP_AT groups work. source_commit is source repository Git, never BE Git.",

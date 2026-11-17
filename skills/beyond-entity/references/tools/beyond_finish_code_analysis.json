@@ -1,7 +1,7 @@
 {
   "name": "beyond_finish_code_analysis",
   "description": "Atomically finalize a run and update latest node states. COMPLETED requires every planned node; PARTIAL records unresolved coverage; FAILED/CANCELLED preserves previous results. Exact retries are idempotent; stale revisions are rejected.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

@@ -1,7 +1,7 @@
 {
   "name": "beyond_update_document",
   "description": "Update a working-stage shared project document in TB_DOCUMENT. ACTOR_TYPE is always AI, and actor_name must identify the LLM model name and version.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "required": [

@@ -1,7 +1,7 @@
 {
   "guide_id": "attribute_security_guide",
   "guide_revision": "06dfa6c02aef9eb5",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "content": {
     "scope": "Entity attributes and processor INPUT/OUTPUT/LOOKUP attributes.",
     "pii_data_type": {

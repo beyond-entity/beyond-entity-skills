@@ -1,7 +1,7 @@
 {
   "name": "beyond_search",
   "description": "Search across entities, processors, attributes, and constraints. Defaults to detail_level='name-only' for compact results with IDs, logical names, physical names, and model names. Use detail_level='full' for richer entity/processor payloads. entity/processor search only their own fields, not attribute names; use search_type=attribute or beyond_find_attributes for columns. Results are definition-level; inspect match_scope, total_matches, exhaustive, has_more and next_offset.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

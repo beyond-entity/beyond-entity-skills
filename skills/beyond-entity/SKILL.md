@@ -33,7 +33,7 @@ Use BE as the shared, persistent architecture memory. Keep intended design, veri
 | Project selection, context recovery, project documents | [Project context](references/project-context.md) |
 | Model/type selection, entities, attributes, constraints, relationships | [Modeling](references/modeling.md) |
 | Processor INPUT/LOOKUP/OUTPUT, HTTP routes, nested contracts | [Processors and contracts](references/processors.md) |
-| SQL notation, cross-layer transformations and parser errors | [Transformations](references/transformations.md) |
+| SQL notation, transformation names, cross-layer flows and parser errors | [Transformations](references/transformations.md) |
 | Impact analysis, lineage continuations and completeness | [Lineage](references/lineage.md) |
 | Coding from design, code extraction, analysis and implementation status | [Implementation](references/implementation.md) |
 | Requirements intake, reviews, work items and estimates | [Development planning](references/development-planning.md) |
@@ -45,6 +45,6 @@ For an exact tool input/output shape, use [the tool index](references/tools.md),
 
 ## Existing server behavior
 
-Baseline: inspected `beserv` source at MCP **3.2.51**. See [source provenance](references/source-provenance.json) for source hashes and the source working-tree state. Prefer live definitions when runtime versions differ; confirm source-only features are deployed before using them.
+Baseline: inspected `beserv` source at MCP **3.2.53**. See [source provenance](references/source-provenance.json) for source hashes and the source working-tree state. Prefer live definitions when runtime versions differ; confirm source-only features are deployed before using them.
 
 Current `guide_id` / `guide_revision` tracking records delivery, not comprehension or local Skill installation. This Skill does not implement a server-side read gate. Do not claim an acknowledgement or bypass a server prerequisite; no proposed `be_help`, capability or acknowledgement-token API is assumed to exist.

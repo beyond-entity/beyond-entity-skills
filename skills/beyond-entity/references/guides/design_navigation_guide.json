@@ -1,7 +1,7 @@
 {
   "guide_id": "design_navigation_guide",
   "guide_revision": "b97c841e87e104f3",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "content": {
     "rules": [
       "Check this current-runtime catalog before claiming a technology is unsupported. A current model allowlist is not the global catalog.",

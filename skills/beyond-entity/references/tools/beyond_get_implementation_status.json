@@ -1,7 +1,7 @@
 {
   "name": "beyond_get_implementation_status",
   "description": "Get implementation status for entities, processors, and processor UX. If model_id is omitted, returns all accessible models. Transformation implementation status is intentionally not exposed at this time.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

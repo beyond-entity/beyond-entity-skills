@@ -1,7 +1,7 @@
 {
   "name": "beyond_add_entity_attributes",
   "description": "Add new attributes to an existing entity. If an added attribute has is_primary_key or default_value, PrimaryKey or Default constraints may be auto-created; read auto_created_constraints and do not create duplicate PK/Default constraints afterward. For nested structures (MongoDB, Elasticsearch, JSON, API), use upper_attribute_id. For pii_data_type and integer encryption_level, read beyond_get_usage_guide(workflow=\"attribute_security\") or beyond_get_definitions(definition_names=[\"attribute_security_guide\"]).",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

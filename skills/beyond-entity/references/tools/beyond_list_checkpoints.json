@@ -1,7 +1,7 @@
 {
   "name": "beyond_list_checkpoints",
   "description": "List recent job checkpoints; overall status snapshots are included only on the first two returned checkpoints. Set include_changes=true to include records matching each CP_AT. Each record has action=insert/update/delete. ACTION describes checkpoint start/end existence, not just the last operation: insert then update stays insert, insert then delete removes the record, delete then reinsert of an existing node becomes update. deleted is action==delete. node_json contains only the matching newData node for insert/update or the deleted oldData node for delete. node_values is no longer stored or returned. Changes after a checkpoint belong to that checkpoint. No legacy ACTION backfill is provided.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

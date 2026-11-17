@@ -1,7 +1,7 @@
 {
   "name": "beyond_modify_processor",
   "description": "For api_server use at most one endpoint per processor (one Swagger/OpenAPI operation); Spring Controller classes may have multiple endpoints. Use endpoints or other_info.endpoints. Explicit endpoints takes precedence over nested endpoints and legacy method/path. On update omission preserves, a list replaces, [] empties and null clears routing. Storage is only other_info.endpoints; legacy method/path inputs are converted. Before architecture writes, read the model_storage_design_guide and acceptable_processors returned by model creation/retrieval. Use verified source, configuration, specifications or explicit user requirements; never guess missing classes, routes, framework or subtype. Omit unknown optional values and ask for required information. For spring_boot_controller, a verified handler automatically creates or reuses handler-named INPUT/OUTPUT Object containers. Read the latest processor before editing, send the complete desired endpoints array, and preserve returned endpoint_id/input_attribute_id/output_attribute_id on retained endpoints. New endpoints omit those IDs. Read data.endpoints and data.auto_created_attributes after modification; do not create duplicate containers. Removed endpoints retain attributes and lineage. Query controller_endpoint_contract_guide for the full lifecycle and examples.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

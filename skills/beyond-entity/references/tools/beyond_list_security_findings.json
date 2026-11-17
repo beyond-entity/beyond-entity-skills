@@ -1,7 +1,7 @@
 {
   "name": "beyond_list_security_findings",
   "description": "List/read security findings including all target and standard mappings. Follow next_offset until has_more=false. Read beyond_get_usage_guide(workflow=\"security_findings\") or beyond_get_definitions(definition_names=[\"security_findings_guide\"]) first.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

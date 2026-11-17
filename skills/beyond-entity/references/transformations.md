@@ -2,6 +2,14 @@
 
 Read current `transformation_design_guide` and, for handler bindings, `controller_sql_input_guide`. Read source/target objects, attributes and existing transformations before editing. Use `beyond_get_processor(include_transformations=true)` / `beyond_get_transformations`.
 
+## Name and rename transformations
+
+For new transformations, supply a short human-readable action and purpose in `transformation_name`, such as "Fetch active orders" or "주문별 결제 합계 계산". Use the project's logical naming language. Keep SQL in the SQL field.
+
+For a name-only change, discover the live [`beyond_rename_transformation` contract](tools/beyond_rename_transformation.json). Read the current processor and its transformations to verify the returned `transformation_id`, owning `processor_id`, current name, SQL and mappings. Call the rename tool with `transformation_id` and the desired non-empty `transformation_name`. It preserves the transformation ID, original SQL, processing order, items and lineage. Deleting and recreating a transformation just to change its name can discard that identity and related metadata.
+
+Inspect `success` and the returned `data.transformation_id`, `processor_id`, `transformation_name`, `previous_name` and `changed`. A successful `changed=false` means the trimmed name already matched. Re-read the transformation to verify the new name and retained mappings. Renaming changes the label only, so use the relevant mapping or ordering operation for behavioral changes. If the connected runtime lacks the rename tool, report the capability gap and pending rename.
+
 ## Represent actual flows
 
 BE SQL is data-flow notation; BE records lineage and does not execute the SQL. Review verified flows across UI/state, controller, service, integration and storage layers, including code that never runs SQL. One processor may contain multiple transformations.

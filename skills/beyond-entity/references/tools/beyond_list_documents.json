@@ -1,7 +1,7 @@
 {
   "name": "beyond_list_documents",
   "description": "List or read shared project documents from TB_DOCUMENT, such as AGENTS.md, CLAUDE.md, README.md, business_requirements.md, and test_scenario.md. Returns working-stage documents only.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

@@ -1,7 +1,7 @@
 {
   "guide_id": "api_server_naming_contract",
   "guide_revision": "94513f63a65a175e",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "content": {
     "title": "API Server Naming And HTTP Metadata Contract",
     "processor_storage_type": "api_server",

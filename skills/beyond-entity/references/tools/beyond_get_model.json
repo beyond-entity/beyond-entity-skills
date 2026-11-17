@@ -1,7 +1,7 @@
 {
   "name": "beyond_get_model",
   "description": "Get model details with entities and processors. Defaults to detail_level='name-only' for compact hierarchy with IDs, logical names, and physical names. Use compact for IDs/names only, or full for detailed model/entity/processor data. Relationships and constraints require explicit flags even with full detail. sections distinguishes omitted data from empty results. include_design_guidance=false removes authoring guidance. Before architecture writes, read the model_storage_design_guide and acceptable_processors returned by model creation/retrieval. Use verified source, configuration, specifications or explicit user requirements; never guess missing classes, routes, framework or subtype. Omit unknown optional values and ask for required information. Guide delivery is session-scoped by guide_id and guide_revision: first delivery includes delivery=full and content, subsequent responses use delivery=reference without content. MUST read and follow full content. A paged guide counts as delivered only after every page is returned. If context was lost, use the details call (beyond_get_definitions, mode=full, include_examples=true) to retrieve the full guide again. A new session, changed revision or expired delivery cache resends content. Delivery records do not prove the AI read it. Never retry model creation merely to recover expired pages; re-read the model. Set include_transformations=true with detail_level=full to include processor transformation bodies, item definitions and reference identities. Assemble all response pages before using a model cache.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {
@@ -4203,7 +4203,7 @@
         "properties": {
           "transformation_name": {
             "type": "string",
-            "description": "Human-readable name, e.g., '[T1] Fetch active orders'"
+            "description": "Use a short human-readable action and purpose, e.g. \"Fetch active orders\" or \"주문별 결제 합계 계산\". Do not paste SQL into the name; original SQL is retained separately."
           },
           "operation_type": {
             "type": "string",

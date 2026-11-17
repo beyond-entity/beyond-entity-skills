@@ -1,7 +1,7 @@
 {
   "guide_id": "external_api_design_guide",
   "guide_revision": "ed31123e312b76eb",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "content": {
     "model_storage_type": "external_system",
     "processor_storage_type": "external_api",

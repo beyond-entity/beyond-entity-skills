@@ -1,7 +1,7 @@
 {
   "guide_id": "sqlite_storage_boundary_guide",
   "guide_revision": "fce22b33434f1f62",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "content": {
     "rule": "Use a sqlite model when the SQLite database is physically or logically separate from the application. For SQLite used as an application-internal cache, create a sqlite_cache entity inside the application model when its acceptable_entities allows sqlite_cache. A .db file or SQLite library alone does not establish a separate model boundary.",
     "separate_database": {

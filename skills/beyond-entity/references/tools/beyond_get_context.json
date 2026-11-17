@@ -1,7 +1,7 @@
 {
   "name": "beyond_get_context",
   "description": "Get current session context including Platform project, branch, permissions, compact model-only schema information, last_checkout, and relevant_documents when available. Use beyond_get_project_overview or beyond_get_model with detail_level='full' for detailed data. Use beyond_get_document for specific documents and fetch all HUMAN-authored documents if they are not already in memory.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

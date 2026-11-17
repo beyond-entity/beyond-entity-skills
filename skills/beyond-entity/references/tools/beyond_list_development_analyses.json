@@ -1,7 +1,7 @@
 {
   "name": "beyond_list_development_analyses",
   "description": "List report summaries without large Markdown content or large OTHER_INFO. Multiple analysis codes per plan are supported. Responses embed current/next-stage guide text and disclose server-generated values; no separate guide query is required.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

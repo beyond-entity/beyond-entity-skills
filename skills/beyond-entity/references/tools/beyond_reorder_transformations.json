@@ -1,7 +1,7 @@
 {
   "name": "beyond_reorder_transformations",
   "description": "Change processing order of transformations. Provide all transformation IDs in new order.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

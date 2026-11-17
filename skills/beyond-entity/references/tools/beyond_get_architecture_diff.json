@@ -1,7 +1,7 @@
 {
   "name": "beyond_get_architecture_diff",
   "description": "Return changes in [from_cp_at, to_cp_at), ordered by node_type and node_id. Both checkpoints must exist; equal endpoints return no changes. Combine first/last ACTION to classify insert/update/delete across the interval and keep the last record values. Omit nodes inserted then deleted within the interval. Reverted updates remain because field values are not compared. Delete values describe the node immediately before its final deletion, not the interval starting state. Return last_changed_cp_at, action, node_json and deleted. node_values is no longer returned. summary contains changed_node_count, inserted_node_count, updated_node_count and deleted_node_count. Missing node history is reported by history_available=false. Historical rows without ACTION are unsupported; do not infer actions from empty strings. Assemble all transport pages with beyond_get_result_page.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "required": [

@@ -1,7 +1,7 @@
 {
   "name": "beyond_delete_constraints",
   "description": "Delete non-relationship constraints. ForeignKey constraints are relationship-owned and must be deleted with beyond_delete_relationships. Deleting PrimaryKey constraints recomputes working-stage attribute is_primary_key from remaining PK membership and publishes attribute old/new rows; flags and constraints commit or roll back together.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

@@ -1,7 +1,7 @@
 {
   "guide_id": "endpoint_cardinality_guide",
   "guide_revision": "7a2a8b05affda4bb",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "content": {
     "source": "processor_storage_types catalog is_module flag; not a client-supplied processor property",
     "rules": [

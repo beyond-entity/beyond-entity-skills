@@ -1,7 +1,7 @@
 {
   "name": "beyond_record_security_scan",
   "description": "Record scan detections by project-unique fingerprint. Scan items do not accept manual status decisions or branch. Default re-detection preserves metadata; refresh_scanner_fields=true refreshes supplied scanner fields/mappings. Human ACCEPTED_RISK/FALSE_POSITIVE decisions always survive. complete=true resolves absent results only in the explicit rule/file/model scope and scan branch; never use for partial/failed scans. Read beyond_get_usage_guide(workflow=\"security_findings\") or beyond_get_definitions(definition_names=[\"security_findings_guide\"]) first. With analysis_run_id, atomically finalize SECURITY coverage and findings. Planned rule/file/model scope, source commit and checkpoint must match; scan branch retains its existing BE finding lifecycle meaning, independent of SOURCE_BRANCH. complete=true additionally requires completed CHECKED coverage for all nodes/rules. Legacy scans retain their explicit complete contract.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

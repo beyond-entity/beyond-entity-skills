@@ -1,7 +1,7 @@
 {
   "name": "beyond_mcp_review_search",
   "description": "Search the central MCP Review Board for known tool issues, ambiguity reports, workaround notes, and resolved maintainer-agent decisions. This does not require a checked-out project.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

@@ -1,7 +1,7 @@
 {
   "name": "beyond_create_requirement_review",
   "description": "Post an AI-authored opinion/question or reply. Author display is server-derived AI (MCP); authenticated CREATED_BY is recorded. Never impersonate a participant. Parent must belong to the same requirement. Default response_detail=compact; use full only when complete saved records are needed. Responses embed current/next-stage guide text and disclose server-generated values; no separate guide query is required.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

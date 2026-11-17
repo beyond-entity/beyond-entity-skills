@@ -1,7 +1,7 @@
 {
   "name": "beyond_get_result_page",
   "description": "Return the next page of an automatically paged MCP tool result. Use paging.result_id and paging.next_cursor from the prior response. Large responses use paged delivery even when the operation partially or fully failed. In a paged response outer success is page-delivery status only; inspect data.operation_status.success/is_error, failed_count and bounded failed_preview immediately. Retrieve and assemble ALL page_content fragments to obtain complete created objects, ID mappings and failed entries. Retry only failed items, never the entire partially successful batch.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

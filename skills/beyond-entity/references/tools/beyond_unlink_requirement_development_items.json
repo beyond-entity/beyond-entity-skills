@@ -1,7 +1,7 @@
 {
   "name": "beyond_unlink_requirement_development_items",
   "description": "Atomically remove requirement-item links. Missing links are idempotent. Default response_detail=compact; use full only when complete saved records are needed. Responses embed current/next-stage guide text and disclose server-generated values; no separate guide query is required.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

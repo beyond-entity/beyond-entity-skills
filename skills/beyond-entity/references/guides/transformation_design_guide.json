@@ -1,7 +1,7 @@
 {
   "guide_id": "transformation_design_guide",
   "guide_revision": "9c055d04bc700827",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "content": {
     "scope": "A transformation represents verified data movement or derivation inside or between modeled processors/entities. SQL is BE lineage notation, not a requirement that the runtime executes SQL.",
     "rules": [

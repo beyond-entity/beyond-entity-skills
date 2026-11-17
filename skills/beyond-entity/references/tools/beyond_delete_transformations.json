@@ -1,7 +1,7 @@
 {
   "name": "beyond_delete_transformations",
   "description": "Delete transformations from a processor. Transformation item links are deleted. Shared references are preserved; reference/canvas_reference rows are deleted only when no relation uses them, no remaining transformation uses them, and REFERENCE_TYPE is not SEMANTIC.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

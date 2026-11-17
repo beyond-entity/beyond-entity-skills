@@ -1,7 +1,7 @@
 {
   "name": "beyond_add_constraints",
   "description": "Add constraints to an entity. ForeignKey constraints are relationship-owned and must be created with beyond_create_relationships, not this tool. For pgvector vector similarity indexes, use constraint_type 'cosine', 'l2', or 'inner_product' instead of generic 'Index'. For PostgreSQL partial unique indexes, use constraint_type 'Unique' with other_info.where, for example {\"where\":\"status = 'active'\"}; do not use check_expression for Unique because check_expression is only for CHECK constraints. PrimaryKey additions synchronize affected working-stage attribute is_primary_key flags and publish EntityAttribute old/new rows in the same committed transaction. Failed constraints do not publish rolled-back rows.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

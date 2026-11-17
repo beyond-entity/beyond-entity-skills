@@ -1,7 +1,7 @@
 {
   "name": "beyond_modify_processor_attributes",
   "description": "Batch modify processor attributes. Use attribute_ids with updates for selected attributes, processor_id plus from_io_type with updates.io_type to move all attributes from one processor IO port to another, or updates_by_attribute_id alone for per-attribute field changes such as assigning different logical names. When no explicit selection is supplied, its keys select the target attributes. Explicit attribute_ids or processor_id/from_io_type selections remain restrictive; update keys outside that selection are rejected. For pii_data_type and integer encryption_level, read beyond_get_usage_guide(workflow=\"attribute_security\") or beyond_get_definitions(definition_names=[\"attribute_security_guide\"]).",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

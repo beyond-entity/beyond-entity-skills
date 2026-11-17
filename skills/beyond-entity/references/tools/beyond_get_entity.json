@@ -1,7 +1,7 @@
 {
   "name": "beyond_get_entity",
   "description": "Get entity details with attributes, constraints, and lineage. Constraints default to not requested; inspect sections before inferring absence. Optional lineage uses context/focused defaults. Inspect lineage_status; follow its continuation with beyond_get_lineage. logical returns a flat graph. Partial/focused lineage cannot prove absence. context returns direct_detail and remote_summary records with interpretation metadata. Repeated summary IDs across pages are additive fragments, not duplicates; process each page_index once. Explicit physical preserves legacy detail shape.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

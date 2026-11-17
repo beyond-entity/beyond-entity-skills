@@ -1,7 +1,7 @@
 {
   "guide_id": "processor_io_guide",
   "guide_revision": "9a27c089a058a2dc",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "content": {
     "controller_endpoint_contract_guide": {
       "applies_to": [

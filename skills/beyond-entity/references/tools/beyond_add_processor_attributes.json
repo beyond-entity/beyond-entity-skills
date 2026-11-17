@@ -1,7 +1,7 @@
 {
   "name": "beyond_add_processor_attributes",
   "description": "Add new attributes to an existing processor. Read processor_info.use_lookup or the model acceptable_processors policy first. use_lookup=false rejects LOOKUP; model verified OUTPUT fields directly. For Controller endpoints, reuse the automatically generated handler INPUT/OUTPUT Objects and add verified children using their returned IDs as upper_attribute_id. For pii_data_type and integer encryption_level, read beyond_get_usage_guide(workflow=\"attribute_security\") or beyond_get_definitions(definition_names=[\"attribute_security_guide\"]). Read only the selected model_design_guide:<model_storage_type> and processor_design_guide:<processor_storage_type> for responsibilities, IO policy and data types.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

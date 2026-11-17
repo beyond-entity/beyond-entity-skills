@@ -1,7 +1,7 @@
 {
   "name": "beyond_get_development_plan",
   "description": "Get a plan; optionally include bounded requirements/items/report summaries. Each included collection has its own total/has_more/next_offset. Responses embed current/next-stage guide text and disclose server-generated values; no separate guide query is required.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

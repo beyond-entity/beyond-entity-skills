@@ -1,7 +1,7 @@
 {
   "guide_id": "checkpoint_run_guide",
   "guide_revision": "74568f468fea1fd1",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "content": {
     "run_flow": [
       "Read newest checkpoint cp_at; create one only if absent.",

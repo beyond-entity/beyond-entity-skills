@@ -1,7 +1,7 @@
 {
   "name": "beyond_mcp_review_get",
   "description": "Get one central MCP Review Board entry with occurrences, replies, resolutions, and audit logs.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

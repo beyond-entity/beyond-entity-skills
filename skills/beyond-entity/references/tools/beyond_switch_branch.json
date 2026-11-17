@@ -1,7 +1,7 @@
 {
   "name": "beyond_switch_branch",
   "description": "Switch to a different branch. Requires clean workspace.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

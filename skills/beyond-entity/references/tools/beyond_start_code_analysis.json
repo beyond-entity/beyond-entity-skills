@@ -1,7 +1,7 @@
 {
   "name": "beyond_start_code_analysis",
   "description": "Start an extraction/security run linked optionally to CP_AT. scope_summary.nodes explicitly plans up to 200 targets; split larger analyses into runs. Reuse run_id on retry. Source Git metadata is separate from BE Git.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {

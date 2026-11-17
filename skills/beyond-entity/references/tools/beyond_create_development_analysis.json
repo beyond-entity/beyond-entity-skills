@@ -1,7 +1,7 @@
 {
   "name": "beyond_create_development_analysis",
   "description": "Create a new analysis code for each analysis/reanalysis. Chat output may be HTML/PDF/PPT but ANALYSIS_CONTENT MUST be full Markdown, never binary/base64/HTML document or just a link. Save representative forecasts and consistent structured OTHER_INFO together. Existing codes are rejected. Default response_detail=compact; use full only when complete saved records are needed. Responses embed current/next-stage guide text and disclose server-generated values; no separate guide query is required.",
-  "source_mcp_version": "3.2.51",
+  "source_mcp_version": "3.2.53",
   "inputSchema": {
     "type": "object",
     "properties": {
