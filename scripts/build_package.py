@@ -12,8 +12,11 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 from validate import ROOT, SKILL, validate
 
 
-def build(output: Path) -> Path:
+def build(output: Path, validated_runtime_versions: list[str] | None = None) -> Path:
     summary = validate()
+    runtimes = sorted(set(validated_runtime_versions or []))
+    if any(not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", runtime) for runtime in runtimes):
+        raise SystemExit("Validated runtime versions must use exact major.minor.patch values")
     match = re.search(r'^  version: "([0-9]+\.[0-9]+\.[0-9]+)"$',
                       (SKILL / "SKILL.md").read_text(), re.MULTILINE)
     if not match:
@@ -28,8 +31,8 @@ def build(output: Path) -> Path:
     manifest = {
         "schema_version": 1, "package_id": "beyond-entity", "version": version,
         "entrypoint": "beyond-entity/SKILL.md", "source_mcp_version": summary["source_mcp_version"],
-        "compatibility": {"policy": "Connected tool definitions are authoritative; source baseline only.",
-                          "validated_runtime_versions": []},
+        "compatibility": {"policy": "Only explicitly validated runtime versions may activate this package.",
+                          "validated_runtime_versions": runtimes},
         "files": {name: {"sha256": hashlib.sha256(data).hexdigest(), "bytes": len(data)}
                   for name, data in files.items()},
     }
@@ -51,4 +54,9 @@ def build(output: Path) -> Path:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "dist")
-    build(parser.parse_args().output.resolve())
+    parser.add_argument(
+        "--validated-runtime-version", action="append", default=[],
+        help="Exact MCP version already verified with this Skill; repeat for each tested version.",
+    )
+    args = parser.parse_args()
+    build(args.output.resolve(), args.validated_runtime_version)

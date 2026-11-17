@@ -12,9 +12,15 @@ The Skill covers `beyond_rename_transformation` for changing an existing transfo
 
 ## Installation
 
-Copy or link the entire `skills/beyond-entity` folder into your AI client's supported Skill location. Copying only `SKILL.md` omits the references. A Codex user Skill location is `~/.agents/skills/beyond-entity`. Check for an existing Skill with the same name before installing. Consult other clients' documentation for their installation paths and reload behavior.
+Use an official stable asset from [Releases](https://github.com/beyond-entity/beyond-entity-skills/releases). Download `beyond-entity-skill-<version>.zip` and its matching `.zip.sha256` file. Verify the archive SHA-256, embedded package manifest, and file receipts before extracting.
 
-The app and AI clients use the same release ZIP for direct GitHub downloads. If release assets have not been published, the packaging command below can build a local ZIP. Automatic installation, login refresh, and server-enforced reading are currently unimplemented. Installing the local Skill does not establish an MCP connection or acknowledge server guide delivery.
+Call `beyond_get_mcp_version` on the intended MCP connection. The package manifest's `compatibility.validated_runtime_versions` must include that exact version. The source baseline alone does not establish compatibility.
+
+Install the entire `beyond-entity` folder into your AI client's supported Skill location. Copying only `SKILL.md` omits the references. A Codex user Skill location is `~/.agents/skills/beyond-entity`; a Claude Code personal Skill location is `~/.claude/skills/beyond-entity`. Preserve an existing installation and user changes, and avoid duplicate installations. Reload the client or start a new session when required for Skill discovery.
+
+For a source checkout, the installable folder is `skills/beyond-entity/`. Locally built packages without a tested runtime list are suitable for inspection. Activate a package only after verifying its runtime compatibility.
+
+Installing the Skill does not establish an MCP connection or acknowledge server guide delivery.
 
 ## Refresh references and validate
 
@@ -29,3 +35,11 @@ python3 scripts/build_package.py --output /path/to/package-output
 The exporter reads server source without modifying it or accessing project data. It regenerates the tool contracts and selected help snapshots used as the initial migration baseline. Workflow Markdown is maintained in this repository. A future single-source guide integration will require the server to consume a pinned content version from this repository. Existing server Skill and guide sources are still in place.
 
 Validation checks Skill links, JSON references, input/output schema availability, tool and guide counts, and file hashes. It does not exercise live MCP operations or project writes. The package contains the complete installable Skill and its manifest. An external SHA-256 receipt accompanies the ZIP for integrity verification. The receipt does not authenticate the publisher, and packaging alone does not establish runtime compatibility.
+
+For a release candidate that has passed runtime verification, record the exact tested version when packaging:
+
+```sh
+python3 scripts/build_package.py --output /path/to/package-output --validated-runtime-version 3.2.53
+```
+
+The flag records verification performed by the maintainer. It does not run runtime tests or infer support from `source_mcp_version`. Omitting the flag leaves the validated runtime list empty.
